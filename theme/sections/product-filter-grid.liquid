@@ -87,6 +87,68 @@
 
 
 <script>
+window.submitPfQvForm = function(e, form) {
+  e.preventDefault();
+  var btn = form.querySelector('button[type="submit"]');
+  var originalText = btn.innerHTML;
+  btn.innerHTML = 'Adding...';
+  btn.disabled = true;
+
+  var formData = new FormData(form);
+  var payload = {
+    items: [
+      {
+        id: formData.get('id'),
+        quantity: parseInt(formData.get('quantity')) || 1
+      }
+    ]
+  };
+  
+  var sellingPlan = formData.get('selling_plan');
+  if (sellingPlan) {
+    payload.items[0].selling_plan = sellingPlan;
+  }
+
+  fetch(form.action + '.js', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(function(response) {
+    if (!response.ok) {
+      return response.json().then(function(json) { throw json; });
+    }
+    return response.json();
+  })
+  .then(function() {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    var errorDiv = form.querySelector('.pf-qv-error-message');
+    if(errorDiv) { errorDiv.classList.add('hidden'); }
+    
+    if (window.theme && window.theme.standardActions && typeof window.theme.standardActions.updateCart === 'function') {
+       window.theme.standardActions.updateCart();
+    } else if (document.querySelector('cart-drawer')) {
+       document.querySelector('cart-drawer').open();
+    } else {
+       window.location.reload();
+    }
+  })
+  .catch(function(error) {
+    console.error('Add to cart error:', error);
+    var errorDiv = form.querySelector('.pf-qv-error-message');
+    if (errorDiv) {
+      errorDiv.textContent = error.description || error.message || 'Error adding to cart.';
+      errorDiv.classList.remove('hidden');
+    }
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  });
+  return false;
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     const sectionId = '{{ section.id }}';
     const container = document.getElementById('product-filter-' + sectionId);
