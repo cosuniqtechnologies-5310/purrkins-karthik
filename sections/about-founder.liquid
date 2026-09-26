@@ -1,0 +1,175 @@
+<div id="purrkins-about-founder-{{ section.id }}" class="purrkins-about-founder-block {{ section.settings.custom_class }}">
+    <div class="purrkins-container about-founder-inner purrkins-section-block">
+        
+        <div class="about-founder-image-col">
+            {% if section.settings.image != blank %}
+                <img src="{{ section.settings.image | image_url: width: 800 }}" alt="{{ section.settings.image.alt | default: 'Founder Image' }}" class="about-founder-img" width="480" height="auto" />
+            {% else %}
+                <div class="about-founder-placeholder">
+                    <span>Founder Image</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="about-founder-content-col">
+            {% if section.settings.heading != blank %}
+                <h3 class="about-founder-heading purrkins-h3-text">{{ section.settings.heading }}</h3>
+            {% endif %}
+            
+            {% if section.settings.content != blank %}
+                <div class="about-founder-text purrkins-subtext">
+                    {{ section.settings.content }}
+                </div>
+            {% endif %}
+            
+            {% if section.settings.signature != blank %}
+                <div class="about-founder-signature">
+                    {{ section.settings.signature }}
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<style>
+.purrkins-about-founder-block {
+    width: 100%;
+    background-color: var(--neutral-white, #FFFFFF);
+
+}
+.about-founder-inner {
+    display: flex;
+    align-items: center;
+    gap: 80px;
+}
+.about-founder-image-col {
+    flex: 1;
+    max-width: 480px;
+}
+.about-founder-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--border-radius-purrkins);
+    object-fit: cover;
+}
+.about-founder-placeholder {
+    width: 100%;
+    height: 500px;
+    background-color: #E0E0E0;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+}
+.about-founder-content-col {
+    flex: 1;
+        max-width: 630px;
+}
+.about-founder-heading {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+.about-founder-text {
+    margin-bottom: 24px;
+}
+.about-founder-text p {
+    margin: 0;
+}
+.about-founder-signature {
+    margin: 0;
+    color: #21252A;
+    font-family: var(--purrkins-primary-font);
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.5;
+}
+.about-founder-signature strong, .about-founder-signature b {
+    color: var(--primary-slate-900, #21252A);
+    font-size: 24px;
+    font-weight: 600;
+    display: block;
+}
+
+@media(max-width: 1024px){
+    .about-founder-inner{
+        gap: 40px;
+    }
+}
+
+@media (max-width: 991px) {
+    .about-founder-inner {
+        flex-direction: column;
+        gap: 40px;
+    }
+.about-founder-content-col{
+    text-align: center;
+}
+}
+@media (max-width: 767px) {
+    .about-founder-image-col{
+        width: 100%;
+    }
+    .about-founder-heading, .about-founder-text p, .about-founder-content-col {
+    text-align: left;
+}
+.about-founder-text {
+    margin-bottom: 16px;
+}
+.about-founder-signature{
+    font-size: 16px;
+}
+.about-founder-signature strong, .about-founder-signature b{
+    font-size: 18px;
+}
+.about-founder-inner{
+        align-items: flex-start;
+}
+.about-founder-inner{
+    gap: 20px;
+}
+}
+</style>
+
+{% schema %}
+{
+  "name": "Purrkins About Founder",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Founder Image"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "It began with a family business, and a lot of animals."
+    },
+    {
+      "type": "richtext",
+      "id": "content",
+      "label": "Content",
+      "default": "<p>I grew up around pet food; my family has made it for nearly thirty years. Building a distribution network across India, I saw two gaps: pet parents didn't trust the bag's contents, and much on shelves was nutritionally weak or not suited for our market. Purrkins aims to close that gap where it matters most, the first months making bringing home a kitten joyful, not stressful, by removing guesswork.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "signature",
+      "label": "Signature Text",
+      "default": "<p><strong>Hari Shankar</strong><br>Founder, Purrkins</p>"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom CSS Class"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins About Founder"
+    }
+  ]
+}
+{% endschema %}

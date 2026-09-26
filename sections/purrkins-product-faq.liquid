@@ -1,0 +1,136 @@
+{{ 'purrkins-product-faq.css' | asset_url | stylesheet_tag }}
+{% assign faqs = product.metafields.custom.product_faqs.value %}
+
+{% if faqs != blank %}
+<div id="purrkins-product-faq-{{ section.id }}" class="purrkins-faq-block purrkins-product-faq {{ section.settings.custom_class }}">
+    <div class="purrkins-container purrkins-faq-inner purrkins-section-block" style="padding-top: 20px;">
+        <div class="purrkins-faq-left">
+            <div class="purrkins-faq-sticky">
+                <h3 class="purrkins-h3-text purrkins-faq-heading">
+                    {{ section.settings.heading | escape }}<br>
+                    {{ section.settings.subheading | escape }}
+                </h3>
+                <p class="purrkins-faq-text purrkins-subtext">{{ section.settings.text | escape }}</p>
+                <a href="{{ section.settings.button_link }}" class="purrkins-faq-btn purrkins-btn-primary" target="_blank" rel="noopener noreferrer">
+                    <span>{{ section.settings.button_text | escape }}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <path d="M12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24Z" fill="white"/>
+  <path d="M6.02848 18.5335C5.88795 18.5335 5.75088 18.4777 5.64928 18.3751C5.51542 18.2396 5.46368 18.0431 5.51408 17.8591L6.30048 14.9871C5.80528 14.0543 5.54475 13.0073 5.54502 11.9455C5.54635 8.3732 8.45328 5.4668 12.0247 5.4668C13.7575 5.46733 15.3855 6.14226 16.6085 7.36706C17.8317 8.5916 18.5047 10.2196 18.5042 11.9508C18.5029 15.5236 15.5962 18.4303 12.0245 18.4303C11.0138 18.43 10.0135 18.1924 9.11622 17.7415L6.16368 18.5159C6.11915 18.5279 6.07355 18.5335 6.02848 18.5335ZM9.18075 16.6399C9.26928 16.6399 9.35728 16.662 9.43622 16.7049C10.2258 17.1356 11.1199 17.3633 12.0226 17.3636C15.0085 17.3636 17.4365 14.9353 17.4378 11.9503C17.4383 10.5039 16.8759 9.14386 15.8541 8.12093C14.8322 7.09773 13.4722 6.534 12.0247 6.53346C9.04128 6.53346 6.61328 8.96146 6.61195 11.9463C6.61168 12.8969 6.86155 13.8329 7.33435 14.6521C7.40555 14.7756 7.42422 14.9223 7.38688 15.0596L6.78715 17.2497L9.04582 16.6572C9.08982 16.6457 9.13542 16.6399 9.18075 16.6399Z" fill="#25D366"/>
+  <path d="M9.70008 12.0668C9.62408 11.9655 9.08008 11.2433 9.08008 10.4959C9.08008 9.7484 9.47234 9.38093 9.61154 9.22893C9.75074 9.07693 9.91528 9.03906 10.0166 9.03906C10.1179 9.03906 10.2193 9.04013 10.3078 9.0444C10.4011 9.0492 10.5262 9.00893 10.6494 9.3052C10.7761 9.6092 11.0795 10.3569 11.1177 10.4329C11.1558 10.5089 11.1809 10.5975 11.1305 10.6991C11.0798 10.8004 11.0545 10.8636 10.9787 10.9524C10.9027 11.0412 10.8193 11.1505 10.7507 11.2185C10.6747 11.2943 10.5955 11.3764 10.6841 11.5284C10.7726 11.6804 11.0774 12.1777 11.5289 12.5807C12.1089 13.0983 12.5982 13.2585 12.7502 13.3345C12.9019 13.4105 12.9907 13.398 13.0793 13.2964C13.1678 13.1951 13.459 12.8529 13.5603 12.7009C13.6617 12.5489 13.7627 12.5743 13.9019 12.6249C14.0411 12.6756 14.7878 13.0431 14.9395 13.1191C15.0913 13.1951 15.1926 13.2332 15.2307 13.2964C15.2689 13.3599 15.2689 13.6639 15.1422 14.0185C15.0155 14.3732 14.4089 14.6972 14.1171 14.7407C13.8555 14.7799 13.5243 14.7961 13.1606 14.6804C12.9401 14.6105 12.6571 14.5169 12.2947 14.3604C10.771 13.7023 9.77634 12.1681 9.70008 12.0668Z" fill="#25D366"/>
+</svg>
+                </a>
+            </div>
+        </div>
+        <div class="purrkins-faq-right">
+            <div class="purrkins-faq-accordion">
+                {% for faq in faqs %}
+                    <div class="purrkins-faq-item js-faq-item {% if forloop.first %}is-open{% endif %}">
+                        <div class="purrkins-faq-question js-faq-toggle" role="button" tabindex="0">
+                            <span>{{ faq.question.value | escape }}</span>
+                            <span class="purrkins-faq-icon"></span>
+                        </div>
+                        <div class="purrkins-faq-answer-wrapper">
+                            <div class="purrkins-faq-answer-inner">
+                                <div class="purrkins-faq-answer">
+                                    {{ faq.answer | metafield_tag }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const accordions = document.querySelectorAll('#purrkins-product-faq-{{ section.id }} .purrkins-faq-accordion');
+    accordions.forEach(accordion => {
+        const items = accordion.querySelectorAll('.js-faq-item');
+        items.forEach(item => {
+            const toggle = item.querySelector('.js-faq-toggle');
+            if (toggle) {
+                toggle.addEventListener('click', function() {
+                    const isOpen = item.classList.contains('is-open');
+                    
+                    // Close all others
+                    items.forEach(otherItem => {
+                        otherItem.classList.remove('is-open');
+                    });
+                    
+                    // Toggle current
+                    if (!isOpen) {
+                        item.classList.add('is-open');
+                    }
+                });
+
+                // Add keyboard accessibility
+                toggle.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.click();
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Product FAQ",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Dynamic Data Setup",
+      "info": "This section automatically pulls FAQs from the product metafield 'custom.product_faqs'. To use this, create a Metaobject called 'Product FAQ' with 'question' (Single line text) and 'answer' (Rich text) fields. Then create a Product Metafield called 'product_faqs' as a List of those Metaobjects."
+    },
+    {
+      "type": "header",
+      "content": "Static Section Settings"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Ask anything."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "We'll answer plainly."
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Support Text",
+      "default": "And if yours isn't here, a real person is one WhatsApp message away."
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Ask on WhatsApp"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom CSS Class"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product FAQ"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,204 @@
+<div id="purrkins-about-purpose-{{ section.id }}" class="purrkins-about-purpose-block {{ section.settings.custom_class }}" {% if section.settings.background_color != blank %}style="background-color: {{ section.settings.background_color }};"{% endif %}>
+    <div class="purrkins-container about-purpose-inner purrkins-section-block">
+        
+        <div class="about-purpose-header">
+            {% if section.settings.heading != blank %}
+                <h3 class="about-purpose-heading purrkins-h3-text">{{ section.settings.heading }}</h3>
+            {% endif %}
+            {% if section.settings.subheading != blank %}
+                <p class="about-purpose-subheading purrkins-subtext">{{ section.settings.subheading }}</p>
+            {% endif %}
+        </div>
+
+        {% if section.blocks.size > 0 %}
+            <div class="about-purpose-grid">
+                {% for block in section.blocks %}
+                    <div class="about-purpose-card" {{ block.shopify_attributes }}>
+                        <div class="about-purpose-card-icon">
+                            {% if block.settings.icon != blank %}
+                                <img src="{{ block.settings.icon | image_url: width: 100 }}" alt="{{ block.settings.icon.alt | default: block.settings.title | escape }}" width="42" height="42" />
+                            {% endif %}
+                        </div>
+                        {% if block.settings.title != blank %}
+                            <h3 class="about-purpose-card-title purrkins-h6-text">{{ block.settings.title }}</h3>
+                        {% endif %}
+                        {% if block.settings.text != blank %}
+                            <p class="about-purpose-card-text purrkins-subtext">{{ block.settings.text }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+.purrkins-about-purpose-block {
+    width: 100%;
+    background: var(--gradient-2, linear-gradient(123deg, #FFF6C3 -0.01%, #F9F8F0 38.43%, #EAE8F9 69.52%));
+}
+
+.about-purpose-header {
+    text-align: center;
+    margin: 0 auto 40px;
+    max-width: 710px;
+}
+.about-purpose-heading {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+.about-purpose-subheading {
+    margin: 0;
+}
+
+.about-purpose-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+.about-purpose-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 32px;
+    border-radius: var(--radius-medium, 16px);
+    border: 0.5px solid var(--color-border, #E0E0E3);
+    background: var(--color-background, #FFF);
+}
+
+.about-purpose-card-icon img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+}
+.about-purpose-card-title {
+    margin: 0;
+    max-width: 225px;
+}
+.about-purpose-card-text {
+    margin: 0;
+    color: var(--semantic-text-secondary, #424953);
+    line-height: 1.6;
+}
+
+.about-purpose-card-icon {
+    margin-bottom: 8px;
+}
+
+@media (max-width: 991px) {
+    .about-purpose-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .about-purpose-header{
+            margin-bottom: 40px;
+    }
+}
+@media (max-width: 767px) {
+    .about-purpose-grid {
+        grid-template-columns: 1fr;
+    }
+    .about-purpose-card {
+        padding: 32px 24px;
+    }
+
+    .about-purpose-card-title{
+        max-width:100%;
+        font-size: 20px;
+    }
+    .about-purpose-heading, .about-purpose-subheading {
+    text-align: left;
+}
+.about-purpose-header {
+    text-align: left;
+    margin-bottom: 20px;
+}
+.about-purpose-card-icon {
+    margin-bottom: 0;
+}
+}
+</style>
+
+{% schema %}
+{
+  "name": "Purrkins About Purpose",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "We went narrow on purpose."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "India has about forty cat-food brands, but none clearly leads in nutrition."
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color (Optional)"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom CSS Class"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Purpose Card",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "A category growing fast"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Cat adoption in India has grown about 30% yearly since the pandemic."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins About Purpose",
+      "blocks": [
+        {
+          "type": "card",
+          "settings": {
+            "title": "A category growing fast",
+            "text": "Cat adoption in India has grown about 30% yearly since the pandemic."
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "title": "Kittens are not small cats",
+            "text": "They are obligate carnivores. Feeding a kitten from the family kitchen is not a safe shortcut."
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "title": "Nobody owns the first months",
+            "text": "Growth, immunity, and digestion are set early, when first-time parents feel most anxious."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

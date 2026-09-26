@@ -1,0 +1,86 @@
+<div class="purrkins-blog-cta pbc-layout-{{ section.settings.layout }}">
+    <div class="pbc-inner" style="background-color: {{ section.settings.bg_color }};">
+        <div class="pbc-content-col">
+            <h3 class="pbc-title" style="color: {{ section.settings.text_color }};">{{ section.settings.title }}</h3>
+            <p class="pbc-desc" style="color: {{ section.settings.text_color }};">{{ section.settings.description }}</p>
+            <a href="{{ section.settings.button_link }}" class="pbc-button">{{ section.settings.button_text }}</a>
+        </div>
+        <div class="pbc-image-col">
+            {% if section.settings.image != blank %}
+                <img src="{{ section.settings.image | image_url: width: 600 }}" alt="{{ section.settings.image.alt | escape }}" width="600" height="auto">
+            {% else %}
+                <div style="width: 100%; height: 200px; background: #eee; display:flex; align-items:center; justify-content:center;">Placeholder Image</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% schema %}
+{
+  "name": "Blog CTA Block",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Starting solids: Weekly guide to weaning your kitten"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Kittens shift from milk to solids between three and eight weeks. Here's what to offer."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Read Article"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        {
+          "value": "image_right",
+          "label": "Image Right"
+        },
+        {
+          "value": "image_left",
+          "label": "Image Left"
+        }
+      ],
+      "default": "image_right"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#F8F6EF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#121217"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog CTA Block",
+      "category": "Blog"
+    }
+  ]
+}
+{% endschema %}

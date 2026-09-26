@@ -1,0 +1,84 @@
+<div class="purrkins-container purrkins-section-block pf-archive-page-header">
+    <div class="pf-archive-header">
+        <h1 class="pf-archive-title purrkins-h1-text">{{ collection.title }}</h1>
+        {% if collection.description != blank %}
+            <div class="pf-archive-description purrkins-subtext">{{ collection.description }}</div>
+        {% else %}
+            <div class="pf-archive-description purrkins-subtext"><p>Complete meals in 70g pouches. 90% real meat and broth, zero fillers.</p></div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.pf-archive-page-header {
+    padding: 60px 20px 0;
+}
+
+.pf-archive-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 60px;
+    gap: 40px;
+}
+
+.pf-archive-title {
+    margin: 0;
+    color: var(--brand-black, #121217);
+    font-size: 58px;
+}
+
+.pf-archive-description {
+    flex: 1;
+    max-width: 400px;
+    color: var(--color-text-primary, #121217);
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+.pf-archive-description p {
+    margin: 0;
+}
+
+@media (max-width: 1024px) {
+    .pf-archive-page-header {
+        padding: 60px 20px 0;
+    }
+}
+
+@media (max-width: 767px) {
+    .pf-archive-page-header {
+        padding: 32px 20px 0;
+    }
+    .pf-archive-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 30px;
+    }
+
+    .pf-archive-title {
+        font-size: 30px;
+        text-align: center;
+    }
+
+    .pf-archive-description {
+        text-align: center;
+        max-width: 100%;
+        font-size: 18px;
+    }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Collection Header",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Collection Header"
+    }
+  ]
+}
+{% endschema %}

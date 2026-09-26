@@ -1,0 +1,215 @@
+<div class="pf-archive-banner" style="{% if section.settings.bg_color != blank %}background-color: {{ section.settings.bg_color }};{% endif %}">
+    <div class="pf-ab-inner purrkins-container">
+        {% if section.settings.heading != blank %}
+            <h3 class="pf-ab-heading purrkins-h3-text">{{ section.settings.heading }}</h3>
+        {% endif %}
+        {% if section.settings.subheading != blank %}
+            <p class="pf-ab-subheading purrkins-subtext">{{ section.settings.subheading }}</p>
+        {% endif %}
+        
+        <div class="pf-ab-features">
+            {% for block in section.blocks %}
+                <div class="pf-ab-feature" {{ block.shopify_attributes }}>
+                    {% if block.settings.title != blank %}
+                        <h3 class="pf-ab-feature-title purrkins-h3-text">{{ block.settings.title }}</h3>
+                    {% endif %}
+                    {% if block.settings.text != blank %}
+                        <p class="pf-ab-feature-text purrkins-subtext">{{ block.settings.text }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        
+        {% if section.settings.btn_text != blank and section.settings.btn_link != blank %}
+            <a href="{{ section.settings.btn_link }}" class="pf-ab-btn purrkins-btn-primary">
+                {{ section.settings.btn_text }}
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+/* Archive Bottom Banner Styles */
+.pf-archive-banner {
+    background-color: var(--brand-black, #22252A);
+    padding: 80px 20px;
+    text-align: center;
+    color: #FFF;
+}
+
+.pf-ab-inner {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.pf-ab-heading {
+    margin: 0 0 8px 0;
+    color: var(--brand-yellow-500, #FFE330);
+    font-weight: 700;
+    letter-spacing: -0.4px;
+}
+
+.pf-ab-subheading {
+    margin: 0 0 30px 0;
+    color: #FFF;
+    text-align: center;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+.pf-ab-features {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    margin-bottom: 46px;
+}
+
+.pf-ab-feature {
+    flex: 1;
+}
+
+.pf-ab-feature-title {
+    margin: 0 0 8px 0;
+    color: #FFF;
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    font-size: 32px;
+    line-height: 1.2;
+}
+
+.pf-ab-feature-text {
+    margin: 0;
+    color: #FFF;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.pf-ab-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 40px;
+    background-color: var(--brand-yellow, #FFE330);
+    color: var(--brand-black, #121217);
+    border-radius: 999px;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pf-ab-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 227, 48, 0.4);
+    color: var(--brand-black, #121217);
+}
+
+@media (max-width: 767px) {
+    .pf-archive-banner {
+        padding: 60px 20px;
+    }
+
+    .pf-ab-features {
+        flex-direction: column;
+        gap: 32px;
+        margin-bottom: 40px;
+    }
+
+    .pf-ab-heading {
+        font-size: 24px;
+    }
+
+    .pf-ab-btn {
+        font-size: 16px;
+    }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Collection Archive Banner",
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#22252A"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Still deciding? Build the box."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Answer six questions about your cat and get a monthly box with food and treats."
+    },
+    {
+      "type": "text",
+      "id": "btn_text",
+      "label": "Button Text",
+      "default": "Build Your Box"
+    },
+    {
+      "type": "url",
+      "id": "btn_link",
+      "label": "Button Link"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "15%"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "off every subscription order"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Archive Banner",
+      "blocks": [
+        {
+          "type": "feature",
+          "settings": {
+            "title": "15%",
+            "text": "off every subscription order"
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "title": "Any month",
+            "text": "swap, pause or cancel"
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "title": "Free",
+            "text": "delivery on boxes over ₹999"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

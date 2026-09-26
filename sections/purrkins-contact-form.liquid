@@ -1,0 +1,253 @@
+<div class="pk-contact-section" id="pk-contact-{{ section.id }}">
+    <div class="pk-contact-header">
+        <h1 class="pk-contact-title">{{ section.settings.heading }}</h1>
+        <p class="pk-contact-subtitle">{{ section.settings.subheading }}</p>
+    </div>
+    
+    <div class="pk-contact-form-container">
+        {% form 'contact', class: 'pk-contact-form' %}
+            {%- if form.posted_successfully? -%}
+                <div class="pk-form-success">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #10B981; margin-right: 8px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    Thanks for reaching out! We'll get back to you shortly.
+                </div>
+            {%- endif -%}
+
+            {%- if form.errors -%}
+                <div class="pk-form-error">
+                    Please check the errors below and try again.
+                </div>
+            {%- endif -%}
+
+            <div class="pk-form-row">
+                <div class="pk-form-group">
+                    <label for="ContactForm-name">Your Name *</label>
+                    <input type="text" id="ContactForm-name" name="contact[name]" placeholder="Full Name" value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}" required>
+                </div>
+                <div class="pk-form-group">
+                    <label for="ContactForm-phone">Mobile Number *</label>
+                    <input type="tel" id="ContactForm-phone" name="contact[phone]" placeholder="+91 |" value="{% if form.phone %}{{ form.phone }}{% elsif customer %}{{ customer.phone }}{% endif %}" required>
+                </div>
+            </div>
+
+            <div class="pk-form-group">
+                <label for="ContactForm-email">Your Email *</label>
+                <input type="email" id="ContactForm-email" name="contact[email]" placeholder="yourname@example.com" value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}" required>
+            </div>
+
+            <div class="pk-form-group">
+                <label for="ContactForm-topic">What is this about? *</label>
+                <div class="pk-select-wrapper">
+                    <select id="ContactForm-topic" name="contact[Topic]" required>
+                        <option value="" disabled selected>Select an option</option>
+                        <option value="Kitten Related">Kitten Related</option>
+                        <option value="Adult Cat">Adult Cat</option>
+                        <option value="Order Tracking/Issue">Order Tracking/Issue</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <svg class="pk-select-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+            </div>
+
+            <div class="pk-form-group">
+                <label for="ContactForm-body">Message *</label>
+                <textarea id="ContactForm-body" name="contact[body]" placeholder="My kitten is always sleepy..." required rows="5">{% if form.body %}{{ form.body }}{% endif %}</textarea>
+            </div>
+
+            <div class="pk-form-submit">
+                <button type="submit" class="pk-submit-btn">Send Message</button>
+            </div>
+        {% endform %}
+    </div>
+</div>
+
+<style>
+.pk-contact-section {
+    padding: 80px 20px 100px;
+    background: linear-gradient(180deg, #FDF9F0 0%, #E9E6F5 100%);
+    font-family: var(--purrkins-body-font, sans-serif);
+    min-height: 80vh;
+}
+
+.pk-contact-header {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 40px;
+}
+
+.pk-contact-title {
+    font-family: var(--purrkins-heading-font, sans-serif);
+    font-size: 48px;
+    font-weight: 800;
+    color: #111827;
+    margin: 0 0 16px;
+    letter-spacing: -1px;
+}
+
+.pk-contact-subtitle {
+    font-size: 18px;
+    color: #4B5563;
+    margin: 0;
+}
+
+.pk-contact-form-container {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 50px 60px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+}
+
+.pk-form-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+.pk-form-row > .pk-form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.pk-form-group {
+    margin-bottom: 24px;
+}
+
+.pk-form-group label {
+    display: block;
+    font-size: 14px;
+    color: #6B7280;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.pk-form-group input, 
+.pk-form-group textarea, 
+.pk-form-group select {
+    width: 100%;
+    border: 1px solid #D1D5DB;
+    border-radius: 20px;
+    padding: 14px 20px;
+    font-size: 16px;
+    color: #1F2937;
+    background-color: #FFFFFF;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.pk-form-group input:focus, 
+.pk-form-group textarea:focus, 
+.pk-form-group select:focus {
+    outline: none;
+    border-color: #9CA3AF;
+    box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.1);
+}
+
+.pk-form-group input::placeholder, 
+.pk-form-group textarea::placeholder {
+    color: #9CA3AF;
+}
+
+.pk-select-wrapper {
+    position: relative;
+}
+
+.pk-select-icon {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9CA3AF;
+    pointer-events: none;
+}
+
+.pk-form-submit {
+    text-align: center;
+    margin-top: 32px;
+}
+
+.pk-submit-btn {
+    background: var(--semantic-brand, #FFE330);
+    color: #111827;
+    border: none;
+    border-radius: 40px;
+    padding: 16px 48px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.pk-submit-btn:hover {
+    transform: translateY(-2px);
+    background-color: #FACC15;
+}
+
+.pk-form-success {
+    display: flex;
+    align-items: center;
+    background: #ECFDF5;
+    color: #065F46;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    font-weight: 500;
+}
+.pk-form-error {
+    background: #FEF2F2;
+    color: #991B1B;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    font-weight: 500;
+}
+
+@media(max-width: 767px){
+    .pk-contact-section {
+        padding: 60px 16px 80px;
+    }
+    .pk-contact-title {
+        font-size: 36px;
+    }
+    .pk-contact-form-container {
+        padding: 30px 20px;
+        border-radius: 16px;
+    }
+    .pk-form-row {
+        flex-direction: column;
+        gap: 24px;
+    }
+    .pk-submit-btn {
+        width: 100%;
+        padding: 16px;
+    }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Purrkins Contact Form",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Get in touch"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Purrkins food, order, or plan? Send us a note; we'll reply within one working day."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins Contact Form"
+    }
+  ]
+}
+{% endschema %}

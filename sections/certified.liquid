@@ -1,0 +1,402 @@
+<div id="purrkins-certified" class="purrkins-certified-block {{ section.settings.custom_class }}" {% if section.settings.background_color != blank %}style="background-color: {{ section.settings.background_color }};"{% endif %}>
+    <div class="purrkins-container certified-inner purrkins-section-block">
+        
+        {% if section.settings.heading != blank %}
+            <div class="certified-header">
+                <h3 class="certified-heading purrkins-h3-text">{{ section.settings.heading }}</h3>
+            </div>
+        {% endif %}
+        
+        <div class="certified-grid">
+            {% for block in section.blocks %}
+                {% if block.type == 'certification' %}
+                    <div class="certified-item" {{ block.shopify_attributes }}>
+                        <div class="certified-item-image">
+                            {% if block.settings.image != blank %}
+                                <img src="{{ block.settings.image | image_url: width: 200 }}" alt="{{ block.settings.image.alt | default: block.settings.text | escape }}" width="100" height="auto" />
+                            {% else %}
+                                <div style="width: 100px; height: 60px; background: #E0E0E0; margin: 0 auto;"></div>
+                            {% endif %}
+                        </div>
+                        {% if block.settings.text != blank %}
+                            <p class="certified-item-text purrkins-subtext">{{ block.settings.text }}</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {% assign has_lab_reports = false %}
+        {% for block in section.blocks %}
+            {% if block.type == 'lab_report' %}
+                {% assign has_lab_reports = true %}
+            {% endif %}
+        {% endfor %}
+
+        {% if has_lab_reports %}
+            <div class="certified-reports-table-wrapper">
+                <table class="certified-reports-table">
+                    <thead>
+                        <tr>
+                            <th class="col-product">Product Name</th>
+                            <th class="col-reports">Test Reports</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for block in section.blocks %}
+                            {% if block.type == 'lab_report' %}
+                                <tr {{ block.shopify_attributes }}>
+                                    <td class="col-product"><strong>{{ block.settings.product_name }}</strong></td>
+                                    <td class="col-reports">
+                                        <div class="certified-batch-links">
+                                            {% for i in (1..5) %}
+                                                {% capture batch_name_key %}batch_name_{{ i }}{% endcapture %}
+                                                {% capture report_file_key %}report_file_{{ i }}{% endcapture %}
+                                                {% assign batch_name = block.settings[batch_name_key] %}
+                                                {% assign report_file = block.settings[report_file_key] %}
+                                                
+                                                {% if batch_name != blank %}
+                                                    {% if report_file != blank %}
+                                                        <a href="{{ report_file }}" target="_blank" rel="noopener noreferrer" class="certified-batch-link">
+                                                            {{ batch_name }}
+                                                        </a>
+                                                    {% else %}
+                                                        <span class="certified-batch-link-disabled">{{ batch_name }}</span>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+.purrkins-certified-block {
+    width: 100%;
+    background-color: var(--primary-slate-50, #F4F8FF);
+    position: relative;
+}
+
+.purrkins-certified-block::before {
+    content: '';
+    position: absolute;
+    border-top: 0.5px solid #C6C8CB;
+    max-width: 1124px;
+    left: 50%;
+    width: 100%;
+    transform: translateX(-50%);
+    top: 1px;
+}
+
+.certified-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+.certified-heading {
+    margin-top: 0;
+    margin-bottom: 0;
+    color: var(--primary-slate-900, #21252A);
+}
+
+.certified-grid {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 90px;
+    margin-bottom: 60px;
+}
+
+.certified-item {
+text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    justify-content: flex-end;
+}
+
+.certified-item-image {
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.certified-item-image img {
+    max-height: 100px;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.certified-item-text {
+    margin: 0;
+    color: var(--color-text-primary, #121217);
+    text-align: center;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+/* Table Styles */
+.certified-reports-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border: 0.5px solid #AAADB2;
+        border-radius: var(--border-radius-purrkins);
+}
+
+.certified-reports-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #FFF;
+        border-radius: var(--border-radius-purrkins);
+    overflow: hidden;
+}
+
+.certified-reports-table thead {
+    background: #FEE12B; /* Brand yellow from screenshot */
+}
+
+.certified-reports-table th {
+    text-align: left;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-text-primary, #121217);
+    font-family: var(--purrkins-heading-font);
+    line-height: 1.3;
+    padding: 20px 39px;
+}
+
+.certified-reports-table td {
+padding: 20px 39px;
+    border-bottom: 0.5px solid #AAADB2;
+    border-right: 0.5px solid #AAADB2;
+    color: var(--color-text-primary, #121217);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.certified-reports-table td:last-child {
+    border-right: none;
+}
+
+.certified-reports-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.certified-reports-table td strong {
+    font-weight: 600;
+}
+
+.col-product {
+width: 50%;
+    border-right: 0.5px solid #AAADB2;
+}
+
+.col-reports {
+    width: 50%;
+}
+
+.certified-batch-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.certified-batch-link {
+    text-decoration: underline;
+    transition: color 0.2s;
+    color: var(--color-text-secondary, #595961);
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 1.3;
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: auto;
+    text-underline-offset: auto;
+    text-underline-position: from-font;
+}
+
+.certified-batch-link:hover {
+    color: #121217;
+}
+
+.certified-batch-link-disabled {
+    color: #8C8C9A;
+    text-decoration: none;
+}
+
+@media (max-width: 991px) {
+    .certified-grid {
+        gap: 40px;
+    }
+    .certified-reports-table th,
+    .certified-reports-table td {
+        padding: 16px 20px;
+    }
+    .purrkins-certified-block::before{
+            max-width: calc(100% - 40px);
+    }
+}
+
+@media (max-width: 767px) {
+    .certified-grid {
+            flex-direction: column;
+        gap: 24px;
+    }
+    .col-product, .col-reports {
+        width: auto;
+    }
+    .certified-reports-table th {
+        font-size: 18px;
+    }
+    .certified-batch-links {
+        gap: 16px;
+    }
+
+    .certified-header {
+    margin-bottom: 24px;
+}
+.certified-item{
+        gap: 10px;
+}
+.certified-item-image{height: auto;}
+.certified-reports-table th, .certified-reports-table td{
+    padding: 10px 20px;
+}
+}
+</style>
+
+{% schema %}
+{
+  "name": "Purrkins Certified",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Every batch tested and certified safe."
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#F4F8FF"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom CSS Class"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "certification",
+      "name": "Certification Logo",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    },
+    {
+      "type": "lab_report",
+      "name": "Lab Report",
+      "settings": [
+        {
+          "type": "text",
+          "id": "product_name",
+          "label": "Product Name",
+          "default": "Product Name"
+        },
+        {
+          "type": "header",
+          "content": "Batches"
+        },
+        {
+          "type": "text",
+          "id": "batch_name_1",
+          "label": "Batch 1 Name"
+        },
+        {
+          "type": "url",
+          "id": "report_file_1",
+          "label": "Batch 1 Report File",
+          "info": "To upload a PDF, go to Shopify Admin > Content > Files, upload your PDF, copy the link, and paste it here."
+        },
+        {
+          "type": "text",
+          "id": "batch_name_2",
+          "label": "Batch 2 Name"
+        },
+        {
+          "type": "url",
+          "id": "report_file_2",
+          "label": "Batch 2 Report File",
+          "info": "Upload PDF to Content > Files and paste link here."
+        },
+        {
+          "type": "text",
+          "id": "batch_name_3",
+          "label": "Batch 3 Name"
+        },
+        {
+          "type": "url",
+          "id": "report_file_3",
+          "label": "Batch 3 Report File",
+          "info": "Upload PDF to Content > Files and paste link here."
+        },
+        {
+          "type": "text",
+          "id": "batch_name_4",
+          "label": "Batch 4 Name"
+        },
+        {
+          "type": "url",
+          "id": "report_file_4",
+          "label": "Batch 4 Report File",
+          "info": "Upload PDF to Content > Files and paste link here."
+        },
+        {
+          "type": "text",
+          "id": "batch_name_5",
+          "label": "Batch 5 Name"
+        },
+        {
+          "type": "url",
+          "id": "report_file_5",
+          "label": "Batch 5 Report File",
+          "info": "Upload PDF to Content > Files and paste link here."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins Certified",
+      "blocks": [
+        { "type": "certification" },
+        { "type": "certification" },
+        { "type": "certification" }
+      ]
+    }
+  ]
+}
+{% endschema %}

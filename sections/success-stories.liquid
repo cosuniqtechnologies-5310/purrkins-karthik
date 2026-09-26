@@ -1,0 +1,343 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer="defer"></script>
+<div id="success-stories-{{ section.id }}" class="success-stories-block {{ section.settings.custom_class }}" {% if section.settings.bg_color != blank %}style="background-color: {{ section.settings.bg_color }};"{% endif %}>
+    <div class="purrkins-container purrkins-section-block">
+        <h3 class="ss-title purrkins-h3-text">{{ section.settings.section_title }}</h3>
+        
+        <div class="swiper ss-swiper-container">
+            <div class="ss-grid swiper-wrapper">
+                {% for block in section.blocks %}
+                    <div class="ss-card swiper-slide" {{ block.shopify_attributes }}>
+                        <div class="ss-images-wrapper">
+                            <!-- Before Image -->
+                            <div class="ss-image-col">
+                                {% if block.settings.before_image != blank %}
+                                    <img src="{{ block.settings.before_image | image_url: width: 400 }}" alt="Before" width="400" height="300">
+                                {% endif %}
+                                {% if block.settings.before_label != blank %}
+                                    <span class="ss-img-label ss-label-dark">{{ block.settings.before_label }}</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- After Image -->
+                            <div class="ss-image-col">
+                                {% if block.settings.after_image != blank %}
+                                    <img src="{{ block.settings.after_image | image_url: width: 400 }}" alt="After" width="400" height="300">
+                                {% endif %}
+                                {% if block.settings.after_label != blank %}
+                                    <span class="ss-img-label ss-label-yellow">{{ block.settings.after_label }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="ss-card-content">
+                            <div class="ss-pet-info">
+                                <strong>{{ block.settings.pet_name }}</strong>
+                                {% if block.settings.pet_details != blank %}
+                                    <span class="ss-pet-details"> • {{ block.settings.pet_details }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <p class="ss-testimonial">
+                                {{ block.settings.testimonial }}
+                            </p>
+                            
+                            {% if block.settings.tag_text != blank %}
+                                <div class="ss-tag-wrapper">
+                                    <span class="ss-tag">{{ block.settings.tag_text }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function initSSSwiper_{{ section.id | replace: '-', '_' }}() {
+    var container = document.querySelector("#success-stories-{{ section.id }} .ss-swiper-container");
+    if (!container) return;
+    
+    if (container.swiper !== undefined) {
+        container.swiper.destroy(true, true);
+    }
+    
+    var ssSwiper = new Swiper(container, {
+        slidesPerView: 1.2,
+        spaceBetween: 16,
+        breakpoints: {
+            768: {
+                slidesPerView: 2.2,
+                spaceBetween: 21,
+            },
+            1024: {
+                slidesPerView: 3,
+                spaceBetween: 21,
+            }
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initSSSwiper_{{ section.id | replace: '-', '_' }});
+
+if (window.Shopify && window.Shopify.designMode) {
+    initSSSwiper_{{ section.id | replace: '-', '_' }}();
+    
+    document.addEventListener('shopify:section:load', function(event) {
+        if (event.detail.sectionId === '{{ section.id }}') {
+            initSSSwiper_{{ section.id | replace: '-', '_' }}();
+        }
+    });
+}
+</script>
+
+<style>
+.success-stories-block {
+    background: #F7FAFF;
+    width: 100%;
+}
+
+.ss-title {
+    text-align: center;
+    margin: 0 0 32px;
+}
+
+.ss-grid {
+    /* Swiper wrapper handles layout */
+}
+
+/* Card Styles */
+.ss-card {
+    box-sizing: border-box;
+    height: auto; /* Allow swiper slides to stretch to same height */
+    padding: 10px 8px 27px;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--border-radius-purrkins);
+    border: 0.5px solid var(--brand-yellow-200, #F1EABC);
+    background: var(--brand-yellow-50, #F9F8F0);
+}
+
+/* Image Split View */
+.ss-images-wrapper {
+    display: flex;
+    position: relative;
+    gap: 5px;
+    height: 204px;
+    margin-bottom: 16px;
+}
+.ss-image-col {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+.ss-image-col:first-child {
+    border-top-left-radius: var(--border-radius-purrkins);
+    border-bottom-left-radius: var(--border-radius-purrkins);
+}
+.ss-image-col:last-child {
+    border-top-right-radius: var(--border-radius-purrkins);
+    border-bottom-right-radius: var(--border-radius-purrkins);
+}
+.ss-image-col img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Center Arrow */
+.ss-arrow-icon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 28px;
+    height: 28px;
+    background: #FFFFFF;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 2;
+}
+
+/* Labels on Images */
+.ss-img-label {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    padding: 5px 16px;
+    z-index: 2;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 140%;
+    border-radius: var(--radius-pill, 999px);
+}
+.ss-label-dark {
+    background: #21252A;
+    color: #FFFFFF;
+}
+.ss-label-yellow {
+    background: #FFE330;
+    color: #21252A;
+}
+
+/* Card Text Content */
+.ss-card-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 0 8px;
+}
+.ss-pet-info {
+    color: var(--color-text-primary, #121217);
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 165%;
+    margin-bottom: 8px;
+}
+.ss-pet-info strong {
+    color: var(--semantic-text-primary, #21252A);
+    font-family: var(--purrkins-heading-font);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 140%;
+}
+
+.ss-testimonial {
+    flex-grow: 1;
+    color: var(--semantic-text-primary, #21252A);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 165%;
+    margin: 0 0 16px;
+    max-width: 336px;
+}
+
+/* Pill Tag */
+.ss-tag-wrapper {
+    margin-top: auto;
+}
+.ss-tag {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 100px;
+    background: var(--primary-yellow-200, #F1EABC);
+    color: var(--semantic-text-primary, #21252A);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 140%;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+}
+@media (max-width: 767px) {
+    .ss-title{
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+    .ss-img-label, .ss-pet-info{
+            font-size: 14px;
+    }
+    .ss-pet-info strong{
+        font-size: 18px;
+    }
+    .ss-testimonial{
+        font-size: 16px;
+    }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Purrkins Success Stories",
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title",
+      "default": "See what the right food does."
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#F7FAFF"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom Class"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "story",
+      "name": "Story Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "before_image",
+          "label": "Before Image"
+        },
+        {
+          "type": "text",
+          "id": "before_label",
+          "label": "Before Label",
+          "default": "Week 1"
+        },
+        {
+          "type": "image_picker",
+          "id": "after_image",
+          "label": "After Image"
+        },
+        {
+          "type": "text",
+          "id": "after_label",
+          "label": "After Label",
+          "default": "Week 8"
+        },
+        {
+          "type": "text",
+          "id": "pet_name",
+          "label": "Pet Name",
+          "default": "Simba"
+        },
+        {
+          "type": "text",
+          "id": "pet_details",
+          "label": "Pet Details",
+          "default": "4 months • Mumbai"
+        },
+        {
+          "type": "textarea",
+          "id": "testimonial",
+          "label": "Testimonial",
+          "default": "\"Simba finally stopped skipping meals, and look at that coat.\""
+        },
+        {
+          "type": "text",
+          "id": "tag_text",
+          "label": "Tag Text",
+          "default": "On Kitten Growth for 6 weeks"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins Success Stories",
+      "blocks": [
+        { "type": "story" },
+        { "type": "story" },
+        { "type": "story" }
+      ]
+    }
+  ]
+}
+{% endschema %}

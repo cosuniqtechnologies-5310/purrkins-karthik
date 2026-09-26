@@ -1,0 +1,95 @@
+<div class="purrkins-container pf-featured-testimonial-section">
+    {% assign testimonial_obj = product.metafields.custom.featured_testimonial.value %}
+    {% assign quote = testimonial_obj.quote.value | default: product.metafields.custom.testimonial_quote.value | default: section.settings.quote %}
+    {% assign avatar = testimonial_obj.avatar.value | default: product.metafields.custom.testimonial_avatar.value | default: section.settings.avatar %}
+    {% assign name = testimonial_obj.name.value | default: product.metafields.custom.testimonial_name.value | default: section.settings.name %}
+    {% assign subtitle = testimonial_obj.subtitle.value | default: product.metafields.custom.testimonial_subtitle.value | default: section.settings.subtitle %}
+    {% assign image = testimonial_obj.image.value | default: product.metafields.custom.testimonial_image.value | default: section.settings.image %}
+
+    {% if quote != blank %}
+    <div class="pf-featured-testimonial-inner">
+        
+        <div class="pf-ft-content">
+            <div class="pf-ft-stars">
+                {% for i in (1..5) %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M9.25834 1.83833C9.29352 1.76724 9.34787 1.7074 9.41526 1.66557C9.48265 1.62373 9.56039 1.60156 9.63971 1.60156C9.71903 1.60156 9.79677 1.62373 9.86415 1.66557C9.93154 1.7074 9.9859 1.76724 10.0211 1.83833L11.8758 5.59505C11.9979 5.84231 12.1783 6.05623 12.4013 6.21845C12.6244 6.38067 12.8835 6.48634 13.1564 6.5264L17.3041 7.13338C17.3827 7.14477 17.4565 7.17792 17.5172 7.22908C17.578 7.28025 17.6232 7.34739 17.6477 7.42291C17.6723 7.49843 17.6752 7.57931 17.6562 7.65641C17.6372 7.73351 17.597 7.80375 17.5401 7.85919L14.5405 10.7801C14.3427 10.9729 14.1947 11.2108 14.1093 11.4735C14.0238 11.7362 14.0035 12.0157 14.05 12.2879L14.7581 16.4148C14.772 16.4933 14.7635 16.5742 14.7336 16.6482C14.7038 16.7221 14.6537 16.7862 14.5892 16.8331C14.5246 16.88 14.4482 16.9077 14.3686 16.9133C14.289 16.9188 14.2095 16.9019 14.1391 16.8644L10.4314 14.915C10.1871 14.7867 9.91524 14.7197 9.63931 14.7197C9.36337 14.7197 9.09156 14.7867 8.84726 14.915L5.14032 16.8644C5.06993 16.9017 4.9905 16.9184 4.91106 16.9128C4.83161 16.9071 4.75535 16.8793 4.69094 16.8325C4.62653 16.7856 4.57656 16.7216 4.54671 16.6478C4.51686 16.574 4.50833 16.4932 4.52209 16.4148L5.22944 12.2887C5.27616 12.0163 5.25592 11.7367 5.17046 11.4738C5.08499 11.211 4.93687 10.9729 4.73887 10.7801L1.73928 7.86C1.68195 7.80462 1.64132 7.73426 1.62203 7.65692C1.60274 7.57959 1.60555 7.49839 1.63015 7.42257C1.65475 7.34676 1.70016 7.27938 1.76118 7.22811C1.82221 7.17684 1.89641 7.14374 1.97533 7.13258L6.12225 6.5264C6.39544 6.48665 6.65488 6.38112 6.87824 6.21888C7.1016 6.05664 7.28219 5.84255 7.40447 5.59505L9.25834 1.83833Z" fill="#FFE330" stroke="#FFE330" stroke-width="1.44448" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                {% endfor %}
+            </div>
+            
+            <blockquote class="pf-ft-quote">
+                "{{ quote | escape }}"
+            </blockquote>
+            
+            <div class="pf-ft-author-meta">
+                {% if avatar != blank %}
+                    <div class="pf-ft-avatar">
+                        {{ avatar | image_url: width: 100 | image_tag: alt: name, loading: 'lazy' }}
+                    </div>
+                {% endif %}
+                <div class="pf-ft-author-details">
+                    {% if name != blank %}
+                        <div class="pf-ft-name">{{ name | escape }}</div>
+                    {% endif %}
+                    {% if subtitle != blank %}
+                        <div class="pf-ft-subtitle">{{ subtitle | escape }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if image != blank %}
+            <div class="pf-ft-image">
+                {{ image | image_url: width: 800 | image_tag: alt: 'Featured Testimonial', loading: 'lazy' }}
+            </div>
+        {% endif %}
+        
+    </div>
+    {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Featured Testimonial",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Testimonial Content",
+      "info": "This section pulls dynamically from your Product's 'Featured Testimonial' Metaobject. LEAVE THESE FIELDS BLANK to use the product's assigned testimonial. If you type in these boxes, it will override the Metaobject and show the same text on every page."
+    },
+    {
+      "type": "textarea",
+      "id": "quote",
+      "label": "Quote",
+      "info": "Leave blank to use the product's metafield."
+    },
+    {
+      "type": "text",
+      "id": "name",
+      "label": "Author Name"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Author Subtitle",
+      "info": "e.g. Leo - 1 month - Persian"
+    },
+    {
+      "type": "image_picker",
+      "id": "avatar",
+      "label": "Author Avatar Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Featured Image (Right side)"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Testimonial"
+    }
+  ]
+}
+{% endschema %}

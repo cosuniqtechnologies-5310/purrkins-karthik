@@ -1,0 +1,279 @@
+<style>
+.site-footer {
+  color: var(--neutral-white);
+  padding: 60px 20px 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  background: var(--brand-yellow-500, #FFE330);
+}
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 40px;
+  margin-bottom: 20px;
+}
+.footer-col-left {
+  flex: 1;
+  min-width: 250px;
+  max-width: 370px;
+}
+.footer-logo-img {
+  height: auto;
+  width: 124px;
+  filter: invert(1);
+}
+.footer-logo-text {
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  display: block;
+  margin-bottom: 20px;
+  color: var(--brand-slate-900, #21252A);
+}
+.footer-description {
+  color: var(--brand-slate-900, #21252A);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  margin-top: 16px;
+}
+.footer-col-right {
+  flex: 2;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 40px;
+  max-width: 585px;
+}
+.footer-nav-col {
+  min-width: 93px;
+}
+.footer-nav-title {
+  margin-bottom: 20px;
+  color: var(--brand-slate-900, #21252A);
+  font-family: var(--purrkins-heading-font);
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 0;
+}
+.footer-nav-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.footer-nav-col a {
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  color: var(--brand-slate-900, #21252A);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.footer-nav-col a:hover {
+  opacity: 1;
+}
+.footer-middle-illustration {
+  text-align: center;
+  width: 100%;
+  margin-top: 40px;
+}
+.footer-illustration-img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding-top: 24px;
+  margin-top: 60px;
+  color: var(--brand-slate-900, #21252A);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.footer-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.payment-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.payment-badge {
+  border-radius: 3.714px;
+  border: 0.3px solid var(--brand-slate-900, #21252A);
+  padding: 2px 6px;
+  font-size: 12px;
+}
+@media(max-width: 991px){
+  .footer-col-right{
+    max-width: 100%;
+  }
+  .footer-top {
+    display: flex;
+    flex-direction: column;
+}
+}
+@media (max-width: 767px) {
+  .footer-col-right { flex-direction: column; }
+  .footer-bottom { flex-direction: column; align-items: flex-start;     margin-top: 8px;}
+  .footer-illustration-img {
+    max-width: 362px;
+  }
+  .footer-middle-illustration{
+    margin-top: 32px;
+  }
+}
+</style>
+
+<footer id="colophon" class="site-footer">
+    <div class="purrkins-container footer-inner">
+        <div class="footer-top">
+            <div class="footer-col-left">
+                <div class="footer-logo">
+                    {% if section.settings.footer_logo != blank %}
+                        <img src="{{ section.settings.footer_logo | image_url: width: 300 }}" alt="{{ section.settings.footer_logo.alt | default: shop.name | escape }}" class="footer-logo-img" />
+                    {% else %}
+                        <span class="footer-logo-text">{{ shop.name }}</span>
+                    {% endif %}
+                </div>
+                {% if section.settings.footer_description != blank %}
+                <p class="footer-description">
+                    {{ section.settings.footer_description }}
+                </p>
+                {% endif %}
+            </div>
+            
+            <div class="footer-col-right">
+                {% for block in section.blocks %}
+                    {% if block.type == 'link_list' %}
+                        <div class="footer-nav-col" {{ block.shopify_attributes }}>
+                            <h4 class="footer-nav-title">{{ block.settings.heading | default: linklists[block.settings.menu].title }}</h4>
+                            {% if block.settings.menu != blank %}
+                                <ul>
+                                    {% for link in linklists[block.settings.menu].links %}
+                                        <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        
+        {% if section.settings.footer_illustration != blank %}
+        <div class="footer-middle-illustration">
+            <picture>
+                {% if section.settings.footer_illustration_mobile != blank %}
+                    <source media="(max-width: 767px)" srcset="{{ section.settings.footer_illustration_mobile | image_url: width: 800 }}">
+                {% endif %}
+                <img src="{{ section.settings.footer_illustration | image_url: width: 1400 }}" alt="{{ section.settings.footer_illustration.alt | escape }}" class="footer-illustration-img" width="1400" height="auto" />
+            </picture>
+        </div>
+        {% endif %}
+        
+        <div class="footer-bottom">
+            <div class="footer-copyright">
+                &copy; {{ 'now' | date: '%Y' }} {{ section.settings.footer_copyright | default: shop.name }}
+            </div>
+            <div class="footer-badges">
+                <div class="payment-badges">
+                    <span class="payment-badge">Cashfree</span>
+                    <span class="payment-badge">UPI</span>
+                    <span class="payment-badge">Visa</span>
+                    <span class="payment-badge">Mastercard</span>
+                    <span class="payment-badge">RuPay</span>
+                </div>
+                {% if section.settings.trust_badges != blank %}
+                    <span class="trust-badges">{{ section.settings.trust_badges }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Purrkins Footer",
+  "class": "section-footer",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "footer_logo",
+      "label": "Footer Logo"
+    },
+    {
+      "type": "textarea",
+      "id": "footer_description",
+      "label": "Footer Description",
+      "default": "Kitten-first nutrition, made in India. Built by a family that's cared about pet food for three decades."
+    },
+    {
+      "type": "image_picker",
+      "id": "footer_illustration",
+      "label": "Footer Illustration (Desktop)"
+    },
+    {
+      "type": "image_picker",
+      "id": "footer_illustration_mobile",
+      "label": "Footer Illustration (Mobile)"
+    },
+    {
+      "type": "text",
+      "id": "footer_copyright",
+      "label": "Copyright Text",
+      "default": "Purrkins. All rights reserved. FSSAI: 12345678901234"
+    },
+    {
+      "type": "text",
+      "id": "trust_badges",
+      "label": "Trust Badges Text",
+      "default": "Secure checkout &nbsp;|&nbsp; Made in India"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "link_list",
+      "name": "Menu Column",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Menu"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins Footer",
+      "blocks": [
+        { "type": "link_list" },
+        { "type": "link_list" },
+        { "type": "link_list" },
+        { "type": "link_list" }
+      ]
+    }
+  ]
+}
+{% endschema %}

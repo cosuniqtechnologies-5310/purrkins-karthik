@@ -1,0 +1,797 @@
+
+
+<div id="product-filter-{{ section.id }}" class="product-filter-block {{ section.settings.custom_class }}">
+    <div class="purrkins-container pf-container purrkins-section-block">
+        
+        <div class="pf-header">
+            <h2 class="pf-heading purrkins-h2-text purrkins-heading-mb">{{ section.settings.heading }}</h2>
+            <p class="pf-subheading purrkins-subtext">{{ section.settings.subheading }}</p>
+        </div>
+
+        <div class="pf-controls-row">
+            <div class="pf-filter-left">
+                {% for block in section.blocks %}
+                    {% if block.type == 'category' and block.settings.collection != blank %}
+                        {% assign cat_collection = block.settings.collection %}
+                        {% assign cat_bg = cat_collection.metafields.custom.card_bg_color | default: '#F4F7FB' %}
+                        {% assign cat_main = cat_collection.metafields.custom.card_primary_color | default: '#424953' %}
+                        {% assign cat_icon = cat_collection.image %}
+                        
+                        <button type="button" class="pf-cat-btn" data-slug="{{ cat_collection.handle }}" style="--dynamic-color: {{ cat_main }}; --dynamic-bg: {{ cat_bg }};" {{ block.shopify_attributes }}>
+                            {% if cat_icon != blank %}
+                                <img src="{{ cat_icon | image_url: width: 48 }}" alt="{{ cat_collection.title | escape }}" width="24" height="24" class="pf-cat-icon">
+                            {% endif %}
+                            <span>{{ cat_collection.title }}</span>
+                        </button>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="pf-filter-right">
+                <div class="pf-tags-dropdown-toggle" id="pf-tags-mobile-toggle">
+                    <span id="pf-tags-selected-text">Filter by Benefit</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="#121217" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="pf-tags-wrapper" id="pf-tags-wrapper">
+                    {% assign unique_benefits = "" %}
+                    {% for block in section.blocks %}
+                        {% if block.type == 'category' and block.settings.collection != blank %}
+                            {% for product in block.settings.collection.products limit: 12 %}
+                                {% assign prod_benefit = product.metafields.custom.benefit %}
+                                {% if prod_benefit != blank %}
+                                    {% assign benefit_with_delim = prod_benefit | append: "|||" %}
+                                    {% unless unique_benefits contains benefit_with_delim %}
+                                        {% assign unique_benefits = unique_benefits | append: benefit_with_delim %}
+                                    {% endunless %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% assign benefit_array = unique_benefits | split: "|||" %}
+                    {% for benefit in benefit_array %}
+                        <button type="button" class="pf-tag-pill" data-slug="{{ benefit | handle }}">
+                            {{ benefit }}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="pf-products-carousel swiper" id="pf-products-carousel-{{ section.id }}">
+            <div class="pf-products-grid swiper-wrapper" id="pf-products-grid-{{ section.id }}">
+                {% assign rendered_products = "" %}
+                {% for block in section.blocks %}
+                    {% if block.type == 'category' and block.settings.collection != blank %}
+                        {% assign collection_to_use = block.settings.collection %}
+                        {% for product in collection_to_use.products limit: 12 %}
+                            {% assign prod_id_string = product.id | append: "" %}
+                            {% unless rendered_products contains prod_id_string %}
+                                {% render 'purrkins-filter-card', product: product, current_collection: collection_to_use %}
+                                {% assign rendered_products = rendered_products | append: prod_id_string | append: "," %}
+                            {% endunless %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if rendered_products == "" %}
+                    <p class="pf-no-products swiper-slide">No products found. Please assign collections with products in the section settings.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Inline Quick View Container -->
+        <div id="pf-quick-view-container-{{ section.id }}" class="pf-quick-view-container"></div>
+
+    </div>
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sectionId = '{{ section.id }}';
+    const container = document.getElementById('product-filter-' + sectionId);
+    if (!container) return;
+
+    const catBtns = container.querySelectorAll('.pf-cat-btn');
+    const tagPills = container.querySelectorAll('.pf-tag-pill');
+    const productsGrid = container.querySelector('#pf-products-grid-' + sectionId);
+    const allCards = Array.from(productsGrid.querySelectorAll('.pf-product-card-wrap'));
+    
+    let activeCat = '';
+    let activeTags = [];
+    let productSwiper;
+
+    function initSwiper() {
+        if (productSwiper) {
+            productSwiper.destroy(true, true);
+        }
+        productSwiper = new Swiper('#pf-products-carousel-' + sectionId, {
+            slidesPerView: 'auto',
+            spaceBetween: 20,
+            loop: false,
+            grabCursor: true,
+            breakpoints: {
+                576: { spaceBetween: 20 },
+                992: { spaceBetween: 30 }
+            }
+        });
+    }
+
+    // Inline Quick View Logic
+    const qvContainer = document.getElementById('pf-quick-view-container-' + sectionId);
+
+    function closeQuickView() {
+        if (!qvContainer) return;
+        qvContainer.style.maxHeight = '0px';
+        qvContainer.style.opacity = '0';
+        qvContainer.style.opacity = '0';
+        qvContainer.setAttribute('data-current-product', '');
+    }
+
+    function openQuickView(url, productId) {
+        if (!qvContainer) return;
+        
+        // Show loading state
+        qvContainer.innerHTML = '<div class="pf-qv-loading"><span class="qv-spinner"></span></div>';
+        qvContainer.style.maxHeight = '300px';
+        qvContainer.style.opacity = '1';
+        qvContainer.style.opacity = '1';
+        
+        fetch(`${url}?section_id=main-product-quick-view`)
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContent = doc.getElementById(`shopify-section-main-product-quick-view`);
+                
+                if (newContent) {
+                    qvContainer.innerHTML = newContent.innerHTML;
+                    qvContainer.setAttribute('data-current-product', productId);
+                    
+                    // Set height to scroll height for smooth animation
+                    setTimeout(() => {
+                        qvContainer.style.maxHeight = qvContainer.scrollHeight + 100 + 'px';
+                    }, 50);
+                } else {
+                    qvContainer.innerHTML = '<div style="text-align: center;">Error loading product.</div>';
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                qvContainer.innerHTML = '<div style="text-align: center;">Error loading product.</div>';
+            });
+    }
+
+    // Auto-open first product
+    function openFirstProduct() {
+        const firstCard = productsGrid.querySelector('.pf-product-card-wrap');
+        if (firstCard) {
+            const url = firstCard.querySelector('.pf-product-image').getAttribute('href');
+            const pId = firstCard.getAttribute('data-product-id');
+            if (url && pId) {
+                openQuickView(url, pId);
+            }
+        }
+    }
+
+    // Init on load
+    initSwiper();
+    setTimeout(openFirstProduct, 500); // slight delay to ensure DOM is ready
+
+    // Event delegation for clicks on product cards
+    productsGrid.addEventListener('click', function(e) {
+        // Find if we clicked on a card link
+        const link = e.target.closest('a.pf-product-image, h4.pf-product-title a');
+        if (!link) return;
+        
+        const cardWrap = link.closest('.pf-product-card-wrap');
+        if (!cardWrap) return;
+        
+        e.preventDefault();
+        
+        const url = link.getAttribute('href');
+        const productId = cardWrap.getAttribute('data-product-id');
+        
+        if (qvContainer.getAttribute('data-current-product') === productId) {
+            if (qvContainer.style.maxHeight !== '0px') {
+                closeQuickView();
+                return;
+            }
+        }
+        
+        openQuickView(url, productId);
+        
+        // Optionally scroll to container
+        setTimeout(() => {
+            qvContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+    });
+
+    // Event delegation for the Bowl Modal inside Quick View
+    if (qvContainer) {
+        qvContainer.addEventListener('click', function(e) {
+            // Handle "What's in the bowl" click
+            const btnBowl = e.target.closest('.pf-btn-bowl');
+            if (btnBowl) {
+                const currentProductId = qvContainer.getAttribute('data-current-product');
+                const bowlModal = qvContainer.querySelector('#pf-bowl-modal-' + currentProductId);
+                if (bowlModal) {
+                    bowlModal.style.display = 'flex';
+                    setTimeout(() => bowlModal.classList.add('visible'), 10);
+                }
+            }
+            
+            // Handle modal close
+            const btnClose = e.target.closest('.pf-bowl-close');
+            const overlay = e.target.classList.contains('pf-bowl-overlay') ? e.target : null;
+            if (btnClose || overlay) {
+                const currentProductId = qvContainer.getAttribute('data-current-product');
+                const bowlModal = qvContainer.querySelector('#pf-bowl-modal-' + currentProductId);
+                if (bowlModal) {
+                    bowlModal.classList.remove('visible');
+                    setTimeout(() => bowlModal.style.display = 'none', 300);
+                }
+            }
+            
+            // Handle tab switching
+            const tabBtn = e.target.closest('.pf-bowl-tab');
+            if (tabBtn) {
+                const currentProductId = qvContainer.getAttribute('data-current-product');
+                const bowlModal = qvContainer.querySelector('#pf-bowl-modal-' + currentProductId);
+                if (bowlModal) {
+                    const tabs = bowlModal.querySelectorAll('.pf-bowl-tab');
+                    const contents = bowlModal.querySelectorAll('.pf-bowl-tab-content');
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    contents.forEach(c => c.classList.remove('active'));
+                    
+                    tabBtn.classList.add('active');
+                    const targetContent = bowlModal.querySelector('#' + tabBtn.dataset.target);
+                    if (targetContent) targetContent.classList.add('active');
+                }
+            }
+
+            // Custom Select dropdown logic for Quick View
+            const selectTrigger = e.target.closest('.pf-custom-select-trigger');
+            if (selectTrigger) {
+                const selectContainer = selectTrigger.closest('.pf-custom-select-container');
+                if (selectContainer) selectContainer.classList.toggle('open');
+            } else {
+                const openSelects = qvContainer.querySelectorAll('.pf-custom-select-container.open');
+                openSelects.forEach(c => {
+                    // Only close if we didn't click inside an option (handled below)
+                    if (!e.target.closest('.pf-custom-select-option')) {
+                        c.classList.remove('open');
+                    }
+                });
+            }
+            
+            const selectOption = e.target.closest('.pf-custom-select-option');
+            if (selectOption) {
+                const selectContainer = selectOption.closest('.pf-custom-select-container');
+                if (selectContainer) {
+                    const selectLabel = selectContainer.querySelector('.pf-custom-select-label');
+                    const nativeSelect = selectContainer.parentElement.querySelector('select[name="quantity"]');
+                    
+                    if (selectLabel) selectLabel.innerText = selectOption.innerText;
+                    if (nativeSelect) {
+                        nativeSelect.value = selectOption.getAttribute('data-value');
+                        nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    selectContainer.classList.remove('open');
+                }
+            }
+        });
+    }
+
+    function filterProducts() {
+        // Clear the grid completely
+        productsGrid.innerHTML = '';
+        
+        let hasVisibleCards = false;
+
+        // Re-append only matching cards
+        allCards.forEach(card => {
+            const cardCat = card.getAttribute('data-category') || '';
+            const cardBenefit = card.getAttribute('data-benefit') || '';
+            const cardBenefitSlug = cardBenefit.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            
+            let catMatch = true;
+            if (activeCat !== '') {
+                catMatch = (cardCat === activeCat);
+            }
+            
+            let tagMatch = true;
+            if (activeTags.length > 0) {
+                tagMatch = activeTags.includes(cardBenefitSlug);
+            }
+
+            if (catMatch && tagMatch) {
+                card.style.display = ''; // Ensure it's visible
+                productsGrid.appendChild(card);
+                hasVisibleCards = true;
+            }
+        });
+
+        // If no cards match, we can show a 'No products' message if we had one
+        // (Optional: handle empty state here if needed)
+
+        // Re-init swiper to recalculate layout perfectly
+        initSwiper();
+    }
+
+    catBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (this.classList.contains('active')) {
+                this.classList.remove('active');
+                activeCat = '';
+            } else {
+                catBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                activeCat = this.getAttribute('data-slug');
+            }
+            filterProducts();
+        });
+    });
+
+    tagPills.forEach(pill => {
+        pill.addEventListener('click', function() {
+            const slug = this.getAttribute('data-slug');
+            
+            if (this.classList.contains('active')) {
+                this.classList.remove('active');
+                activeTags = activeTags.filter(t => t !== slug);
+            } else {
+                this.classList.add('active');
+                if(!activeTags.includes(slug)) {
+                    activeTags.push(slug);
+                }
+            }
+            
+            // Update mobile dropdown text
+            const toggleText = container.querySelector('#pf-tags-selected-text');
+            if (toggleText) {
+                if (activeTags.length > 0) {
+                    const firstActive = container.querySelector(`.pf-tag-pill[data-slug="${activeTags[0]}"]`);
+                    if (firstActive) {
+                        toggleText.textContent = firstActive.textContent.trim() + (activeTags.length > 1 ? ` (+${activeTags.length - 1})` : '');
+                    }
+                } else {
+                    toggleText.textContent = 'Filter by Benefit';
+                }
+            }
+
+            // Close dropdown on mobile after selection
+            const tagsWrapper = container.querySelector('#pf-tags-wrapper');
+            if (tagsWrapper) {
+                if (window.innerWidth <= 767) {
+                    tagsWrapper.classList.remove('is-open');
+                }
+            }
+            
+            filterProducts();
+        });
+    });
+
+    const mobileToggle = container.querySelector('#pf-tags-mobile-toggle');
+    const tagsWrapper = container.querySelector('#pf-tags-wrapper');
+    if (mobileToggle && tagsWrapper) {
+        mobileToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            tagsWrapper.classList.toggle('is-open');
+        });
+        document.addEventListener('click', function(e) {
+            if (!mobileToggle.contains(e.target) && !tagsWrapper.contains(e.target)) {
+                tagsWrapper.classList.remove('is-open');
+            }
+        });
+    }
+});
+</script>
+
+<style>
+.product-filter-block .pf-container {
+  overflow: visible !important;
+}
+.pf-header {
+  margin-bottom: 40px;
+}
+.pf-heading {
+    margin: 0 0 12px;
+}
+.pf-subheading {
+    color: var(--semantic-text-secondary, #424953);
+    margin: 0;
+}
+.pf-controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 26px;
+}
+.pf-filter-left {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 364px;
+    row-gap: 14px;
+    column-gap: 12px;
+}
+.pf-cat-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--border-radius-purrkins, 12px);
+    border: 1px solid var(--dynamic-color, #C2C5CE);
+    background: var(--dynamic-bg, #F4F7FB);
+    color: var(--dynamic-color, #424953);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 176px;
+    font-family: var(--purrkins-heading-font);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 20px;
+}
+.pf-cat-btn:hover {
+  opacity: 0.85;
+}
+.pf-cat-btn.active {
+  background: var(--dynamic-color, #558A29);
+  border-color: var(--dynamic-color, #558A29);
+  color: #FFFFFF;
+}
+.pf-cat-btn.active svg {
+  color: #FFFFFF;
+}
+.pf-cat-btn .pf-cat-icon {
+    width: 54px;
+    height: 54px;
+    object-fit: contain;
+    transition: all 0.2s ease;
+}
+.pf-cat-btn.active .pf-cat-icon {
+    filter: brightness(0) invert(1);
+}
+.pf-filter-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+.pf-tags-dropdown-toggle {
+    display: none;
+    border-radius: 999px;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--brand-slate-900, #21252A);
+    background: #FFF;
+    border: 1.636px solid var(--color-text-primary, #121217);
+    max-width: 260px;
+    padding: 8.182px 16.364px;
+}
+.pf-tags-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 11px;
+    column-gap: 10px;
+}
+.pf-tag-pill {
+    background: #FFF;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 999px;
+    border: 1px solid var(--primary-slate-300, #AAADB2);
+    display: flex;
+    padding: 4px 14px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    color: var(--primary-slate-300, #AAADB2);
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.5;
+    font-family: var(--purrkins-primary-font);
+    min-width: 185px;
+}
+.pf-tag-pill:hover, .pf-tag-pill.active {
+    border: 1px solid var(--primary-yellow-400, #F6E051);
+    background: var(--primary-yellow-100, #F6F3DF);
+    color: var(--primary-yellow-800, #685B0C);
+}
+
+.product-filter-block {
+    overflow-x: hidden;
+}
+.pf-products-carousel {
+  position: relative;
+  overflow: hidden !important;
+  transition: opacity 0.3s ease;
+  margin-right: calc(-50vw + 50%);
+  width: calc(100% + (50vw - 50%)) !important;
+}
+.pf-products-grid .swiper-slide {
+    width: calc((100vw - 40px) / 1.2);
+    height: auto;
+}
+@media (min-width: 576px) {
+    .pf-products-grid .swiper-slide {
+        width: calc((100vw - 20px) / 2.2);
+    }
+}
+@media (min-width: 992px) {
+    .pf-products-grid .swiper-slide {
+        width: calc((min(100vw, 1336px) - 60px) / 3.2);
+    }
+}
+.pf-products-grid {
+  display: flex;
+}
+.pf-product-card-wrap {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    border-radius: var(--border-radius-purrkins, 12px);
+    border: 1px solid var(--brand-slate-50, #F0F0F1);
+    background: var(--color-background, #FFF);
+    margin-right: 24px !important;
+}
+.pf-product-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-height: 360px;
+    margin-bottom: 18px;
+    border-radius: 12px 12px 0 0;
+    background: var(--accent-teal-light, #E5F4F2);
+    padding: 77px 20px 32px 20px;
+}
+.pf-product-badge {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    border-radius: 999px;
+    background: var(--accent-teal-500, #BFE3DF);
+    display: inline-flex;
+    padding: 6px 14px;
+    align-items: center;
+    color: var(--accent-teal-900, #1F5E58);
+    font-family: var(--purrkins-heading-font);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: 0.14px;
+}
+.pf-product-image img {
+  max-width: 100%;
+  max-height: 250px;
+  object-fit: contain;
+}
+.pf-product-info {
+display: flex;
+    padding: 0 20px 22px 20px;
+    flex-direction: column;
+    gap: 10px;
+}
+.pf-product-title {
+font-size: 24px;
+    font-weight: 700;
+    color: var(--semantic-text-primary, #21252A);
+    margin: 0;
+    font-family: var(--purrkins-heading-font);
+    text-align: center;
+}
+.pf-product-title a {
+  color: inherit;
+  text-decoration: none;
+}
+.pf-product-excerpt {
+    color: #595961;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.44;
+}
+
+.pf-product-price {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--semantic-text-primary, #21252A);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+}
+.pf-product-price .price-val {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+.pf-product-price .price-sep {
+    font-size: 18px;
+    font-weight: 400;
+    color: #E0E0E3;
+}
+.pf-product-price .price-size {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--semantic-text-primary, #21252A);
+}
+
+@media (max-width: 991px) {
+  .pf-controls-row {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 40px;
+    gap: 25px;
+  }
+  .pf-filter-right {
+    justify-content: center;
+  }
+  .pf-tags-wrapper {
+    justify-content: flex-start;
+  }
+  .pf-header {
+    margin-bottom: 24px;
+  }
+}
+
+.pf-products-grid {
+    padding-bottom: 20px;
+}
+
+/* Inline Quick View Container */
+.pf-quick-view-container {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out, padding 0.5s ease-in-out;
+    background: #FFFFFF;
+    border-radius: 24px;
+    margin-top: 60px;
+}
+.pf-qv-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 150px;
+}
+.qv-spinner {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(0,0,0,0.1);
+    border-radius: 50%;
+    border-top-color: var(--color-text-primary);
+    animation: spin 1s ease-in-out infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media(max-width: 767px){
+    .pf-controls-row{
+        align-items: center;
+    }
+    .pf-header {
+    text-align: center;
+}
+.pf-cat-btn {
+    min-width: unset;
+    width: calc(50% - 5px);
+}
+.pf-product-price .price-val {
+    font-size: 20px;
+}
+.pf-product-price .price-size {
+    font-size: 16px;
+}
+.pf-filter-left {
+    row-gap: 10px;
+    column-gap: 9px;
+}
+.pf-product-excerpt{
+    font-size: 14px;
+}
+.pf-cat-btn .pf-cat-icon {
+    width: 42px;
+    height: 42px;
+}
+    .pf-filter-right {
+        position: relative;
+        width: 100%;
+    }
+    .pf-tags-dropdown-toggle {
+        display: flex;
+    }
+    .pf-tags-wrapper {
+        display: none;
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid var(--primary-slate-300, #AAADB2);
+        border-radius: 12px;
+        padding: 16px;
+        z-index: 10;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .pf-tags-wrapper.is-open {
+        display: flex;
+    }
+    .pf-tag-pill {
+        border: none;
+        width: 100%;
+        justify-content: flex-start;
+        border-radius: 8px;
+    }
+    .pf-product-image img{
+        max-height: 181px;
+}   
+  .pf-filter-right {
+    justify-content: center;
+  }
+    .pf-quick-view-container {
+  margin-top: 12px;
+}
+}
+</style>
+
+{% schema %}
+{
+  "name": "Product Filter Grid",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Nutrition for every stage."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Choose your cat's life stage or health need to find the right food."
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom CSS Class"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category (Collection)",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection",
+          "info": "This collection's title, products, and custom metafields (icon, colors) will be used."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Filter Grid",
+      "blocks": [
+        { "type": "category" },
+        { "type": "category" }
+      ]
+    }
+  ]
+}
+{% endschema %}

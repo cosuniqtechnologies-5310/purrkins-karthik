@@ -1,0 +1,163 @@
+
+{{ 'purrkins-blog.css' | asset_url | stylesheet_tag }}
+
+<div class="blog-page-container">
+    {%- paginate blog.articles by 9 -%}
+      {%- if paginate.current_page == 1 and blog.articles.size > 0 -%}
+        {%- assign featured = blog.articles.first -%}
+        <a href="{{ featured.url }}" class="blog-featured-post">
+            <div class="bfp-image-col">
+                {%- if featured.image -%}
+                    <img src="{{ featured.image | image_url: width: 800 }}" alt="{{ featured.title | escape }}" class="bfp-img" width="800" height="{{ 800 | divided_by: featured.image.aspect_ratio | round }}" loading="eager">
+                {%- else -%}
+                    {{ 'image' | placeholder_svg_tag: 'bfp-img' }}
+                {%- endif -%}
+            </div>
+            <div class="bfp-content-col">
+                <div class="bfp-badge">Featured &middot; {{ featured.tags.first | default: blog.title }}</div>
+                <h2 class="bfp-title">{{ featured.title }}</h2>
+                <div class="bfp-excerpt">
+                  {%- if featured.excerpt.size > 0 -%}
+                    {{ featured.excerpt | strip_html | truncatewords: 30 }}
+                  {%- else -%}
+                    {{ featured.content | strip_html | truncatewords: 30 }}
+                  {%- endif -%}
+                </div>
+                
+                <div class="bfp-meta">
+                    {%- if featured.metafields.custom.writer_image != blank -%}
+                        <img src="{{ featured.metafields.custom.writer_image | image_url: width: 80 }}" alt="{{ featured.author }}" class="bfp-author-img" width="80" height="80" loading="lazy">
+                    {%- endif -%}
+                    {%- if featured.author -%}
+                        <div class="bfp-author-text">
+                            <div class="bfp-author-name"><strong>{{ featured.author }}</strong>, Veterinary Writer</div>
+                            {%- if featured.metafields.custom.article_reviewer != blank -%}
+                                <div class="bfp-reviewer">Reviewed by {{ featured.metafields.custom.article_reviewer }}</div>
+                            {%- endif -%}
+                        </div>
+                    {%- endif -%}
+                </div>
+                
+                <span class="button button--secondary bfp-read-btn purrkins-btn-secondary">Read the Blog</span>
+            </div>
+        </a>
+      {%- endif -%}
+
+      <div class="blog-list-header">
+          <div class="blog-filter-wrap">
+              <select class="blog-sort-select" id="blog-sort-select">
+                  <option value="featured">Featured</option>
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+              </select>
+          </div>
+      </div>
+
+      <div class="blog-post-grid" id="blog-post-grid">
+          {%- for article in blog.articles -%}
+              {%- if paginate.current_page == 1 and forloop.first -%}
+                  {%- continue -%}
+              {%- endif -%}
+              
+              <div class="blog-card">
+                  <a href="{{ article.url }}" class="blog-card-link">
+                      <div class="blog-card-img-wrap">
+                          {%- if article.image -%}
+                              <img src="{{ article.image | image_url: width: 500 }}" alt="{{ article.title | escape }}" class="blog-card-img" width="500" height="{{ 500 | divided_by: article.image.aspect_ratio | round }}" loading="lazy">
+                          {%- else -%}
+                              {{ 'image' | placeholder_svg_tag: 'blog-card-img placeholder-svg' }}
+                          {%- endif -%}
+                      </div>
+                      <div class="blog-card-content">
+                          <div class="blog-card-badge">{{ article.tags.first | default: blog.title }}</div>
+                          <h3 class="blog-card-title">{{ article.title }}</h3>
+                          <div class="blog-card-excerpt">
+                            {%- if article.excerpt.size > 0 -%}
+                              {{ article.excerpt | strip_html | truncatewords: 25 }}
+                            {%- else -%}
+                              {{ article.content | strip_html | truncatewords: 25 }}
+                            {%- endif -%}
+                          </div>
+                          <div class="blog-card-date">{{ article.published_at | time_tag: format: 'date' }}</div>
+                      </div>
+                  </a>
+              </div>
+          {%- endfor -%}
+      </div>
+
+      {%- if paginate.pages > 1 -%}
+        <div class="blog-pagination">
+            <div class="nav-links">
+                {%- if paginate.previous -%}
+                    <a href="{{ paginate.previous.url }}" class="page-numbers"><</a>
+                {%- endif -%}
+                
+                {%- for part in paginate.parts -%}
+                    {%- if part.is_link -%}
+                        <a href="{{ part.url }}" class="page-numbers">{{ part.title }}</a>
+                    {%- else -%}
+                        {%- if part.title == paginate.current_page -%}
+                            <span class="page-numbers current">{{ part.title }}</span>
+                        {%- else -%}
+                            <span class="page-numbers">{{ part.title }}</span>
+                        {%- endif -%}
+                    {%- endif -%}
+                {%- endfor -%}
+
+                {%- if paginate.next -%}
+                    <a href="{{ paginate.next.url }}" class="page-numbers">></a>
+                {%- endif -%}
+            </div>
+        </div>
+      {%- endif -%}
+    {%- endpaginate -%}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sortSelect = document.getElementById('blog-sort-select');
+    const grid = document.getElementById('blog-post-grid');
+    
+    if (!sortSelect || !grid) return;
+
+    // Store original order
+    const originalCards = Array.from(grid.querySelectorAll('.blog-card'));
+
+    sortSelect.addEventListener('change', function(e) {
+      const value = e.target.value;
+      const cards = Array.from(grid.querySelectorAll('.blog-card'));
+
+      if (value === 'featured') {
+        // Revert to original DOM order (which is newest first, minus the featured post)
+        grid.innerHTML = '';
+        originalCards.forEach(card => grid.appendChild(card));
+      } else {
+        cards.sort((a, b) => {
+          // Extract dates from the <time> element's datetime attribute
+          const timeA = a.querySelector('.blog-card-date time');
+          const timeB = b.querySelector('.blog-card-date time');
+          const dateA = timeA ? new Date(timeA.getAttribute('datetime')) : new Date(0);
+          const dateB = timeB ? new Date(timeB.getAttribute('datetime')) : new Date(0);
+          
+          if (value === 'newest') {
+            return dateB - dateA;
+          } else if (value === 'oldest') {
+            return dateA - dateB;
+          }
+          return 0;
+        });
+
+        // Re-append sorted cards
+        grid.innerHTML = '';
+        cards.forEach(card => grid.appendChild(card));
+      }
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Purrkins Blog Posts",
+  "settings": []
+}
+{% endschema %}

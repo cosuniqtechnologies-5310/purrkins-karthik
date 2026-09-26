@@ -1,0 +1,426 @@
+<div class="split-banner-block purrkins-block-sec {{ section.settings.custom_class }}">
+    <div class="purrkins-container split-banner-inner">
+        
+        <div class="split-banner-content">
+            <h2 class="split-banner-heading purrkins-h1-text">{{ section.settings.heading }}</h2>
+            <p class="split-banner-subheading">{{ section.settings.subheading }}</p>
+            
+            {% if section.blocks.size > 0 %}
+                <div class="split-banner-features">
+                    {% for block in section.blocks %}
+                        <div class="sb-feature-item" {{ block.shopify_attributes }}>
+                            {% if block.settings.icon != blank %}
+                                <img src="{{ block.settings.icon | image_url }}" class="sb-feature-icon" alt="" width="600" height="auto" />
+                            {% endif %}
+                            {% if block.settings.text != blank %}
+                                <span class="sb-feature-text">{{ block.settings.text }}</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="split-banner-media">
+            {% if section.settings.video_embed != blank %}
+                <div class="split-banner-embed">
+                    {{ section.settings.video_embed }}
+                </div>
+            {% else %}
+                {% if section.settings.image != blank %}
+                    <img src="{{ section.settings.image | image_url }}" alt="{{ section.settings.image.alt | escape }}" class="split-banner-img" width="1000" height="auto" />
+                {% else %}
+                    <!-- Placeholder Image -->
+                    <div class="split-banner-placeholder">
+                        <p>Select an image in the section settings</p>
+                    </div>
+                {% endif %}
+                
+                {% if section.settings.video_url != blank %}
+                    <a href="{{ section.settings.video_url }}" class="split-banner-play-btn js-split-banner-play" aria-label="Play video">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="65" height="65" viewBox="0 0 65 65" fill="none">
+                            <circle opacity="0.5" cx="32.5" cy="32.5" r="32.5" fill="white"/>
+                            <path d="M4.9375 32.5008C4.9375 17.278 17.278 4.9375 32.5008 4.9375C47.7237 4.9375 60.0641 17.278 60.0641 32.5008C60.0641 47.7237 47.7237 60.0641 32.5008 60.0641C17.278 60.0641 4.9375 47.7237 4.9375 32.5008ZM26.4112 21.9533C25.8162 22.2968 25.4497 22.9317 25.4497 23.6187V41.3828C25.4497 42.0697 25.8162 42.7046 26.4112 43.0482C27.0062 43.3918 27.7391 43.3918 28.3342 43.0482L43.7184 34.1661C44.3135 33.8225 44.6799 33.1877 44.6799 32.5008C44.6799 31.8136 44.3135 31.1788 43.7184 30.8355L28.3342 21.9533C27.7391 21.6098 27.0062 21.6098 26.4112 21.9533Z" fill="white"/>
+                        </svg>
+                    </a>
+                    <div class="split-banner-modal" style="display:none;">
+                        <div class="split-banner-modal-overlay js-split-banner-close"></div>
+                        <div class="split-banner-modal-content">
+                            <button class="split-banner-modal-close js-split-banner-close" aria-label="Close video">&times;</button>
+                            <div class="split-banner-modal-video">
+                                <iframe src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=0" frameborder="0" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+        
+    </div>
+</div>
+
+<style>
+.split-banner-block {
+    margin: 8px 0;
+    width: 100%;
+}
+.split-banner-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 20px;
+}
+.split-banner-content {
+flex: 1;
+    display: flex;
+    flex-direction: column;
+    color: var(--primary-slate-900);
+    border-radius: var(--border-radius-purrkins);
+    background: var(--gradient-1, linear-gradient(118deg, #FFF6C3 0%, var(--primary-yellow-50, #F9F8F0) 67.5%, var(--accent-teal-400, #C9E7E4) 97.53%));
+    max-width: 678px;
+padding: 75px 55px 77px 61px;
+}
+.split-banner-heading {
+    margin: 0px 0 12px;
+}
+.split-banner-subheading {
+    margin: 0 0 40px;
+    color: var(--semantic-text-primary, #21252A);
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+.split-banner-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 50px;
+    justify-content: space-between;
+    max-width: 496px;
+}
+.sb-feature-item {
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sb-feature-item:first-child .sb-feature-text{
+    max-width: 78px;
+}
+
+.sb-feature-item .sb-feature-text{
+    max-width: 120px;
+}
+
+.sb-feature-item:last-child .sb-feature-text{
+    max-width: 132px;
+}
+.sb-feature-icon {
+    width: 54px;
+    height: 54px;
+    object-fit: contain;
+}
+.sb-feature-text {
+    color: var(--semantic-text-primary, #21252A);
+    font-family: var(--purrkins-heading-font);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: center;
+}
+
+.split-banner-media {
+    flex: 1;
+    position: relative;
+    background-color: #E0E0E0;
+    display: flex;
+    border-radius: var(--border-radius-purrkins);
+    overflow: hidden;
+    max-height: 488px;
+}
+.split-banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: var(--border-radius-purrkins);
+}
+.split-banner-placeholder {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+}
+.split-banner-play-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+.split-banner-play-btn:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+}
+.split-banner-embed {
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+.split-banner-embed iframe {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Modal Styles */
+.split-banner-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.split-banner-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    cursor: pointer;
+}
+.split-banner-modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 900px;
+    z-index: 1;
+}
+.split-banner-modal-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 32px;
+    cursor: pointer;
+}
+.split-banner-modal-video {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: 0;
+    overflow: hidden;
+    width: 100%;
+    background: #000;
+}
+.split-banner-modal-video iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+@media(max-width: 1100px){
+    ..purrkins-h1-text{
+        font-size: 58px;
+    }
+}
+
+@media(max-width: 1048px){
+    .split-banner-features{
+            max-width: 100%;
+    gap: 24px;
+    }
+}
+
+@media(max-width: 991px){
+    .split-banner-content {
+        padding: 40px 20px;
+    }
+    .split-banner-features {
+        max-width: 100%;
+        gap: 5px;
+    }
+}
+
+@media (max-width: 767px) {
+    .split-banner-content {
+    padding: 28px 26px;
+}
+    .split-banner-subheading{
+    font-size: 18px;
+        margin: 0 auto 24px;
+        text-align: center;
+        max-width: 292px;
+
+    }
+    .split-banner-inner {
+            flex-direction: column;
+                    padding: 0 20px 16px;
+    }
+
+    .split-banner-media {
+        min-height: 250px;
+    }
+
+    .split-banner-features {
+    gap: 15px;
+    align-content: center;
+}
+
+.sb-feature-item{
+    max-width: 95px;
+}
+.sb-feature-item .sb-feature-text {
+    max-width: 100%;
+    font-size: 10px;
+}
+.split-banner-heading {
+    margin: 0px 0 8px;
+            text-align: center;
+}
+.sb-feature-icon {
+    width: 40px;
+    height: 40px;
+}
+}
+
+@media(max-width: 390px){
+        .split-banner-features {
+    gap: 30px;
+    flex-direction: column;
+}
+.sb-feature-item .sb-feature-text {
+    max-width: 100% !important;
+}
+
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var playBtns = document.querySelectorAll('.js-split-banner-play');
+    playBtns.forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            var modal = this.nextElementSibling;
+            if (modal && modal.classList.contains('split-banner-modal')) {
+                e.preventDefault();
+                modal.style.display = 'flex';
+                
+                var iframe = modal.querySelector('iframe');
+                if (iframe) {
+                    var src = iframe.src;
+                    if (!iframe.getAttribute('allow') || !iframe.getAttribute('allow').includes('autoplay')) {
+                        iframe.setAttribute('allow', (iframe.getAttribute('allow') || '').replace('fullscreen', '') + ' autoplay; fullscreen');
+                    }
+                    if (src.indexOf('autoplay=0') > -1) {
+                        iframe.src = src.replace('autoplay=0', 'autoplay=1');
+                    } else if (src.indexOf('autoplay=1') === -1) {
+                        var prefix = src.indexOf('?') > -1 ? '&' : '?';
+                        iframe.src = src + prefix + 'autoplay=1';
+                    }
+                }
+            }
+        });
+    });
+
+    var closeBtns = document.querySelectorAll('.js-split-banner-close');
+    closeBtns.forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            var modal = this.closest('.split-banner-modal');
+            if (modal) {
+                e.preventDefault();
+                modal.style.display = 'none';
+                
+                var iframe = modal.querySelector('iframe');
+                if (iframe) {
+                    var src = iframe.src;
+                    iframe.src = src.replace('autoplay=1', 'autoplay=0');
+                }
+            }
+        });
+    });
+});
+</script>
+
+{% schema %}
+{
+  "name": "Purrkins Split Banner",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Right nutrition for your kitten"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Balanced recipes for each stage of your kitten, made in India."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url",
+      "label": "YouTube/Vimeo Popup URL",
+      "accept": ["youtube", "vimeo"]
+    },
+    {
+      "type": "html",
+      "id": "video_embed",
+      "label": "Custom Video Embed (iframe)"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom Class"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins Split Banner",
+      "blocks": [
+        { "type": "feature" },
+        { "type": "feature" },
+        { "type": "feature" }
+      ]
+    }
+  ]
+}
+{% endschema %}

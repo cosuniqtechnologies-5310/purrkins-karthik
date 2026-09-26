@@ -1,0 +1,38 @@
+<div class="pf-aplus-banners-section">
+    {% assign banners = product.metafields.custom.aplus_banners.value %}
+    {% for banner in banners %}
+        {% assign desktop_img = banner.desktop_image.value %}
+        {% assign mobile_img = banner.mobile_image.value | default: desktop_img %}
+        
+        {%- comment -%} Fallback if only mobile is provided {%- endcomment -%}
+        {% assign desktop_img = desktop_img | default: mobile_img %}
+        
+        {% if desktop_img != blank %}
+        <div class="pf-aplus-banner-item" style="line-height: 0;">
+            <picture>
+                <source media="(max-width: 768px)" srcset="{{ mobile_img | image_url: width: 800 }}">
+                <source media="(min-width: 769px)" srcset="{{ desktop_img | image_url: width: 1600 }}">
+                {{ desktop_img | image_url: width: 1600 | image_tag: alt: desktop_img.alt, loading: 'lazy', style: 'width: 100%; height: auto; display: block;' }}
+            </picture>
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+{% schema %}
+{
+  "name": "A+ Content Banners",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Dynamic Data Setup",
+      "info": "This section pulls a list of images dynamically from the product metafield 'custom.aplus_banners'. To use this, create a Metaobject called 'A+ Banner' with 'desktop_image' and 'mobile_image' fields, then create a Product Metafield called 'aplus_banners' as a List of those Metaobjects."
+    }
+  ],
+  "presets": [
+    {
+      "name": "A+ Content Banners"
+    }
+  ]
+}
+{% endschema %}

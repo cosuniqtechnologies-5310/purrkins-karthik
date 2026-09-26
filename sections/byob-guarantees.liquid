@@ -1,0 +1,187 @@
+<div class="byob-guarantees-section purrkins-section-block" >
+  <div class="purrkins-container">
+    
+    <div class="byob-guarantees-header">
+      <h3 class="purrkins-h3-text">
+        {{ section.settings.heading }}
+      </h3>
+    </div>
+
+    <div class="byob-guarantees-grid">
+      {% for block in section.blocks %}
+        <div class="byob-guarantee-item" {{ block.shopify_attributes }}>
+          <div class="byob-guarantee-icon">
+            {% if block.settings.icon != blank %}
+              <img src="{{ block.settings.icon | image_url: width: 80 }}" alt="{{ block.settings.heading | escape }}" width="40" height="40" loading="lazy">
+            {% endif %}
+          </div>
+          <div class="byob-guarantee-text">
+            <h4 class="purrkins-h4-text">
+              {{ block.settings.heading }}
+            </h4>
+            <p>
+              {{ block.settings.text }}
+            </p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+<style>
+.byob-guarantees-header h3 {
+    color: #FFE330;
+    margin: 0;
+}
+
+.byob-guarantees-section {
+ background: #21252A;
+}
+.byob-guarantees-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+
+.byob-guarantees-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  margin: 0 auto;
+}
+
+.byob-guarantee-text p {
+    max-width: 240px;
+}
+
+@media (min-width: 768px) {
+  .byob-guarantees-grid {
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 60px;
+    row-gap: 60px;
+  }
+}
+
+@media (min-width: 990px) {
+  .byob-guarantees-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.byob-guarantee-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.byob-guarantee-icon {
+  flex-shrink: 0;
+  width: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.byob-guarantee-icon img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.byob-guarantee-text {
+  flex: 1;
+}
+
+.byob-guarantee-text h4 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #ffffff;
+}
+
+.byob-guarantee-text p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+   color: #ffffff9e;
+}
+
+@media(max-width: 767px){
+  .byob-guarantees-header h3 {
+    font-size: 24px;
+}
+.byob-guarantee-item {
+display: flex;
+    gap: 8px;
+    flex-direction: column;
+    max-width: 203px;
+    margin: auto;
+    text-align: center;
+    align-items: center;
+}
+.byob-guarantee-icon img {
+    max-width: 46px;
+    max-height: 46px;
+}
+.byob-guarantee-text h4{
+    font-size: 18px;
+    
+}
+}
+</style>
+
+{% schema %}
+{
+  "name": "BYOB Guarantees",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "No lock-in. Genuinely."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "guarantee_item",
+      "name": "Guarantee Item",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon Image"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Feature Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Description",
+          "default": "Feature description goes here."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "BYOB Guarantees",
+      "blocks": [
+        { "type": "guarantee_item" },
+        { "type": "guarantee_item" },
+        { "type": "guarantee_item" },
+        { "type": "guarantee_item" },
+        { "type": "guarantee_item" },
+        { "type": "guarantee_item" }
+      ]
+    }
+  ]
+}
+{% endschema %}

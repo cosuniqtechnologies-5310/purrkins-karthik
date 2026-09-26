@@ -1,0 +1,364 @@
+<div id="loved-by-{{ section.id }}" class="loved-by-block {{ section.settings.custom_class }}" {% if section.settings.bg_color != blank %}style="background-color: {{ section.settings.bg_color }};"{% endif %}>
+    <div class="purrkins-container loved-container purrkins-section-block">
+        
+        <div class="loved-header">
+            <h3 class="loved-heading purrkins-h3-text">{{ section.settings.heading }}</h3>
+            {% if section.settings.link_text != blank %}
+                <a href="{{ section.settings.link_url }}" class="loved-link">{{ section.settings.link_text }}</a>
+            {% endif %}
+        </div>
+
+        <div class="loved-grid">
+            
+            <!-- Item 1: Top Left Image -->
+            <div class="loved-item item-img-large">
+                {% if section.settings.img_1 != blank %}
+                    <img src="{{ section.settings.img_1 | image_url: width: 1000 }}" alt="{{ section.settings.img_1.alt | escape }}" class="loved-img" width="1000" height="auto">
+                {% else %}
+                    <div style="width:100%; height:100%; background:#e0e0e0; display:flex; align-items:center; justify-content:center;">Image 1 Placeholder</div>
+                {% endif %}
+            </div>
+
+            {% capture stars_html %}
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M8.64901 1.72117C8.68187 1.65477 8.73265 1.59887 8.7956 1.55979C8.85855 1.52071 8.93116 1.5 9.00526 1.5C9.07935 1.5 9.15197 1.52071 9.21492 1.55979C9.27787 1.59887 9.32864 1.65477 9.36151 1.72117L11.094 5.23042C11.2081 5.4614 11.3766 5.66123 11.585 5.81276C11.7933 5.96429 12.0354 6.063 12.2903 6.10042L16.1648 6.66742C16.2382 6.67806 16.3071 6.70902 16.3639 6.75682C16.4206 6.80462 16.4628 6.86733 16.4858 6.93788C16.5087 7.00842 16.5115 7.08397 16.4937 7.156C16.4759 7.22802 16.4384 7.29363 16.3853 7.34542L13.5833 10.0739C13.3985 10.254 13.2602 10.4763 13.1804 10.7216C13.1006 10.967 13.0816 11.2281 13.125 11.4824L13.7865 15.3374C13.7995 15.4108 13.7915 15.4863 13.7636 15.5554C13.7357 15.6245 13.689 15.6844 13.6287 15.7282C13.5684 15.772 13.497 15.7979 13.4227 15.8031C13.3483 15.8083 13.274 15.7924 13.2083 15.7574L9.74476 13.9364C9.51655 13.8166 9.26264 13.754 9.00488 13.754C8.74712 13.754 8.49322 13.8166 8.26501 13.9364L4.80226 15.7574C4.7365 15.7922 4.6623 15.8079 4.58809 15.8026C4.51389 15.7973 4.44265 15.7713 4.38248 15.7276C4.32231 15.6838 4.27563 15.6241 4.24775 15.5551C4.21987 15.4861 4.2119 15.4107 4.22476 15.3374L4.88551 11.4832C4.92915 11.2287 4.91024 10.9675 4.83041 10.722C4.75058 10.4764 4.61221 10.254 4.42726 10.0739L1.62526 7.34617C1.5717 7.29444 1.53375 7.22872 1.51573 7.15648C1.4977 7.08423 1.50033 7.00838 1.52332 6.93756C1.5463 6.86674 1.58871 6.8038 1.64571 6.75591C1.70272 6.70801 1.77203 6.67709 1.84576 6.66667L5.71951 6.10042C5.9747 6.06329 6.21705 5.96471 6.42569 5.81316C6.63434 5.66161 6.80303 5.46162 6.91726 5.23042L8.64901 1.72117Z" fill="#FFE330" stroke="#FFE330" stroke-width="1.34933" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            {% endcapture %}
+
+            <!-- Item 2: Top Right Review -->
+            <div class="loved-item item-review-card">
+                <div class="loved-stars">
+                    {{ stars_html }}{{ stars_html }}{{ stars_html }}{{ stars_html }}{{ stars_html }}
+                </div>
+                <p class="loved-quote">{{ section.settings.rev_1_quote }}</p>
+                <div class="loved-reviewer">
+                    {% if section.settings.rev_1_photo != blank %}
+                        <img src="{{ section.settings.rev_1_photo | image_url: width: 100 }}" alt="{{ section.settings.rev_1_name | escape }}" class="reviewer-avatar" width="100" height="100">
+                    {% endif %}
+                    <div class="reviewer-info">
+                        <h4 class="reviewer-name">{{ section.settings.rev_1_name }}</h4>
+                        <p class="reviewer-pet">{{ section.settings.rev_1_pet }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item 3: Bottom Left Review -->
+            <div class="loved-item item-review-card bottom-review">
+                <div class="loved-stars">
+                    {{ stars_html }}{{ stars_html }}{{ stars_html }}{{ stars_html }}{{ stars_html }}
+                </div>
+                <p class="loved-quote">{{ section.settings.rev_2_quote }}</p>
+                <div class="loved-reviewer">
+                    {% if section.settings.rev_2_photo != blank %}
+                        <img src="{{ section.settings.rev_2_photo | image_url: width: 100 }}" alt="{{ section.settings.rev_2_name | escape }}" class="reviewer-avatar" width="100" height="100">
+                    {% endif %}
+                    <div class="reviewer-info">
+                        <h4 class="reviewer-name">{{ section.settings.rev_2_name }}</h4>
+                        <p class="reviewer-pet">{{ section.settings.rev_2_pet }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item 4: Bottom Right Image -->
+            <div class="loved-item item-img-medium">
+                {% if section.settings.img_3 != blank %}
+                    <img src="{{ section.settings.img_3 | image_url: width: 800 }}" alt="{{ section.settings.img_3.alt | escape }}" class="loved-img" width="800" height="auto">
+                {% else %}
+                    <div style="width:100%; height:100%; background:#e0e0e0; display:flex; align-items:center; justify-content:center;">Image 2 Placeholder</div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+.loved-by-block {
+    width: 100%;
+    background: #F7FAFF;
+}
+
+/* Header */
+.loved-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 32px;
+}
+
+h3.loved-heading{
+    margin: 0;
+}
+
+.loved-link {
+    text-decoration: none;
+    transition: opacity 0.3s ease;
+    color: var(--semantic-text-primary, #21252A);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 165%;
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: auto;
+    text-underline-offset: auto;
+    text-underline-position: from-font;
+    display: none;
+}
+.loved-link:hover {
+    opacity: 0.7;
+}
+
+/* Grid Layout */
+.loved-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: 340px;
+    gap: 24px;
+}
+
+.loved-item {
+    border-radius: var(--border-radius-purrkins);
+    overflow: hidden;
+}
+
+/* Grid Spans */
+.item-img-large {
+    grid-column: span 7;
+}
+.item-review-card:not(.bottom-review) {
+    grid-column: span 5;
+}
+.bottom-review {
+    grid-column: span 5;
+}
+.item-img-medium {
+    grid-column: span 7;
+}
+
+/* Images */
+.loved-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: var(--border-radius-purrkins);
+}
+
+/* Review Cards */
+.item-review-card {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-medium, 16px);
+    border: 0.5px solid var(--brand-yellow-200, #F1EABC);
+    background: var(--color-background, #FFF);
+}
+.loved-stars {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+}
+.loved-quote {
+    margin: 0;
+    flex-grow: 1;
+    color: var(--semantic-text-primary, #21252A);
+    font-family: var(--purrkins-heading-font);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 150%;
+}
+
+/* Reviewer Profile */
+.loved-reviewer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+}
+.reviewer-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+.reviewer-info {
+    display: flex;
+    flex-direction: column;
+}
+.reviewer-name {
+    margin: 0 0 4px 0;
+    color: var(--semantic-text-primary, #21252A);
+    font-family: var(--purrkins-heading-font);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 140%;
+}
+.reviewer-pet {
+    margin: 0;
+    color: var(--semantic-text-secondary, #424953);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 165%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    .loved-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    .loved-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-auto-rows: auto;
+    }
+    .loved-item {
+        grid-column: span 2 !important;
+        height: 300px;
+    }
+    .item-review-card {
+        height: auto;
+    }
+}
+@media(max-width: 767px){
+    .loved-quote{
+        font-size: 16px;
+    }
+    .loved-header {
+        margin-bottom: 26px;
+    }
+    .loved-heading {
+        font-size: 24px;
+        text-align: center;
+        width: 100%;
+    }
+    .loved-item.item-img-large, .loved-item.item-img-medium {
+        padding: 0;
+    }
+    .loved-stars{
+        margin-bottom: 10px;
+    }
+    .reviewer-name{
+        font-size: 14px;
+    }
+    .reviewer-pet{
+        font-size: 12px;
+    }
+    .loved-grid{
+        gap: 8px;
+    }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Loved By Section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Loved by kitten parents."
+    },
+    {
+      "type": "text",
+      "id": "link_text",
+      "label": "Link Text",
+      "default": "Read more stories"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Link URL"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#F7FAFF"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom Class"
+    },
+    {
+      "type": "header",
+      "content": "Image 1 (Top Left)"
+    },
+    {
+      "type": "image_picker",
+      "id": "img_1",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Review 1 (Top Right)"
+    },
+    {
+      "type": "textarea",
+      "id": "rev_1_quote",
+      "label": "Quote",
+      "default": "\"Leo's coat has gone from dull to genuinely glossy in a month. Our vet asked what we changed, it was just the food.\""
+    },
+    {
+      "type": "image_picker",
+      "id": "rev_1_photo",
+      "label": "Reviewer Photo"
+    },
+    {
+      "type": "text",
+      "id": "rev_1_name",
+      "label": "Reviewer Name",
+      "default": "Rahul M."
+    },
+    {
+      "type": "text",
+      "id": "rev_1_pet",
+      "label": "Pet Info",
+      "default": "Leo · 5 months · Persian"
+    },
+    {
+      "type": "header",
+      "content": "Review 2 (Bottom Left)"
+    },
+    {
+      "type": "textarea",
+      "id": "rev_2_quote",
+      "label": "Quote",
+      "default": "\"Biscuit had a sensitive tummy from day one. This is the first food that hasn't caused any trouble and he actually loves it.\""
+    },
+    {
+      "type": "image_picker",
+      "id": "rev_2_photo",
+      "label": "Reviewer Photo"
+    },
+    {
+      "type": "text",
+      "id": "rev_2_name",
+      "label": "Reviewer Name",
+      "default": "Priya K."
+    },
+    {
+      "type": "text",
+      "id": "rev_2_pet",
+      "label": "Pet Info",
+      "default": "Biscuit · 4 months · British Shorthair"
+    },
+    {
+      "type": "header",
+      "content": "Image 2 (Bottom Right)"
+    },
+    {
+      "type": "image_picker",
+      "id": "img_3",
+      "label": "Image"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins Loved By",
+      "category": "Testimonials"
+    }
+  ]
+}
+{% endschema %}

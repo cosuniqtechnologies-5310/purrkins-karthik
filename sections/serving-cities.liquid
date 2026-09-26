@@ -1,0 +1,231 @@
+<div id="purrkins-serving-cities-{{ section.id }}" class="purrkins-serving-cities-block {{ section.settings.custom_class }}">
+    <div class="purrkins-container serving-cities-inner purrkins-section-block">
+        
+        <div class="sc-top-section">
+            {% if section.settings.heading != blank %}
+                <h3 class="sc-heading purrkins-h3-text">{{ section.settings.heading }}</h3>
+            {% endif %}
+            {% if section.settings.subheading != blank %}
+                <p class="sc-subheading purrkins-subtext">{{ section.settings.subheading }}</p>
+            {% endif %}
+            
+            {% if section.settings.cities != blank %}
+                {% assign cities_list = section.settings.cities | split: '|' %}
+                <div class="sc-cities-list">
+                    {% for city in cities_list %}
+                        <span class="sc-city-item">{{ city | strip }}</span>
+                        {% unless forloop.last %}
+                            <span class="sc-city-divider">|</span>
+                        {% endunless %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="sc-bottom-section">
+            <div class="sc-community-image-col">
+                {% if section.settings.community_image != blank %}
+                    <img src="{{ section.settings.community_image | image_url: width: 600 }}" alt="{{ section.settings.community_image.alt | default: 'Community Image' | escape }}" class="sc-community-img" width="320" height="auto" />
+                {% else %}
+                    <div class="sc-placeholder-img">Cat Image</div>
+                {% endif %}
+            </div>
+            <div class="sc-community-text-col">
+                {% if section.settings.community_text != blank %}
+                    <h3 class="sc-community-text">{{ section.settings.community_text }}</h3>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.purrkins-serving-cities-block {
+width: 100%;
+    overflow: hidden;
+    background: linear-gradient(123deg, #FFF6C3 -0.01%, #F9F8F0 38.43%, #EAE8F9 69.52%);
+}
+.serving-cities-inner {
+    position: relative;
+}
+
+/* Top Section */
+.sc-top-section {
+    text-align: center;
+    margin-bottom: 70px;
+}
+.sc-heading {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: var(--primary-slate-900, #21252A);
+}
+.sc-subheading {
+    margin-top: 0;
+    margin-bottom: 44px;
+}
+.sc-cities-list {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 22px;
+    color: var(--semantic-text-secondary, #424953);
+    text-align: center;
+    font-family: var(--purrkins-primary-font);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+.sc-city-divider {
+    color: #A0AAB5;
+    font-weight: 300;
+}
+
+/* Bottom Section */
+.sc-bottom-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    margin: 0 auto;
+    max-width: 900px;
+}
+.sc-community-image-col {
+flex: 0 0 50%;
+    max-width: 414px;
+    display: flex;
+    justify-content: flex-end;
+    position: relative;
+    overflow: visible;
+}
+.sc-community-img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    position: absolute;
+    top: -100px;
+    right: 0;
+    max-height: 280px;
+}
+.sc-placeholder-img {
+    width: 300px;
+    height: 300px;
+    background: #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+.sc-community-text-col {
+    flex: 0 0 65%;
+    max-width: 580px;
+}
+.sc-community-text {
+margin: 0;
+    color: #000;
+    font-family: var(--purrkins-heading-font);
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 1.6;
+    letter-spacing: -0.38px;
+    padding-top: 60px;
+}
+
+@media (max-width: 991px) {
+    .sc-bottom-section {
+            flex-direction: column-reverse;
+        text-align: center;
+        gap: 16px;
+    }
+    .sc-community-image-col {
+        justify-content: center;
+        flex: 0 0 100%;
+    }
+    .sc-community-text-col {
+        flex: 0 0 100%;
+    }
+    .sc-community-img{
+        position: relative;
+        max-height: 180px;
+    }
+    .sc-community-text{
+        padding-top:0;
+        font-size: 24px;
+    }
+    .sc-top-section{
+            margin-bottom: 60px;
+    }
+    .sc-subheading{
+            margin-bottom: 16px;
+    }
+    .serving-cities-inner {
+    padding-bottom: 0;
+}
+}
+@media (max-width: 767px) {
+        .sc-community-text {
+        font-size: 20px;
+    }
+    .sc-cities-list {
+        font-size: 20px;
+        gap: 22px;
+    }
+    .sc-heading{
+        margin-bottom: 8px;
+    }
+        .sc-top-section {
+        margin-bottom: 32px;
+    }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Purrkins Serving Cities",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Serving the freshest bowls across three cities."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "We are packing our bags to trot into new cities very soon."
+    },
+    {
+      "type": "text",
+      "id": "cities",
+      "label": "Cities (Pipe separated)",
+      "default": "Bengaluru | Mumbai | Delhi NCR",
+      "info": "Separate cities with a pipe '|' character."
+    },
+    {
+      "type": "image_picker",
+      "id": "community_image",
+      "label": "Community Image"
+    },
+    {
+      "type": "textarea",
+      "id": "community_text",
+      "label": "Community Text",
+      "default": "\"Purrkins\" was chosen by the WhatsApp cat community we grew up with and still test ideas with before release."
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom CSS Class"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins Serving Cities"
+    }
+  ]
+}
+{% endschema %}

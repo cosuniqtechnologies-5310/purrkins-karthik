@@ -1,0 +1,340 @@
+<div id="purrkins-family-wild-{{ section.id }}" class="purrkins-family-wild-block {{ section.settings.custom_class }}" {% if section.settings.background_color != blank %}style="background-color: {{ section.settings.background_color }};"{% endif %}>
+    <div class="purrkins-container family-wild-inner purrkins-section-block">
+        
+        <div class="family-wild-header">
+            {% if section.settings.heading != blank %}
+                <h3 class="purrkins-h3-text family-wild-heading purrkins-heading-mb">{{ section.settings.heading }}</h3>
+            {% endif %}
+            {% if section.settings.subheading != blank %}
+                <div class="family-wild-subheading purrkins-subtext">{{ section.settings.subheading }}</div>
+            {% endif %}
+        </div>
+
+        <div class="family-wild-gallery-wrapper">
+            <div class="family-wild-gallery">
+                {% if section.blocks.size > 0 %}
+                    {% assign classes = "img-tall,img-short,img-mid,img-mid,img-short,img-tall" | split: "," %}
+                    {% for block in section.blocks %}
+                        {% assign mod = forloop.index0 | modulo: 6 %}
+                        {% assign css_class = classes[mod] %}
+                        <div class="family-wild-img-item {{ css_class }}" {{ block.shopify_attributes }}>
+                            {% if block.settings.image != blank %}
+                                <img src="{{ block.settings.image | image_url: width: 400 }}" alt="{{ block.settings.image.alt | escape }}" width="183" height="230" />
+                            {% else %}
+                                <div style="width: 100%; height: 100%; background: #ccc; border-radius: 12px;"></div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Placeholders if no images uploaded -->
+                    {% assign classes = "img-tall,img-short,img-mid,img-mid,img-short,img-tall" | split: "," %}
+                    {% for i in (1..6) %}
+                        {% assign mod = forloop.index0 | modulo: 6 %}
+                        <div class="family-wild-img-item {{ classes[mod] }}">
+                            <div style="width: 100%; height: 100%; background: #ccc; border-radius: 12px;"></div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            {% if section.settings.hashtag_text != blank %}
+                <div class="family-wild-tag">
+                    {{ section.settings.hashtag_text }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="family-wild-actions">
+            {% if section.settings.ig_link != blank %}
+                <a href="{{ section.settings.ig_link }}" target="_blank" rel="noopener noreferrer" class="btn-ig">
+                    {{ section.settings.ig_btn_text | default: 'Follow Along on Instagram' }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                      <path d="M21.5694 25.9341H9.69779C7.2873 25.9341 5.33325 23.98 5.33325 21.5695V9.69798C5.33325 7.28749 7.2873 5.33344 9.69779 5.33344H21.5694C23.9798 5.33344 25.9339 7.28749 25.9339 9.69798V21.5695C25.9339 23.98 23.9798 25.9341 21.5694 25.9341Z" stroke="white" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M19.6928 15.6338C19.6928 17.8756 17.8754 19.6929 15.6337 19.6929C13.392 19.6929 11.5747 17.8756 11.5747 15.6338C11.5747 13.3921 13.392 11.5748 15.6337 11.5748C17.8754 11.5748 19.6928 13.3921 19.6928 15.6338Z" stroke="white" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M22.5006 9.85808C22.5006 9.25547 22.0122 8.76695 21.4095 8.76695C20.8069 8.76695 20.3184 9.25547 20.3184 9.85808C20.3184 10.4607 20.8069 10.9492 21.4095 10.9492C22.0122 10.9492 22.5006 10.4607 22.5006 9.85808Z" fill="white"/>
+                    </svg>
+                </a>
+            {% endif %}
+            
+            {% if section.settings.li_link != blank %}
+                <a href="{{ section.settings.li_link }}" target="_blank" rel="noopener noreferrer" class="btn-li">
+                    {{ section.settings.li_btn_text | default: "Follow Founder's Journey on LinkedIn" }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                      <path d="M10.5709 22.9219H9.26158C8.77947 22.9219 8.38867 22.5311 8.38867 22.049V13.9309C8.38867 13.4488 8.77947 13.058 9.26158 13.058H10.5709C11.053 13.058 11.4439 13.4488 11.4439 13.9309V22.049C11.4439 22.5311 11.053 22.9219 10.5709 22.9219Z" fill="white"/>
+                      <path d="M9.96037 11.7051C8.96936 11.7051 8.17017 10.9034 8.17017 9.91548C8.17017 8.92783 8.96936 8.12615 9.96037 8.12615C10.9475 8.12615 11.7488 8.92783 11.7488 9.91548C11.7488 10.9034 10.9475 11.7051 9.96037 11.7051Z" fill="white"/>
+                      <path d="M22.0058 22.9219H20.7401C20.258 22.9219 19.8672 22.5311 19.8672 22.049V18.106C19.8672 16.9659 19.8164 15.4992 18.2483 15.4992C16.6583 15.4992 16.3319 16.7418 16.3319 18.0244V22.049C16.3319 22.5311 15.9411 22.9219 15.459 22.9219H14.2369C13.7548 22.9219 13.364 22.5311 13.364 22.049V13.9309C13.364 13.4488 13.7548 13.058 14.2369 13.058H15.459C15.9411 13.058 16.3319 13.4488 16.3319 13.9309V14.3997H16.3347C16.7421 13.6268 17.7397 12.8834 19.2262 12.8834C22.3194 12.8834 22.8787 14.8474 22.8787 17.4952V22.049C22.8787 22.5311 22.4879 22.9219 22.0058 22.9219Z" fill="white"/>
+                      <path d="M25.9339 23.3149C25.9339 24.7611 24.7614 25.9336 23.3152 25.9336H7.95198C6.5057 25.9336 5.33325 24.7611 5.33325 23.3149V7.95168C5.33325 6.5054 6.5057 5.33295 7.95198 5.33295H23.3152C24.7614 5.33295 25.9339 6.5054 25.9339 7.95168V18.9067" stroke="white" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<style>
+.purrkins-family-wild-block {
+    background-color: var(--neutral-white, #F4F7FB);
+    width: 100%;
+    overflow: hidden;
+}
+.family-wild-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.family-wild-header {
+    text-align: center;
+    margin-bottom: 60px;
+    max-width: 884px;
+}
+.family-wild-heading {
+    margin-top: 0;
+}
+.family-wild-subheading {
+    margin: 0;
+    color: var(--color-text-secondary, #595961);
+    text-align: center;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.family-wild-subheading p {
+    margin: 0;
+}
+.family-wild-subheading strong {
+    font-weight: 600;
+}
+
+/* Gallery */
+.family-wild-gallery-wrapper {
+position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 80px;
+}
+.family-wild-gallery {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: nowrap;
+}
+.family-wild-img-item {
+    border-radius: var(--border-radius-purrkins);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.family-wild-img-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Staggered Heights & Widths */
+.family-wild-img-item:nth-child(1) { width: 183px; height: 230px; transform: translateY(30px); }
+.family-wild-img-item:nth-child(2) { width: 183px; height: 230px; transform: translateY(-15px); }
+.family-wild-img-item:nth-child(3) { width: 183px; height: 230px; transform: translateY(25px); }
+.family-wild-img-item:nth-child(4) { width: 183px; height: 230px; transform: translateY(-10px); }
+.family-wild-img-item:nth-child(5) { width: 183px; height: 230px; transform: translateY(35px); }
+.family-wild-img-item:nth-child(6) { width: 183px; height: 230px; transform: translateY(-25px); }
+
+/* Center Tag */
+.family-wild-tag {
+position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-5deg);
+    z-index: 2;
+    white-space: nowrap;
+    color: var(--neutral-white, #FFF);
+    font-family: var(--purrkins-heading-font);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 140%;
+    border-radius: 999px;
+    background: var(--primary-slate-900, #21252A);
+    box-shadow: 0 12px 28px 0 rgba(43, 52, 64, 0.30);
+    display: flex;
+    padding: 16px 24px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Actions */
+.family-wild-actions {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.family-wild-actions a {
+display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 22px;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-family: var(--purrkins-heading-font);
+    color: var(--color-background, #FFF);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.33;
+    letter-spacing: 0.18px;
+}
+.family-wild-actions a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.btn-ig {
+color: #FFF;
+    background: linear-gradient(89deg, #FCAF45 3.63%, #F56040 21.13%, #E1306C 38.62%, #833AB4 66.88%, #405DE6 96.93%);
+}
+.btn-ig svg {
+    color: #FFF;
+}
+.btn-li {
+color: #fff;
+    background: #069;
+}
+.btn-li svg {
+    color: #fff;
+}
+
+@media (max-width: 1024px) {
+    .family-wild-gallery {
+    overflow-x: auto;
+        justify-content: flex-start;
+        padding-bottom: 20px;
+        height: 260px;
+    }
+    .family-wild-img-item:nth-child(2), .family-wild-img-item:nth-child(4), .family-wild-img-item:nth-child(6){
+            transform: translateY(0);
+    }
+    .family-wild-header, .family-wild-gallery-wrapper{
+    margin-bottom: 24px;
+}
+.family-wild-actions a{
+        font-size: 14px;
+}
+.family-wild-actions svg {
+    width: 20px;
+}
+.family-wild-actions{
+    gap: 16px;
+}
+.family-wild-tag{
+    font-size: 18px;
+}
+}
+
+@media(max-width: 767px){
+    .family-wild-heading{
+            font-size: 24px;
+    }
+        .family-wild-tag {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+}
+@media(max-width: 460px){
+    .family-wild-actions a {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+}
+</style>
+
+{% schema %}
+{
+  "name": "Purrkins Family In Wild",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The Purrkins family, in the wild"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>Naps interrupted, boxes conquered. Tag #MyPurrkinsKitten to be featured.</p>"
+    },
+    {
+      "type": "text",
+      "id": "hashtag_text",
+      "label": "Hashtag Overlay Text",
+      "default": "#MyPurrkinsKitten"
+    },
+    {
+      "type": "text",
+      "id": "ig_btn_text",
+      "label": "Instagram Button Text",
+      "default": "Follow Along on Instagram"
+    },
+    {
+      "type": "url",
+      "id": "ig_link",
+      "label": "Instagram Link"
+    },
+    {
+      "type": "text",
+      "id": "li_btn_text",
+      "label": "LinkedIn Button Text",
+      "default": "Follow Founder's Journey on LinkedIn"
+    },
+    {
+      "type": "url",
+      "id": "li_link",
+      "label": "LinkedIn Link"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#F4F7FB"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom CSS Class"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Gallery Image",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins Family In Wild",
+      "blocks": [
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" }
+      ]
+    }
+  ]
+}
+{% endschema %}

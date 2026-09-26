@@ -1,0 +1,293 @@
+<div class="policy-block-wrapper purrkins-section-block">
+    <div class="purrkins-container">
+        <div class="pb-grid">
+            
+            <!-- Left Column: Overview -->
+            <div class="pb-overview">
+                <div class="pb-overview-inner">
+                    {% assign display_heading = section.settings.heading | default: page.title %}
+                    {% if display_heading != blank %}
+                        <h1 class="pb-heading purrkins-h1-text">{{ display_heading | escape }}</h1>
+                    {% endif %}
+                    
+                    {% if section.settings.intro != blank %}
+                        <div class="pb-intro purrkins-subtext">{{ section.settings.intro }}</div>
+                    {% endif %}
+                    
+                    {% if section.settings.last_updated != blank %}
+                        <p class="pb-updated">{{ section.settings.last_updated | escape }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Right Column: Sections -->
+            <div class="pb-sections">
+                {% if section.blocks.size > 0 %}
+                    {% for block in section.blocks %}
+                        {% if block.type == 'policy_section' %}
+                            <div class="pb-section" {{ block.shopify_attributes }}>
+                                {% if block.settings.section_heading != blank %}
+                                    <h3 class="pb-section-heading purrkins-h3-text">{{ block.settings.section_heading | escape }}</h3>
+                                {% endif %}
+                                
+                                {% if block.settings.section_content != blank %}
+                                    <div class="pb-section-content purrkins-subtext">
+                                        {{ block.settings.section_content | replace: '&lt;blockquote&gt;', '<blockquote>' | replace: '&lt;/blockquote&gt;', '</blockquote>' | replace: '<blockquote><br>', '<blockquote>' }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% elsif block.type == 'quote' %}
+                            <div class="pb-section" {{ block.shopify_attributes }} style="padding: 40px 0 0;">
+                                <div class="pb-section-content purrkins-subtext">
+                                    <blockquote>{{ block.settings.quote_text }}</blockquote>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        {% unless forloop.last %}
+                            {% if block.type == 'policy_section' %}
+                                <hr class="pb-divider">
+                            {% endif %}
+                        {% endunless %}
+                    {% endfor %}
+                {% else %}
+                    <!-- Fallback to standard page content if no blocks are added -->
+                    <div class="pb-section">
+                        <div class="pb-section-content purrkins-subtext">
+                            {{ page.content | replace: '&lt;blockquote&gt;', '<blockquote>' | replace: '&lt;/blockquote&gt;', '</blockquote>' | replace: '<blockquote><br>', '<blockquote>' }}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<style>
+/* Override global overflow: hidden on the container so sticky works */
+.policy-block-wrapper .purrkins-container {
+    overflow: visible;
+}
+
+.pb-grid {
+    display: grid;
+    grid-template-columns: 4fr 7fr;
+    gap: 80px;
+    align-items: flex-start;
+}
+
+.pb-overview {
+    align-self: stretch;
+}
+
+.pb-overview-inner {
+    position: sticky;
+    top: 130px;
+}
+
+.pb-sections {
+    display: flex;
+    flex-direction: column;
+}
+
+.pb-section {
+    padding: 40px 0;
+}
+.pb-section:first-child {
+    padding-top: 0;
+}
+.pb-section:last-child {
+    padding-bottom: 0;
+}
+
+.pb-divider {
+    border: none;
+    margin: 0;
+    width: 100%;
+    border-top: 1px solid var(--brand-slate-100, #E1E2E3);
+}
+
+.pb-heading.purrkins-h1-text {
+    margin: 0;
+    font-size: 60px;
+    color: var(--color-text-primary, #121217);
+}
+
+.pb-intro.purrkins-subtext {
+    font-size: 18px;
+    margin: 16px 0;
+}
+.pb-intro.purrkins-subtext p {
+    margin: 0;
+}
+.pb-updated {
+    margin: 16px 0 0;
+    color: var(--color-text-secondary, #595961);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.pb-section-heading.purrkins-h3-text {
+    color: var(--color-text-primary, #121217);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin: 0 0 8px;
+}
+
+/* Typography styles for WYSIWYG Content */
+.pb-section-content p, .pb-section-content li {
+    margin: 0 0 16px 0;
+    color: var(--color-text-secondary, #595961);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.pb-section-content b, .pb-section-content strong {
+    font-weight: 600;
+}
+
+.pb-section-content p:last-child {
+    margin-bottom: 0;
+}
+
+.pb-section-content ul, 
+.pb-section-content ol {
+    margin: 0 0 20px 0;
+    padding-left: 20px;
+}
+.pb-section-content ul:last-child, 
+.pb-section-content ol:last-child {
+    margin-bottom: 0;
+}
+
+.pb-section-content ul li::marker {
+    color: #424953;
+}
+
+.pb-section-content blockquote,
+.pb-section-content h6 {
+    position: relative;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--color-text-secondary, #595961);
+    margin: 0 0 16px 0;
+    line-height: 1.5;
+    padding-left: 16px;
+}
+
+.pb-section-content blockquote::before,
+.pb-section-content h6::before {
+    content: '';
+    border-left: 3px solid var(--brand-slate-600, #424953);
+    position: absolute;
+    height: 80%;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.pb-section-content > :last-child {
+    margin-bottom: 0 !important;
+}
+
+@media (max-width: 991px) {
+    .pb-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+    
+    .pb-overview-inner {
+        position: static;
+    }
+    
+    .pb-heading {
+        font-size: 48px !important;
+    }
+    
+    .pb-section-heading {
+        font-size: 24px !important;
+    }
+}
+
+@media(max-width: 767px){
+    .pb-heading {
+        font-size: 36px !important;
+    }
+    .pb-section {
+        padding: 24px 0;
+    }
+    .pb-overview-inner {
+        text-align: center;
+    }
+    .pb-updated {
+        margin: 12px 0 0;
+        font-size: 12px;
+    }
+    .pb-section-content p, .pb-section-content li {
+        font-size: 14px;
+    }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Purrkins Policy Block",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Leave blank to use the page title automatically."
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Intro Text"
+    },
+    {
+      "type": "text",
+      "id": "last_updated",
+      "label": "Last Updated",
+      "info": "e.g., 'Last updated: March 15, 2024'"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "policy_section",
+      "name": "Policy Section",
+      "settings": [
+        {
+          "type": "text",
+          "id": "section_heading",
+          "label": "Section Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "section_content",
+          "label": "Section Content"
+        }
+      ]
+    },
+    {
+      "type": "quote",
+      "name": "Quote",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "quote_text",
+          "label": "Quote Text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins Policy Block",
+      "category": "Purrkins"
+    }
+  ]
+}
+{% endschema %}

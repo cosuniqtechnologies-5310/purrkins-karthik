@@ -1,0 +1,409 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer="defer"></script>
+
+<div id="vetted-{{ section.id }}" class="vetted-block {{ section.settings.custom_class }}" {% if section.settings.bg_color != blank %}style="background-color: {{ section.settings.bg_color }};"{% endif %}>
+    <div class="purrkins-container vetted-container purrkins-section-block">
+        
+        <div class="vetted-header">
+            <h3 class="vetted-heading purrkins-h3-text">{{ section.settings.heading }}</h3>
+            {% if section.settings.subheading != blank %}
+                <p class="vetted-subheading">{{ section.settings.subheading }}</p>
+            {% endif %}
+        </div>
+
+        <div class="swiper vetted-swiper-container">
+            <div class="vetted-grid swiper-wrapper">
+                {% for block in section.blocks %}
+                    {% assign mod = forloop.index0 | modulo: 3 %}
+                    {% if mod == 0 %}
+                        {% assign gradient = 'linear-gradient(180deg, rgba(50, 160, 147, 0.00) 40%, #5FA99E 88%)' %}
+                        {% assign color = '#5FA99E' %}
+                    {% elsif mod == 1 %}
+                        {% assign gradient = 'linear-gradient(180deg, rgba(27, 165, 75, 0.00) 40%, #CC926B 88%)' %}
+                        {% assign color = '#CC926B' %}
+                    {% else %}
+                        {% assign gradient = 'linear-gradient(180deg, rgba(33, 94, 212, 0.00) 40%, #4EA0D2 88%)' %}
+                        {% assign color = '#4EA0D2' %}
+                    {% endif %}
+                    
+                    {% assign text_color = 'text-light' %}
+                    
+                    <div class="vetted-card-container swiper-slide" {{ block.shopify_attributes }}>
+                        <div class="vetted-card-flipper">
+                            
+                            <!-- Front of Card: Image -->
+                            <div class="vetted-card-front">
+                                {% if block.settings.image != blank %}
+                                    <img src="{{ block.settings.image | image_url: width: 600 }}" alt="{{ block.settings.name | escape }}" class="vetted-card-bg" width="600" height="auto">
+                                {% endif %}
+                                <!-- Gradient Overlay -->
+                                <div class="vetted-overlay" style="background: {{ gradient }};"></div>
+                                
+                                <div class="vetted-card-content front-content">
+                                    <h4 class="vetted-doc-name text-light">{{ block.settings.name }}</h4>
+                                    <p class="vetted-doc-details text-light">{{ block.settings.details }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Back of Card: Text Quote -->
+                            <div class="vetted-card-back" style="background-color: {{ color }};">
+                                <div class="vetted-card-content text-card-content">
+                                    <p class="vetted-quote {{ text_color }}">{{ block.settings.quote }}</p>
+                                    
+                                    <div class="vetted-text-footer">
+                                        <h4 class="vetted-doc-name {{ text_color }}">{{ block.settings.name }}</h4>
+                                        <p class="vetted-doc-details {{ text_color }}">{{ block.settings.details }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if section.settings.bottom_note != blank %}
+        <div class="vetted-bottom-note">
+            <div class="vetted-check-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                  <circle cx="15.9989" cy="15.9979" r="11.1698" fill="#47857C"/>
+                  <path d="M16 0C7.16347 0 0 7.16341 0 16C0 24.8366 7.16347 32 16 32C24.8365 32 32 24.8366 32 16C32 7.16341 24.8365 0 16 0ZM14.2421 22.4926L8.19194 16.4422L10.3264 14.3077L14.2421 18.2232L22.9697 9.49615L25.1041 11.6306L14.2421 22.4926Z" fill="#C3DFDB"/>
+                </svg>
+            </div>
+            <span>{{ section.settings.bottom_note }}</span>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+.vetted-block {
+    background: #F4F8FF;
+    width: 100%;
+}
+
+/* Header */
+.vetted-header {
+    text-align: center;
+    max-width: 956px;
+    margin: 0 auto 40px;
+}
+.vetted-heading {
+    margin-bottom: 16px;
+    margin-top: 0;
+}
+.vetted-subheading {
+    margin: 0;
+    color: var(--semantic-text-secondary, #424953);
+    text-align: center;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 165%;
+}
+
+/* Grid / Slider Container */
+.vetted-swiper-container {
+    width: 90%;
+    margin: 0 auto 32px;
+}
+
+/* CSS 3D Flip Card Architecture */
+.swiper-slide.vetted-card-container {
+    perspective: 1000px;
+    height: 440px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.vetted-card-flipper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .vetted-card-container:hover .vetted-card-flipper {
+        transform: rotateY(180deg);
+    }
+}
+
+.vetted-card-container.is-flipped .vetted-card-flipper {
+    transform: rotateY(180deg);
+}
+
+.vetted-card-front,
+.vetted-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--border-radius-purrkins);
+    overflow: hidden;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* Front Styling */
+.vetted-card-front {
+    justify-content: flex-end;
+    background: #FFFFFF;
+}
+.vetted-card-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+}
+.vetted-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+}
+.vetted-card-front .front-content {
+    position: relative;
+    z-index: 3;
+    padding: 32px 31px 21px 29px;
+}
+
+/* Back Styling */
+.vetted-card-back {
+    transform: rotateY(180deg);
+    padding: 40px 32px 21px;
+}
+.text-card-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.vetted-quote {
+    margin: 0 0 24px 0;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 26px;
+}
+.vetted-text-footer {
+    margin-top: auto;
+}
+
+/* Typography inside cards */
+.vetted-doc-name {
+    font-family: var(--purrkins-heading-font);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 140%;
+    margin: 0 0 10px;
+}
+.vetted-doc-details {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.4%;
+}
+
+/* Dynamic Colors */
+.text-dark {
+    color: #21252A;
+}
+.text-light {
+    color: #FFFFFF;
+}
+
+/* Bottom Note */
+.vetted-bottom-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    color: var(--semantic-text-primary);
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 115%;
+}
+.vetted-check-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Responsive */
+@media(max-width: 1200px){
+    .vetted-swiper-container{
+        width: 100%;
+    }
+}
+@media (max-width: 991px) {
+    .vetted-swiper-container {
+        width: 100%;
+    }
+}
+@media (max-width: 767px) {
+    .vetted-subheading {
+        font-size: 16px;
+    }
+    .swiper-slide.vetted-card-container {
+        height: 400px;
+    }
+    .vetted-doc-name{font-size: 21px;}
+    .vetted-header {
+        margin-bottom: 24px;
+    }
+    .vetted-check-icon{
+        max-width: 24px;
+    }
+    .vetted-bottom-note{
+        align-items: flex-start;
+    }
+    .vetted-heading {
+       max-width: 956px;
+    margin: 0 auto 16px;
+    }
+    .vetted-quote{font-size: 16px;}
+    .vetted-swiper-container{
+        margin: 0 auto 22px;
+    }
+}
+</style>
+
+<script>
+function initVettedSwiper_{{ section.id | replace: '-', '_' }}() {
+    var container = document.querySelector("#vetted-{{ section.id }} .vetted-swiper-container");
+    if (!container) return;
+    
+    // Destroy existing instance if any (important for Theme Editor)
+    if (container.swiper !== undefined) {
+        container.swiper.destroy(true, true);
+    }
+    
+    var vettedSwiper = new Swiper(container, {
+        slidesPerView: 1.2,
+        spaceBetween: 24,
+        breakpoints: {
+            768: {
+                slidesPerView: 2.2,
+                spaceBetween: 40,
+            },
+            1024: {
+                slidesPerView: 3,
+                spaceBetween: 40,
+            },
+            1201: {
+                slidesPerView: 3,
+                spaceBetween: 52,
+            }
+        }
+    });
+
+    var vettedCards = document.querySelectorAll('#vetted-{{ section.id }} .vetted-card-container');
+    vettedCards.forEach(function(card) {
+        // Remove old listeners to avoid duplicates on section reload
+        var newCard = card.cloneNode(true);
+        card.parentNode.replaceChild(newCard, card);
+        newCard.addEventListener('click', function() {
+            this.classList.toggle('is-flipped');
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initVettedSwiper_{{ section.id | replace: '-', '_' }});
+
+if (window.Shopify && window.Shopify.designMode) {
+    // Run immediately when injected by Customizer
+    initVettedSwiper_{{ section.id | replace: '-', '_' }}();
+    
+    document.addEventListener('shopify:section:load', function(event) {
+        if (event.detail.sectionId === '{{ section.id }}') {
+            initVettedSwiper_{{ section.id | replace: '-', '_' }}();
+        }
+    });
+}
+</script>
+
+{% schema %}
+{
+  "name": "Purrkins Vetted By",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Vetted by the experts."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Veterinarians across India trust Purrkins."
+    },
+    {
+      "type": "text",
+      "id": "bottom_note",
+      "label": "Bottom Note Text",
+      "default": "Approved by 100+ Veterinarians"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#F4F8FF"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom Class"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "expert",
+      "name": "Expert Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Photo"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Dr. Name"
+        },
+        {
+          "type": "text",
+          "id": "details",
+          "label": "Credentials / Location",
+          "default": "BVSc • Delhi"
+        },
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins Vetted By",
+      "blocks": [
+        { "type": "expert" },
+        { "type": "expert" },
+        { "type": "expert" }
+      ]
+    }
+  ]
+}
+{% endschema %}

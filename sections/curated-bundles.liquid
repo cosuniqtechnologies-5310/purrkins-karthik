@@ -1,0 +1,633 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer="defer"></script>
+<div class="curated-bundles-block {{ section.settings.custom_class }}" id="cb-{{ section.id }}">
+    <div class="purrkins-container purrkins-section-block">
+        
+        <div class="cb-header">
+            <div class="cb-header-left">
+                {% if section.settings.heading != blank %}
+                    <h2 class="cb-heading purrkins-h2-text">{{ section.settings.heading }}</h2>
+                {% endif %}
+                {% if section.settings.subheading != blank %}
+                    <p class="cb-subheading purrkins-subtext">{{ section.settings.subheading }}</p>
+                {% endif %}
+            </div>
+            {% if section.settings.button_text != blank and section.settings.button_url != blank %}
+                <div class="cb-header-right">
+                    <a href="{{ section.settings.button_url }}" class="cb-compare-btn">{{ section.settings.button_text }}</a>
+                </div>
+            {% endif %}
+        </div>
+        
+        {% assign use_slider = section.settings.enable_slider %}
+        {% if template.name == 'collection' %}
+            {% assign use_slider = false %}
+        {% endif %}
+        
+        <div class="{% if use_slider %}swiper cb-swiper-container{% else %}cb-grid-container{% endif %}">
+            <div class="{% if use_slider %}swiper-wrapper{% else %}cb-grid-wrapper{% endif %}">
+                {% assign coll = section.settings.collection %}
+                {% if coll == blank and collection %}
+                    {% assign coll = collection %}
+                {% endif %}
+                
+                {% if coll != blank and coll.products.size > 0 %}
+                    {% for product in coll.products %}
+                        <div class="{% if use_slider %}swiper-slide{% else %}cb-grid-item{% endif %}">
+                            <div class="cb-slide-inner">
+                                <div class="cb-slide-left">
+                                    <img src="{{ product.featured_image | image_url: width: 800 }}" alt="{{ product.title | escape }}" class="cb-product-image" width="800" height="800">
+                                </div>
+                                <div class="cb-slide-right">
+                                    <div class="cb-title-row">
+                                        <h3 class="cb-product-title purrkins-h3-text">{{ product.title }}</h3>
+                                    </div>
+                                    
+                                    {% if product.metafields.custom.short_description != blank %}
+                                        <p class="cb-short-desc purrkins-subtext">{{ product.metafields.custom.short_description }}</p>
+                                    {% endif %}
+                                    
+                                    <div class="cb-qd-item">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="31" height="23" viewBox="0 0 31 23" fill="none">
+                                          <path d="M26.9488 14.5563C26.9488 8.45595 21.7356 3.5108 15.3045 3.5108C8.87389 3.5108 3.66016 8.45595 3.66016 14.5563C3.66016 18.6233 7.136 21.9199 11.4231 21.9199H19.186C23.4735 21.9199 26.9488 18.6233 26.9488 14.5563Z" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                          <path d="M15.3072 12.7146V14.5555C15.3072 15.0439 15.103 15.5119 14.7391 15.8571C14.3752 16.2027 13.8813 16.3965 13.3665 16.3965C12.2948 16.3965 11.4258 15.5722 11.4258 14.5555" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                          <path d="M15.3027 12.7146V14.5555C15.3027 15.0439 15.5075 15.5119 15.8714 15.8571C16.2352 16.2027 16.7292 16.3965 17.2434 16.3965C18.3157 16.3965 19.1842 15.5722 19.1842 14.5555" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                          <path d="M14.3359 12.7148H16.2767" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                          <path d="M5.60179 12.7148H0.75" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                          <path d="M29.8616 12.7148H25.0098" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                          <path d="M5.60179 16.3965H0.75" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                          <path d="M29.8616 16.3965H25.0098" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                          <path d="M4.63184 10.1348V0.749312H4.63232C6.4959 0.749312 8.28331 1.45163 9.60151 2.70158L11.1992 4.21718" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                          <path d="M25.9819 10.1348V0.749312C24.1179 0.749312 22.3305 1.45163 21.0128 2.70158L19.415 4.21718" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                          <path d="M10.4521 9.95312C10.9878 9.44502 11.8577 9.44502 12.3929 9.95312" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                          <path d="M18.2178 9.95312C18.7534 9.44502 19.6233 9.44502 20.1585 9.95312" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        {{ product.type | default: '3-week+' }}
+                                    </div>
+                                    
+                                    {% if product.metafields.custom.number_of_product != blank or product.metafields.number_of_pouches != blank %}
+                                        <div class="cb-meta-row">
+                                            <div class="cb-meta-pill">
+                                                <span style="line-height: 1;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="26" viewBox="0 0 20 26" fill="none">
+                                                        <path d="M0.75 3.84783H3.74787V6.8457H0.75" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        <path d="M3.74902 3.84766H18.7384" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        <path d="M3.74902 6.8457H18.7384" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        <path d="M18.7402 6.84532C18.7402 9.84319 17.9757 11.3421 17.9757 16.1087C17.9757 19.5263 19.1748 22.5092 18.5753 24.4728C17.2562 25.4621 14.2434 24.0831 9.74659 24.0831C5.24978 24.0831 2.23687 25.4621 0.917861 24.4728C0.318338 22.5092 1.51744 19.5263 1.51744 16.1087C1.51744 11.3421 0.752979 9.84319 0.752979 6.84532V0.749657H18.7402V6.84532Z" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                </span>
+                                                {% if product.metafields.custom.number_of_product != blank %}{{ product.metafields.custom.number_of_product }}{% endif %}
+                                                {% if product.metafields.custom.number_of_product != blank and product.metafields.custom.number_of_pouches != blank %}<span>|</span>{% endif %}
+                                                {% if product.metafields.custom.number_of_pouches != blank %}{{ product.metafields.custom.number_of_pouches }}{% endif %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% assign inside_items = product.metafields.custom.bundle_whats_inside.value %}
+                                    {% if inside_items != blank %}
+                                        <div class="cb-section">
+                                            <h4 class="cb-section-heading">What's inside</h4>
+                                            <div class="cb-inside-grid">
+                                                {% for item in inside_items %}
+                                                    <div class="cb-inside-pill">
+                                                        <div class="cb-inside-left-icons">
+                                                            {% if item.item_icon != blank %}
+                                                                <img src="{{ item.item_icon | image_url: width: 64 }}" class="cb-inside-icon" alt="" width="64" height="64">
+                                                            {% else %}
+                                                                <div></div>
+                                                            {% endif %}
+                                                            <span class="cb-inside-text">{{ item.item_name }}</span>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% assign best_items = product.metafields.custom.bundle_best_for.value %}
+                                    {% if best_items != blank %}
+                                        <div class="cb-section">
+                                            <h4 class="cb-section-heading">Best for</h4>
+                                            <div class="cb-best-for-row">
+                                                {% for tag in best_items %}
+                                                    <div class="cb-best-for-pill">
+                                                        {% if tag.item_icon != blank %}
+                                                            <img src="{{ tag.item_icon | image_url: width: 64 }}" class="cb-best-for-icon" alt="" width="64" height="64">
+                                                        {% endif %}
+                                                        <span>{{ tag.item_name }}</span>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="cb-footer-row">
+                                        <div class="cb-price-col">
+                                            <div class="cb-price purrkins-h3-text">{{ product.price | money_without_trailing_zeros }}</div>
+                                            {% if section.settings.subscription_text != blank %}
+                                                <div class="cb-sub-text">{{ section.settings.subscription_text }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="cb-btn-col">
+                                            <button class="cb-add-to-cart purrkins-btn-secondary cb-ajax-add-to-cart" data-variant-id="{{ product.selected_or_first_available_variant.id }}">Add to Cart</button>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="{% if use_slider %}swiper-slide{% else %}cb-grid-item{% endif %}">
+                        <div style="padding: 40px; text-align: center;">Please select a collection with products in the section settings.</div>
+                    </div>
+                {% endif %}
+            </div>
+            <!-- Pagination -->
+            {% if use_slider %}
+                <div class="swiper-pagination cb-pagination"></div>
+            {% endif %}
+        </div>
+        
+    </div>
+</div>
+
+<script>
+function initCBSwiper_{{ section.id | replace: '-', '_' }}() {
+    var container = document.querySelector("#cb-{{ section.id }} .cb-swiper-container");
+    if (!container) return;
+    
+    if (typeof Swiper === 'undefined') return;
+    
+    if (container.swiper !== undefined) {
+        container.swiper.destroy(true, true);
+    }
+    
+    var cbSwiper = new Swiper(container, {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        pagination: {
+            el: "#cb-{{ section.id }} .cb-pagination",
+            clickable: true,
+        },
+        autoHeight: true
+    });
+
+    const cbBlock = document.getElementById('cb-{{ section.id }}');
+    if (cbBlock && !cbBlock.dataset.listenerAdded) {
+        cbBlock.dataset.listenerAdded = 'true';
+        
+        cbBlock.addEventListener('click', function(e) {
+            const addBtn = e.target.closest('.cb-ajax-add-to-cart');
+            if (addBtn) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                
+                if (addBtn.disabled) return;
+                
+                const variantId = parseInt(addBtn.getAttribute('data-variant-id'), 10);
+                const qty = 1;
+                
+                if (!variantId) {
+                    alert('Product variant not available.');
+                    return;
+                }
+                
+                const originalText = addBtn.innerHTML;
+                addBtn.innerHTML = 'Adding...';
+                addBtn.disabled = true;
+                addBtn.style.opacity = '0.7';
+
+                fetch(window.Shopify.routes ? window.Shopify.routes.root + 'cart/add.js' : '/cart/add.js', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        items: [{ id: variantId, quantity: qty }]
+                    })
+                })
+                .then(async res => {
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) {
+                        throw new Error(data.description || data.message || 'Error adding to cart');
+                    }
+                    return data;
+                })
+                .then(data => {
+                    addBtn.innerHTML = originalText;
+                    addBtn.disabled = false;
+                    addBtn.style.opacity = '1';
+                    document.documentElement.dispatchEvent(new CustomEvent('cart:build', {bubbles: true}));
+                })
+                .catch(err => {
+                    console.error(err);
+                    addBtn.innerHTML = originalText;
+                    addBtn.disabled = false;
+                    addBtn.style.opacity = '1';
+                    alert('Could not add item to cart: ' + err.message);
+                });
+            }
+        });
+    }
+}
+
+function tryInitCBSwiper_{{ section.id | replace: '-', '_' }}() {
+    if (typeof Swiper !== 'undefined') {
+        initCBSwiper_{{ section.id | replace: '-', '_' }}();
+    } else {
+        setTimeout(tryInitCBSwiper_{{ section.id | replace: '-', '_' }}, 100);
+    }
+}
+
+{% if use_slider %}
+document.addEventListener("DOMContentLoaded", tryInitCBSwiper_{{ section.id | replace: '-', '_' }});
+{% endif %}
+
+if (window.Shopify && window.Shopify.designMode) {
+    {% if use_slider %}
+    tryInitCBSwiper_{{ section.id | replace: '-', '_' }}();
+    {% endif %}
+    
+    document.addEventListener('shopify:section:load', function(event) {
+        if (event.detail.sectionId === '{{ section.id }}') {
+            {% if use_slider %}
+            tryInitCBSwiper_{{ section.id | replace: '-', '_' }}();
+            {% endif %}
+        }
+    });
+}
+</script>
+
+<style>
+.cb-grid-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+.cb-grid-item {
+    width: 100%;
+}
+.curated-bundles-block {
+    width: 100%;
+}
+.cb-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.cb-heading {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+.cb-subheading {
+    margin: 0;
+    color: var(--color-text-secondary, #595961);
+}
+.cb-compare-btn {
+    display: inline-flex;
+    padding: 12px 24px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 30px;
+    border: 1px solid var(--brand-slate-900, #21252A);
+    color: var(--brand-slate-900, #21252A);
+    font-family: var(--purrkins-heading-font);
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    background: transparent;
+}
+.cb-compare-btn:hover {
+    background: var(--brand-slate-900, #21252A);
+    color: #FFFFFF;
+}
+.cb-slide-inner {
+    display: flex;
+    padding: 50px;
+    gap: 40px;
+    align-items: center;
+    border-radius: var(--border-radius-purrkins, 16px);
+    border: 1px solid var(--blue-200, #B6D8ED);
+    background: var(--blue-50, #EEF3F6);
+    overflow: hidden;
+}
+.cb-slide-left {
+    flex: 0 0 45%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 508px;
+}
+.cb-slide-left img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+        max-height: 396px;
+}
+.cb-slide-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.cb-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+.cb-product-title {
+    margin: 0;
+}
+.cb-short-desc {
+    margin-top: 0;
+    margin-bottom: 16px;
+}
+.cb-qd-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: #3E4148;
+    font-size: 18px;
+    font-weight: 500;
+}
+.cb-meta-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.cb-meta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #3E4148;
+    font-size: 18px;
+    font-weight: 400;
+    margin-left: 4px;
+}
+.cb-section {
+    margin-bottom: 24px;
+}
+.cb-section-heading {
+    margin: 0 0 4px 0;
+    font-family: var(--purrkins-heading-font);
+    color: var(--color-text-primary, #121217);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 2;
+}
+.cb-inside-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.cb-inside-pill {
+    display: flex;
+    padding: 8px;
+    align-items: center;
+    border-radius: var(--radius-small, 8px);
+    background: #FFF;
+    gap: 12px;
+}
+.cb-inside-left-icons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.cb-inside-icon {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    border-radius: 6px;
+}
+.cb-inside-text {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-text-primary, #121217);
+    line-height: 1.5;
+}
+.cb-best-for-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.cb-best-for-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: #FFF;
+    border: 1px solid #E2E8F0;
+    font-size: 14px;
+    color: #424953;
+}
+.cb-best-for-icon {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+}
+.cb-footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 20px;
+}
+.cb-price {
+    margin: 0 0 4px 0;
+    font-weight: 700;
+}
+.cb-sub-text {
+    color: var(--teal-600, #47857C);
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+.cb-add-to-cart {
+    padding: 14px 45px;
+}
+
+.cb-pagination {
+    position: relative;
+    margin-top: 48px;
+    text-align: center;
+}
+.cb-swiper-container .swiper-pagination-bullet {
+    width: 14px;
+    height: 14px;
+    background: #F1EABC;
+    opacity: 1;
+}
+.cb-swiper-container .swiper-pagination-bullet-active {
+    background: var(--semantic-brand, #FFE330);
+}
+
+.cb-swiper-container .swiper-wrapper {
+    margin-bottom: 60px;
+}
+
+@media(max-width: 991px){
+    .cb-slide-inner {
+        flex-direction: column;
+        padding: 10px 20px 40px 20px;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .cb-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .cb-footer-row {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        margin: 0;
+    }
+
+    .cb-add-to-cart {
+        width: 100%;
+        text-align: center;
+    }
+
+    .cb-slide-left {
+        max-width: 425px;
+    }
+
+    .cb-title-row {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .cb-meta-row,
+    .curated-bundles-block .cb-qd-item,
+    .pf-archive-page .cb-qd-item {
+        justify-content: center;
+    }
+
+    .cb-header {
+        margin-bottom: 24px;
+    }
+
+    .cb-section-heading {
+        text-align: center;
+    }
+
+    .cb-price {
+        font-size: 36px;
+        text-align: center;
+    }
+
+    .pf-bundles-archive-list {
+        gap: 40px;
+        margin-bottom: 20px;
+    }
+}
+
+@media(max-width: 767px){
+     .cb-inside-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .cb-badge {
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .cb-section-heading {
+        font-size: 16px;
+    }
+
+    .cb-add-to-cart.purrkins-btn-secondary {
+        font-size: 14px;
+    }
+
+    .cb-header {
+        align-items: center;
+    }
+
+    .cb-product-title {
+        font-size: 24px;
+    }
+
+    .cb-sub-text {
+        font-size: 16px;
+    }
+
+    .cb-pagination {
+        margin-top: 24px;
+    }
+    .cb-meta-pill, .cb-qd-item{
+font-size: 16px;
+    }
+}
+
+</style>
+
+{% schema %}
+{
+  "name": "Purrkins Curated Bundles",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Curated bundles"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "The easiest way to feed your cat"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Compare All Bundles >"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button URL"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Select the Collections"
+    },
+    {
+      "type": "text",
+      "id": "subscription_text",
+      "label": "Subscription Text",
+      "default": "Save 15% with subscription"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom Class"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_slider",
+      "label": "Enable Slider Layout",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins Curated Bundles"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,190 @@
+<div class="byob-routine-section purrkins-section-block" style="background-color: {{ section.settings.bg_color | default: '#FFFFFF' }};">
+  <div class="purrkins-container">
+    
+    <div class="byob-routine-header">
+      <h3 class="purrkins-h3-text purrkins-heading-mb">{{ section.settings.heading }}</h3>
+      <p class="purrkins-subtext">{{ section.settings.subheading }}</p>
+    </div>
+
+    <div class="byob-routine-grid" style="--grid-border: {{ section.settings.grid_border_color | default: '#F2DFCD' }}; --grid-bg: {{ section.settings.grid_bg_color | default: '#FEF5EB' }};">
+      {% for block in section.blocks %}
+        <div class="byob-routine-cell" {{ block.shopify_attributes }}>
+          <div class="byob-routine-cell-text">
+            {{ block.settings.text }}
+          </div>
+          <div class="byob-routine-cell-image">
+            {% if block.settings.image != blank %}
+              <img src="{{ block.settings.image | image_url: width: 400 }}" alt="{{ block.settings.text | escape }}" width="200" height="200" loading="lazy">
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+<style>
+.byob-routine-section {
+  padding-top: 0;
+}
+.byob-routine-header {
+    margin-bottom: 40px;
+    max-width: 913px;
+}
+
+.byob-routine-header p {
+    margin: 0;
+}
+
+.byob-routine-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--grid-border);
+  border-left: 1px solid var(--grid-border);
+}
+
+@media (min-width: 576px) {
+  .byob-routine-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 990px) {
+  .byob-routine-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.byob-routine-cell {
+    background-color: var(--grid-bg);
+    border-right: 0.5px solid var(--grid-border);
+    border-bottom: 0.5px solid var(--grid-border);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    gap: 24px;
+    padding: 29px 43px 0 44px;
+}
+
+.byob-routine-cell-text {
+    max-width: 222px;
+    color: #000;
+    text-align: center;
+    font-family: var(--purrkins-heading-font);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: normal;  
+}
+
+.byob-routine-cell-image {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end; /* Ensures image sits on the bottom border */
+}
+
+.byob-routine-cell-image img {
+    display: block;
+    height: auto;
+    object-fit: contain;
+    max-width: 196px;
+    max-height: 196px;
+}
+
+@media(max-width: 1024px){
+  .byob-routine-cell{
+    padding: 29px 24px 0 24px;
+  }
+}
+@media(max-width: 767px){
+  .byob-routine-header {
+    text-align: center;
+  }
+  .byob-routine-cell-text{
+    font-size; 14px;
+  }
+  .byob-routine-cell {
+    padding: 20px 10px 0 10px;
+    gap: 10px;
+  }
+.byob-routine-cell-image img{
+  max-width: 123px;
+    max-height: 123px;
+}
+}
+</style>
+
+{% schema %}
+{
+  "name": "BYOB Routine",
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section Background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "grid_bg_color",
+      "label": "Grid Cell Background",
+      "default": "#FEF5EB"
+    },
+    {
+      "type": "color",
+      "id": "grid_border_color",
+      "label": "Grid Border Color",
+      "default": "#F2DFCD"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Purr-Baby's routine"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Kittens settle faster with a predictable rhythm. Adjust the clock to fit your household and keep order."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "routine_item",
+      "name": "Routine Item",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Routine activity description"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "BYOB Routine",
+      "blocks": [
+        { "type": "routine_item" },
+        { "type": "routine_item" },
+        { "type": "routine_item" },
+        { "type": "routine_item" },
+        { "type": "routine_item" },
+        { "type": "routine_item" },
+        { "type": "routine_item" },
+        { "type": "routine_item" }
+      ]
+    }
+  ]
+}
+{% endschema %}

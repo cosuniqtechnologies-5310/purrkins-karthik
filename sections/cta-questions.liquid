@@ -1,0 +1,151 @@
+<div id="purrkins-cta-questions-{{ section.id }}" class="purrkins-cta-questions-block {{ section.settings.custom_class }}">
+    <div class="purrkins-container cta-questions-inner purrkins-section-block">
+        
+        <div class="cta-q-content">
+            {% if section.settings.heading != blank %}
+                <h3 class="cta-q-heading purrkins-h3-text">{{ section.settings.heading }}</h3>
+            {% endif %}
+            
+            {% if section.settings.subheading != blank %}
+                <p class="cta-q-subheading purrkins-subtext">{{ section.settings.subheading }}</p>
+            {% endif %}
+            
+            <div class="cta-q-actions">
+                {% if section.settings.primary_button_text != blank %}
+                    <a href="{{ section.settings.primary_button_link | default: '#' }}" class="cta-q-btn cta-q-btn-primary purrkins-btn-primary">{{ section.settings.primary_button_text }}</a>
+                {% endif %}
+
+                {% if section.settings.secondary_button_text != blank %}
+                    <a href="{{ section.settings.secondary_button_link | default: '#' }}" class="cta-q-btn cta-q-btn-secondary purrkins-btn-secondary">{{ section.settings.secondary_button_text }}</a>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.purrkins-cta-questions-block {
+    width: 100%;
+    background-color: var(--neutral-white, #FFFFFF);
+}
+
+.cta-q-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+.cta-q-heading {
+    margin-top: 0;
+    margin-bottom: 32px;
+    color: var(--primary-slate-900, #21252A);
+}
+.cta-q-subheading {
+margin-top: 0;
+    margin-bottom: 32px;
+    max-width: 645px;
+    margin-left: auto;
+    margin-right: auto;
+    color: var(--primary-slate-900, #21252A);
+}
+
+/* Actions */
+.cta-q-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.cta-q-btn {
+padding: 14px 22px;
+}
+
+.cta-q-btn-primary {
+    border:none;
+}
+.cta-q-btn-primary:hover {
+    box-shadow: 0 4px 12px rgba(255, 227, 48, 0.3);
+}
+
+.cta-q-btn-secondary {
+    background-color: transparent;
+    color: var(--primary-slate-900, #21252A);
+    border: 1px solid var(--primary-slate-900, #21252A);
+}
+.cta-q-btn-secondary:hover {
+    background-color: var(--primary-slate-50, #F4F8FF);
+}
+
+@media(max-width: 991px){
+    .cta-q-heading {
+    margin-bottom: 16px;
+    }
+}
+
+@media (max-width: 767px) {
+    .cta-q-actions {
+        flex-direction: column;
+        gap: 16px;
+    }
+    .cta-q-btn {
+        max-width: 100%;
+        width: 210px;
+    }
+    .cta-q-subheading{
+            margin-bottom: 16px;
+    }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Purrkins CTA Questions",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Not sure where to start?"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Answer a few questions about your kitten and we will match the right recipe, the right portion and the right delivery rhythm."
+    },
+    {
+      "type": "text",
+      "id": "primary_button_text",
+      "label": "Primary Button Text",
+      "default": "Find Your Kitten's Plan"
+    },
+    {
+      "type": "url",
+      "id": "primary_button_link",
+      "label": "Primary Button Link"
+    },
+    {
+      "type": "text",
+      "id": "secondary_button_text",
+      "label": "Secondary Button Text",
+      "default": "Browse the Range"
+    },
+    {
+      "type": "url",
+      "id": "secondary_button_link",
+      "label": "Secondary Button Link"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom CSS Class"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins CTA Questions"
+    }
+  ]
+}
+{% endschema %}

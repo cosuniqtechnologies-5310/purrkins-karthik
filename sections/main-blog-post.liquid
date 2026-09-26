@@ -1,0 +1,149 @@
+{{ 'purrkins-blog.css' | asset_url | stylesheet_tag }}
+{{ 'purrkins-single-blog.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'purrkins-blog-toc.js' | asset_url }}" defer="defer"></script>
+
+<div class="single-blog-container purrkins-container purrkins-section-block">
+  
+  <header class="single-blog-header">
+      <h1 class="single-blog-title">{{ article.title }}</h1>
+      {%- if article.excerpt != blank -%}
+          <div class="single-blog-subtitle">{{ article.excerpt | strip_html }}</div>
+      {%- endif -%}
+      
+      <div class="single-blog-meta">
+          {%- if article.metafields.custom.writer_image != blank -%}
+              <img src="{{ article.metafields.custom.writer_image | image_url: width: 96 }}" alt="{{ article.author }}" class="sb-author-img" width="96" height="96" loading="lazy">
+          {%- endif -%}
+          <div class="sb-author-text">
+              <span class="sb-author-name">{{ article.author }}</span>, <span class="sb-author-role">Veterinary Writer</span>
+              {%- if article.metafields.custom.article_reviewer != blank -%}
+                  <span class="sb-meta-divider">|</span>
+                  <span class="sb-reviewer">Reviewed by {{ article.metafields.custom.article_reviewer }}</span>
+              {%- endif -%}
+          </div>
+      </div>
+  </header>
+
+  {%- if article.image -%}
+      <div class="single-blog-featured-image">
+          <img src="{{ article.image | image_url: width: 1200 }}" alt="{{ article.title | escape }}" width="1200" height="{{ 1200 | divided_by: article.image.aspect_ratio | round }}" loading="eager">
+      </div>
+  {%- endif -%}
+
+  <div class="single-blog-content-wrapper {% unless article.content contains '<h2' or article.content contains '<h3' %}no-sidebar{% endunless %}">
+      
+      <aside class="single-blog-sidebar">
+          <div class="sb-toc-container">
+              <h3 class="sb-toc-title">Table of contents</h3>
+              <ul id="sb-toc-list" class="sb-toc-list">
+                  <!-- JS will populate this -->
+              </ul>
+          </div>
+      </aside>
+
+      <div class="single-blog-content" id="single-blog-content">
+          {{ article.content }}
+          
+          {%- if article.metafields.custom.cta_product != blank -%}
+              {%- assign cta_product = article.metafields.custom.cta_product.value -%}
+              <div class="sb-cta-card">
+                  <div class="sb-cta-img-wrap">
+                      <img src="{{ cta_product.featured_image | image_url: width: 400 }}" alt="{{ cta_product.title | escape }}" loading="lazy" width="400" height="{{ 400 | divided_by: cta_product.featured_image.aspect_ratio | round }}">
+                  </div>
+                  <div class="sb-cta-content">
+                      {%- if cta_product.tags.size > 0 -%}
+                          <div class="sb-cta-tag">{{ cta_product.tags.first }}</div>
+                      {%- endif -%}
+                      <h3 class="sb-cta-title">{{ cta_product.title }}</h3>
+                      <div class="sb-cta-desc">
+                          {%- if cta_product.metafields.custom.short_description != blank -%}
+                              {{ cta_product.metafields.custom.short_description }}
+                          {%- else -%}
+                              {{ cta_product.description | strip_html | truncatewords: 20 }}
+                          {%- endif -%}
+                      </div>
+                      <a href="{{ cta_product.url }}" class="purrkins-btn-secondary sb-cta-btn">View Product</a>
+                  </div>
+              </div>
+          {%- endif -%}
+          
+          {%- if blog.comments_enabled? -%}
+            <div class="blog-post-comments-container" style="margin-top: 64px;">
+              <h2 class="h3">{{- 'blogs.article.comments_heading' | t: count: article.comments_count -}}</h2>
+
+              <div class="blog-post-comments">
+                {% paginate article.comments by 10 %}
+                  {% for comment in article.comments %}
+                    <div class="blog-post-comment">
+                      {{ comment.content }}
+                      <div class="blog-post-comment__author">
+                        <span class="blog-post-comment__author-name">{{- comment.author -}}</span>
+                        <span>{{- 'blogs.article.comment_author_separator' | t -}}</span>
+                        <span class="blog-post-comment__date">
+                          {{- comment.created_at | time_tag: format: 'date' -}}
+                        </span>
+                      </div>
+                    </div>
+                  {% endfor %}
+
+                  <div class="blog-post-comments-pagination">
+                    {{- paginate | default_pagination -}}
+                  </div>
+                {% endpaginate %}
+              </div>
+
+              {% render 'blog-comment-form', article: article, section_id: section.id %}
+            </div>
+          {%- endif -%}
+      </div>
+      
+  </div>
+</div>
+
+<script type="application/ld+json">
+  {{ article | structured_data }}
+</script>
+
+<div class="sb-related-blogs">
+<div class="purrkins-container purrkins-section-block">
+    <h2 class="sb-related-title">Related blogs</h2>
+    <div class="blog-post-grid" >
+        {%- assign related_count = 0 -%}
+        {%- for related_article in blog.articles limit: 4 -%}
+            {%- if related_article.id != article.id and related_count < 3 -%}
+                <div class="blog-card">
+                  <a href="{{ related_article.url }}" class="blog-card-link">
+                      <div class="blog-card-img-wrap">
+                          {%- if related_article.image -%}
+                              <img src="{{ related_article.image | image_url: width: 500 }}" alt="{{ related_article.title | escape }}" class="blog-card-img" width="500" height="{{ 500 | divided_by: related_article.image.aspect_ratio | round }}" loading="lazy">
+                          {%- else -%}
+                              {{ 'image' | placeholder_svg_tag: 'blog-card-img placeholder-svg' }}
+                          {%- endif -%}
+                      </div>
+                      <div class="blog-card-content">
+                          <div class="blog-card-badge">{{ related_article.tags.first | default: blog.title }}</div>
+                          <h3 class="blog-card-title">{{ related_article.title }}</h3>
+                          <div class="blog-card-excerpt">
+                            {%- if related_article.excerpt.size > 0 -%}
+                              {{ related_article.excerpt | strip_html | truncatewords: 25 }}
+                            {%- else -%}
+                              {{ related_article.content | strip_html | truncatewords: 25 }}
+                            {%- endif -%}
+                          </div>
+                          <div class="blog-card-date">{{ related_article.published_at | time_tag: format: 'date' }}</div>
+                      </div>
+                  </a>
+              </div>
+              {%- assign related_count = related_count | plus: 1 -%}
+            {%- endif -%}
+        {%- endfor -%}
+    </div>
+</div>
+</div>
+
+{% schema %}
+{
+  "name": "Purrkins Blog Post",
+  "settings": []
+}
+{% endschema %}

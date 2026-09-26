@@ -1,0 +1,555 @@
+{%- assign check_icon = '✓' -%}
+{%- assign cross_icon = '✕' -%}
+{%- assign block_id = 'comp-table-' | append: section.id -%}
+
+<div class="comparison-table-block" id="{{ block_id }}">
+    <div class="purrkins-container comp-table-inner purrkins-section-block">
+        
+        <h3 class="comp-table-heading purrkins-h3-text">{{ section.settings.heading | escape }}</h3>
+        
+        <div class="comp-pf-controls-row comp-tabs" {% if section.blocks.size <= 1 %}style="display: none;"{% endif %}>
+            {%- for block in section.blocks -%}
+                {%- assign coll = block.settings.collection -%}
+                {%- if coll != blank -%}
+                    {%- assign tab_name = coll.title -%}
+                    {%- assign icon_url = coll.image | image_url: width: 24 -%}
+                    {%- assign main_color = coll.metafields.custom.card_primary_color.value -%}
+                    {%- assign bg_color = coll.metafields.custom.card_bg_color.value -%}
+                    
+                    {%- capture style_attr -%}
+                        {%- if main_color != blank -%}--dynamic-color: {{ main_color }}; {%- endif -%}
+                        {%- if bg_color != blank -%}--dynamic-bg: {{ bg_color }}; {%- endif -%}
+                    {%- endcapture -%}
+
+                    <button type="button" class="comp-pf-cat-btn comp-tab {% if forloop.first %}active{% endif %}" data-tab-index="{{ forloop.index0 }}" {% if style_attr != blank %}style="{{ style_attr }}"{% endif %} {{ block.shopify_attributes }}>
+                        {%- if icon_url != blank -%}
+                            <img src="{{ icon_url }}" alt="{{ tab_name | escape }}" width="24" height="24" class="pf-cat-icon">
+                        {%- endif -%}
+                        <span>{{ tab_name | escape }}</span>
+                    </button>
+                {%- endif -%}
+            {%- endfor -%}
+        </div>
+
+        <div class="comp-table-wrapper">
+            <table class="comp-table">
+                <thead>
+                    <tr>
+                        <th class="col-feature-header">
+                            <div class="header-inner feature-header-inner">
+                                What you’re getting
+                            </div>
+                        </th>
+                        <th class="col-purrkins-header">
+                            <div class="header-inner purrkins-header-inner">
+                                <div class="header-icon-cat">
+                                    {%- if settings.purrkins_brand_image != blank -%}
+                                        <img src="{{ settings.purrkins_brand_image | image_url: width: 134 }}" alt="Purrkins" width="67" height="76">
+                                    {%- endif -%}
+                                </div>
+                                <span>Purrkins</span>
+                            </div>
+                        </th>
+                        <th class="col-others-header">
+                            <div class="header-inner others-header-inner">
+                                <div class="header-icon-bowl">
+                                    {%- if settings.others_brand_image != blank -%}
+                                        <img src="{{ settings.others_brand_image | image_url: width: 134 }}" alt="Others" width="67" height="76">
+                                    {%- endif -%}
+                                </div>
+                                <span>Others</span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                
+                {%- for block in section.blocks -%}
+                    {%- assign coll = block.settings.collection -%}
+                    {%- if coll != blank -%}
+                        <tbody class="comp-tbody" data-tab-index="{{ forloop.index0 }}" style="display: {% if forloop.first %}table-row-group{% else %}none{% endif %};">
+                            {%- assign features = coll.metafields.custom.comparison_features.value -%}
+                            {%- if features != blank -%}
+                                {%- for feature in features -%}
+                                    <tr>
+                                        <td class="col-feature-cell">{{ feature.feature_name }}</td>
+                                        <td class="col-purrkins-cell">
+                                            {%- if feature.purrkins_has.value == true -%}
+                                                {{ check_icon }}
+                                            {%- else -%}
+                                                {{ cross_icon }}
+                                            {%- endif -%}
+                                        </td>
+                                        <td class="col-others-cell">
+                                            {%- if feature.others_has.value == true -%}
+                                                {{ check_icon }}
+                                            {%- else -%}
+                                                {{ cross_icon }}
+                                            {%- endif -%}
+                                        </td>
+                                    </tr>
+                                {%- endfor -%}
+                            {%- else -%}
+                                <tr>
+                                    <td class="col-feature-cell" colspan="3">No features added yet. Add them in the Collection Metafields.</td>
+                                </tr>
+                            {%- endif -%}
+                        </tbody>
+                    {%- endif -%}
+                {%- endfor -%}
+                
+            </table>
+        </div>
+        
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var block = document.getElementById("{{ block_id }}");
+    if(!block) return;
+    
+    var tabs = block.querySelectorAll('.comp-tab');
+    var tbodies = block.querySelectorAll('.comp-tbody');
+    var featureHeader = block.querySelector('.feature-header-inner');
+    
+    function updateHeaderColor(activeTab) {
+        if (!featureHeader || !activeTab) return;
+        var color = activeTab.style.getPropertyValue('--dynamic-color').trim();
+        if (color) {
+            featureHeader.style.backgroundColor = color;
+        } else {
+            featureHeader.style.backgroundColor = ''; // Reverts to CSS default
+        }
+    }
+    
+    // Initialize color on load
+    var initialActiveTab = block.querySelector('.comp-tab.active');
+    if (initialActiveTab) {
+        updateHeaderColor(initialActiveTab);
+    }
+    
+    tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var targetIndex = this.getAttribute('data-tab-index');
+            
+            // Remove active from all tabs
+            tabs.forEach(function(t) { t.classList.remove('active'); });
+            // Add active to clicked
+            this.classList.add('active');
+            
+            // Update header background color
+            updateHeaderColor(this);
+            
+            // Hide all tbodies
+            tbodies.forEach(function(tbody) {
+                tbody.style.display = 'none';
+            });
+            
+            // Show target tbody
+            var targetBody = block.querySelector('.comp-tbody[data-tab-index="'+targetIndex+'"]');
+            if (targetBody) {
+                targetBody.style.display = 'table-row-group';
+            }
+        });
+    });
+});
+</script>
+
+<style>
+.comparison-table-block {
+    width: 100%;
+}
+.comp-table-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.comp-table-heading {
+    margin-bottom: 40px;
+    margin-top: 0;
+}
+
+.comp-pf-controls-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.comp-pf-cat-btn {
+    gap: 8px;
+    border-radius: 16px;
+    border: 1px solid var(--dynamic-color, var(--primary-slate-300, #C2C5CE));
+    background: var(--dynamic-bg, #F4F7FB);
+    color: var(--dynamic-color, var(--semantic-text-secondary, #424953));
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 140px;
+    font-family: var(--purrkins-heading-font);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0.16px;
+    display: flex;
+    width: 176.75px;
+    padding: 8px 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+.comp-pf-cat-btn:hover {
+  opacity: 0.85;
+}
+
+.comp-pf-cat-btn.active {
+  background: var(--dynamic-color, #558A29);
+  border-color: var(--dynamic-color, #558A29);
+  color: #FFFFFF;
+}
+
+.comp-pf-cat-btn .pf-cat-icon {
+    width: 54px;
+    height: 54px;
+    object-fit: contain;
+    transition: all 0.2s ease;
+}
+
+.comp-pf-cat-btn.active .pf-cat-icon {
+    filter: brightness(0) invert(1);
+}
+
+/* Table */
+.comp-table-wrapper {
+    width: 100%;
+    padding-bottom: 35px;
+}
+.comp-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 600px;
+}
+
+/* Headers */
+.comp-table th {
+    padding: 0;
+    border: none;
+    vertical-align: bottom;
+    text-align: center;
+}
+.col-purrkins-header, .col-others-header {
+    width: 299px;
+}
+.col-feature-header {
+    width: auto;
+}
+
+.feature-header-inner {
+    display: flex;
+    align-items: center;
+    border-radius: var(--border-radius-purrkins, 24px) 0 0 0;
+    background: #4ea0d2;
+    color: #fff;
+    font-family: var(--purrkins-heading-font);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 140%;
+    padding: 25px 54px;
+}
+
+.purrkins-header-inner {
+background-color: #FFE330;
+    color: #1A202C;
+    border-top-left-radius: var(--border-radius-purrkins, 24px);
+    border-top-right-radius: var(--border-radius-purrkins, 24px);
+    font-family: var(--purrkins-heading-font);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 140%;
+    position: relative;
+    z-index: 2;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 0;
+}
+
+.others-header-inner {
+    background-color: #21252A;
+    color: #FFFFFF;
+    border-top-right-radius: var(--border-radius-purrkins, 24px);
+    font-family: var(--purrkins-heading-font);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 140%;
+    padding: 25px 0;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+td.col-feature-cell::before {
+    content: '';
+    width: 80%;
+    position: absolute;
+    border-bottom: 0.3px solid #64ACD8;
+    left: 54px;
+    bottom: 0;
+}
+
+td.col-purrkins-cell::before {
+content: '';
+    width: 80%;
+    position: absolute;
+    border-bottom: 0.3px solid #A08C0A;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+}
+
+td.col-others-cell::before {
+    content: '';
+    width: 80%;
+    position: absolute;
+    border-bottom: 0.3px solid #AAADB2;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+}
+
+.comp-table tr:last-child td::before{
+     content: unset !important;   
+} 
+
+/* Icons in Headers */
+.header-icon-cat, .header-icon-bowl {
+    display: block;
+}
+
+/* Body Cells */
+tbody.comp-tbody {
+    border-radius: 0 0 0 26px;
+}
+
+.col-feature-cell {
+    text-align: left;
+    position: relative;
+    padding: 20px 100px 20px 54px;
+    display: block;
+    color: var(--color-text-primary, #121217);
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 150%;
+    background: var(--blue-50, #EEF3F6);
+}
+
+.col-purrkins-cell {
+    background-color: #F9F8F0;
+    position: relative;
+    z-index: 2;
+    color: var(--brand-yellow-700, #A08C0A);
+    text-align: center;
+    font-size: 25px;
+    font-weight: 700;
+    line-height: 149%;
+}
+
+/* Ensure the cell content stays above the pseudo-element */
+.col-purrkins-cell > * {
+    position: relative;
+    z-index: 3;
+}
+.col-others-cell {
+    background-color: #F0F0F1;
+    text-align: center;
+    position: relative;
+    color: var(--color-text-secondary, #595961);
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 200%;
+}
+
+/* Column Borders / Shadows for Purrkins Column */
+.col-purrkins-header, .col-purrkins-cell {
+    border-left: 3px solid #FFE330;
+    border-right: 3px solid #FFE330;
+}
+.comp-table tr:last-child .col-purrkins-cell {
+    /* Remove the cell's bottom border radius so the pseudo-element continues smoothly */
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none;
+}
+
+/* CSS visual extension for the bottom of the Purrkins column */
+.comp-table tr:last-child .col-purrkins-cell::after {
+content: '';
+    position: absolute;
+    top: 100%;
+    left: -3px;
+    right: -3px;
+    height: 30px;
+    background-color: #F9F8F0;
+    border-left: 3px solid #FFE330;
+    border-right: 3px solid #FFE330;
+    border-bottom: 3px solid #FFE330;
+    border-bottom-left-radius: var(--border-radius-purrkins, 24px);
+    border-bottom-right-radius: var(--border-radius-purrkins, 24px);
+    z-index: 1;
+}
+
+/* Bottom Radius for other columns */
+.comp-table tr:last-child .col-feature-cell {
+    border-bottom-left-radius: var(--border-radius-purrkins, 24px);
+    padding-bottom: 40px;
+}
+.comp-table tr:last-child .col-others-cell {
+    border-bottom-right-radius: var(--border-radius-purrkins, 24px);
+}
+
+.comp-table .header-icon-cat img {
+    width: 108px;
+    height: 101px;
+}
+
+.header-icon-bowl img {
+    width: 110px;
+    height: 105px;
+    position: absolute;
+    top: 0;
+    left: 36px;
+}
+
+.header-icon-bowl {
+    width: 68px;
+}
+
+.col-others-header {
+    position: relative;
+}
+
+@media(max-width: 1024px){
+    .feature-header-inner{
+        padding: 25px 20px;
+    }
+    .col-feature-cell {
+        padding: 20px;
+    }
+    td.col-feature-cell::before{
+        width: 90%;
+        left: 20px;
+    }
+}
+
+@media(max-width: 991px){
+    .comp-pf-controls-row {
+        flex-direction: row;
+        margin-bottom: 34px;
+        row-gap: 10px;
+        column-gap: 9px;
+    }
+
+    .header-icon-cat, .header-icon-bowl {
+    display: none;
+    }
+    .purrkins-header-inner{
+            padding: 36px 0;
+    }
+    .col-purrkins-header, .col-others-header {
+        width: 106px;
+    }
+    .col-feature-cell {
+        padding: 12px 14px 13px 17px;
+        font-size: 14px;
+    }
+    .comp-table tr:last-child .col-feature-cell{
+        padding-bottom: 20px;
+    }
+    .comp-table{
+        min-width: auto;
+    }
+    .header-icon-bowl svg { width: 24px; }
+    .comp-table-heading {
+        margin-bottom: 32px;
+    }
+    .comp-table-wrapper{
+        padding-bottom: 0;
+    }
+    .comp-table tr:last-child .col-purrkins-cell::after{
+        height: 12px;
+    }
+}
+
+@media(max-width: 767px){
+    .feature-header-inner {
+        padding: 8px 12px;
+    }
+    .col-purrkins-cell {
+        font-size: 18px;
+    }
+    .col-others-cell{
+        font-size: 15px;
+    }
+    .others-header-inner, .purrkins-header-inner, .feature-header-inner{
+        font-size: 14px;
+    }
+    .comp-table .header-icon-cat img, .header-icon-bowl img, .header-icon-bowl{
+        display: none;
+    }
+    .header-inner.purrkins-header-inner {
+        padding: 15px 0;
+        border-radius: var(--border-radius-purrkins, 24px) var(--border-radius-purrkins, 24px) 0 0;
+    }
+    .header-inner.others-header-inner {
+        height: unset;
+        padding: 8px 12px;
+    }
+    .comp-table-inner {
+        padding-bottom: 76px;
+    }
+    .comp-pf-cat-btn.comp-tab{
+        width: calc(50% - 16px);
+    }
+}
+@media(max-width: 380px){
+    .others-header-inner, .purrkins-header-inner, .feature-header-inner {
+        font-size: 13px;
+    }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Comparison Table",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "What makes Purrkins different?"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection Tab",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Comparison Table"
+    }
+  ]
+}
+{% endschema %}

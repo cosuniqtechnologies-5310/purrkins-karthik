@@ -1,0 +1,26 @@
+<div class="purrkins-related-blogs" style="margin-top: 80px;">
+    <div class="purrkins-container">
+        <h2 class="sb-related-title purrkins-h2-text">Keep Reading</h2>
+        <div class="purrkins-blog-grid">
+            {% assign count = 0 %}
+            {% for related_article in blog.articles %}
+                {% if related_article.id != article.id and count < 3 %}
+                    <a href="{{ related_article.url }}" class="purrkins-blog-card">
+                        <div class="blog-card-image">
+                            {% if related_article.image != blank %}
+                                <img src="{{ related_article.image | image_url: width: 600 }}" alt="{{ related_article.title | escape }}" width="600" height="auto">
+                            {% endif %}
+                        </div>
+                        <div class="blog-card-content">
+                            <h3 class="blog-card-title">{{ related_article.title }}</h3>
+                            <div class="blog-card-meta">
+                                <span>By {{ related_article.author }}</span> | <span>5 Min Read</span>
+                            </div>
+                        </div>
+                    </a>
+                    {% assign count = count | plus: 1 %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>

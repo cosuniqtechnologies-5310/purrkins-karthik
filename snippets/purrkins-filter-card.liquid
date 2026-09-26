@@ -1,0 +1,50 @@
+{% comment %}
+    Accepts:
+    - product: {Object} Product Liquid object (required)
+    - current_collection: {Object} The collection being used to render this (optional)
+{% endcomment %}
+
+{% assign collection_to_use = current_collection | default: product.collections.first %}
+{% assign card_bg_color = collection_to_use.metafields.custom.card_bg_color | default: '#f9f9f9' %}
+{% assign card_main_color = collection_to_use.metafields.custom.card_primary_color | default: '#333' %}
+{% assign badge_text = collection_to_use.title %}
+
+{% assign product_benefit = product.metafields.custom.benefit | default: '' %}
+
+<div class="pf-product-card-wrap swiper-slide" data-product-id="{{ product.id }}" data-category="{{ collection_to_use.handle }}" data-benefit="{{ product_benefit | escape }}">
+    <div class="pf-product-card" style="background-color: {{ card_bg_color }};">
+        {% if badge_text != blank %}
+            <span class="pf-product-badge" style="background-color: {{ card_bg_color }}; border: 1px solid {{ card_main_color }}; color: {{ card_main_color }};">
+                {{ badge_text }}
+            </span>
+        {% endif %}
+        
+        <a href="{{ product.url }}" class="pf-product-image">
+            {% if product.featured_image %}
+                <img src="{{ product.featured_image | image_url: width: 600 }}" alt="{{ product.featured_image.alt | escape }}" loading="lazy" width="100%" height="auto">
+            {% else %}
+                {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+            {% endif %}
+        </a>
+    </div>
+    
+    <div class="pf-product-info">
+        <h4 class="pf-product-title purrkins-h6-text">
+            <a href="{{ product.url }}">{{ product.title }}</a>
+        </h4>
+        <div class="pf-product-price">
+            <span class="price-val">{{ product.price | money_without_trailing_zeros | replace: 'Rs. ', '₹' | replace: 'Rs.', '₹' }}</span>
+            <span class="price-sep">|</span>
+            <span class="price-size">
+                {% if product.variants.first.weight > 0 %}
+                    {{ product.variants.first.weight | round }}{{ product.variants.first.weight_unit }}
+                {% else %}
+                    70g
+                {% endif %}
+            </span>
+        </div>
+        <div class="pf-product-excerpt">
+            {{ product.metafields.custom.short_description | default: 'Real broth for daily hydration' }}
+        </div>
+    </div>
+</div>

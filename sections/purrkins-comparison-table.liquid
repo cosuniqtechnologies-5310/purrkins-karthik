@@ -1,0 +1,90 @@
+<div class="purrkins-container pf-comparison-section {{ section.settings.custom_class }}">
+    {% assign heading = section.settings.heading | default: product.metafields.custom.comparison_heading.value %}
+    
+    {% assign purrkins_features = product.metafields.custom.purrkins_features.value %}
+    {% assign others_features = product.metafields.custom.others_features.value %}
+    
+    {% if purrkins_features != blank and others_features != blank %}
+        {% if heading != blank %}
+            <h3 class="pf-comparison-heading purrkins-h3-text" style="text-align: center; margin-bottom: 40px;">{{ heading | escape }}</h3>
+        {% endif %}
+
+        <div class="pf-comparison-table-wrap">
+            <div class="pf-comparison-table">
+                <div class="pf-comp-header pf-comp-header-left">
+                    {% if section.settings.purrkins_mascot != blank %}
+                        <div class="pf-mascot pf-mascot-left">
+                            {{ section.settings.purrkins_mascot | image_url: width: 300 | image_tag: alt: 'Purrkins Mascot', loading: 'lazy' }}
+                        </div>
+                    {% endif %}
+                    <h3>{{ section.settings.purrkins_title | default: 'Purrkins' }}</h3>
+                </div>
+                
+                <div class="pf-comp-header pf-comp-header-right">
+                    {% if section.settings.others_mascot != blank %}
+                        <div class="pf-mascot pf-mascot-right">
+                            {{ section.settings.others_mascot | image_url: width: 300 | image_tag: alt: 'Others Mascot', loading: 'lazy' }}
+                        </div>
+                    {% endif %}
+                    <h3>{{ section.settings.others_title | default: 'Others' }}</h3>
+                </div>
+
+                {% for p_feature in purrkins_features %}
+                    <div class="pf-comp-cell pf-comp-cell-left">
+                        {{ p_feature | escape }}
+                    </div>
+                    <div class="pf-comp-cell pf-comp-cell-right">
+                        {{ others_features[forloop.index0] | escape }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Product Comparison",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "What makes our Chicken Broth better",
+      "info": "Leave blank to pull dynamically from the 'comparison_heading' product metafield."
+    },
+    {
+      "type": "text",
+      "id": "purrkins_title",
+      "label": "Purrkins Column Title",
+      "default": "Purrkins"
+    },
+    {
+      "type": "image_picker",
+      "id": "purrkins_mascot",
+      "label": "Purrkins Mascot Image"
+    },
+    {
+      "type": "text",
+      "id": "others_title",
+      "label": "Others Column Title",
+      "default": "Others"
+    },
+    {
+      "type": "image_picker",
+      "id": "others_mascot",
+      "label": "Others Mascot Image"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom CSS Class"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Comparison"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,218 @@
+{% assign wrapper_id = section.settings.custom_id | default: section.id | prepend: 'purrkins-about-team-' %}
+{% if section.settings.custom_id != blank %}
+    {% assign wrapper_id = section.settings.custom_id %}
+{% endif %}
+<div id="{{ wrapper_id }}" class="purrkins-about-team-block {{ section.settings.custom_class }}">
+    <div class="purrkins-container purrkins-section-block">
+        
+        {% if section.settings.heading != blank %}
+            <div class="about-team-header">
+                <h3 class="about-team-heading purrkins-h3-text">{{ section.settings.heading }}</h3>
+            </div>
+        {% endif %}
+
+        {% if section.blocks.size > 0 %}
+            <div class="about-team-grid">
+                {% for block in section.blocks %}
+                    <div class="about-team-card" {{ block.shopify_attributes }}>
+                        <div class="about-team-image">
+                            {% if block.settings.image != blank %}
+                                <img src="{{ block.settings.image | image_url: width: 600 }}" alt="{{ block.settings.image.alt | default: block.settings.name | escape }}" width="320" height="320" />
+                            {% else %}
+                                <div class="about-team-placeholder"></div>
+                            {% endif %}
+                        </div>
+                        <div class="about-team-info">
+                            <h4 class="about-team-name">{{ block.settings.name }}</h4>
+                            <p class="about-team-role">{{ block.settings.role }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+.purrkins-about-team-block {
+    width: 100%;
+    background-color: var(--neutral-white, #FFFFFF);
+}
+
+.about-team-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.about-team-heading {
+    margin: 0;
+}
+
+.about-team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.about-team-card {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.about-team-image {
+    width: 100%;
+    border-radius: var(--border-radius-purrkins, 24px);
+    overflow: hidden;
+    background-color: #F1F1F1;
+    aspect-ratio: 1 / 1;
+}
+
+.about-team-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.about-team-placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: #F1F1F1;
+}
+
+.about-team-info {
+    text-align: left;
+}
+
+.about-team-name {
+margin: 0;
+    color: var(--brand-slate-900, #21252A);
+    font-family: var(--purrkins-heading-font);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.about-team-role {
+margin: 0;
+    color: var(--brand-slate-900, #21252A);
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+@media (max-width: 991px) {
+    .about-team-grid {
+        display: flex;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        scroll-snap-type: x mandatory;
+        gap: 20px;
+        padding-bottom: 16px; /* Space for scrollbar */
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Hide scrollbar Firefox */
+    }
+    .about-team-grid::-webkit-scrollbar {
+        display: none; /* Hide scrollbar Chrome/Safari/Edge */
+    }
+    .about-team-card {
+        width: 320px;
+        flex: 0 0 320px;
+        scroll-snap-align: start;
+    }
+    .about-team-header {
+        margin-bottom: 40px;
+    }
+}
+
+@media (max-width: 767px) {
+    .about-team-card {
+        width: 280px; /* Slightly narrower on mobile to show next card */
+        flex: 0 0 280px;
+    }
+    .about-team-grid {
+        gap: 16px;
+    }
+    .about-team-name {
+        font-size: 18px;
+        margin: 0;
+    }
+    .about-team-header {
+        margin-bottom: 24px;
+    }
+    .about-team-card{
+        gap: 8px;
+    }
+    .about-team-role{
+        font-size: 14px;
+    }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Purrkins About Team",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Team behind Purrkins"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom CSS Class"
+    },
+    {
+      "type": "text",
+      "id": "custom_id",
+      "label": "Custom ID (for anchor links)",
+      "info": "e.g., 'team'. You can link to this section using #team."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "team_member",
+      "name": "Team Member",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Photo"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Name"
+        },
+        {
+          "type": "text",
+          "id": "role",
+          "label": "Role",
+          "default": "Role"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins About Team",
+      "blocks": [
+        {
+          "type": "team_member",
+          "settings": {
+            "name": "Hari Shankar",
+            "role": "Founder, Purrkins"
+          }
+        },
+        { "type": "team_member" },
+        { "type": "team_member" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,121 @@
+<div id="purrkins-about-stats-{{ section.id }}" class="purrkins-about-stats-block {{ section.settings.custom_class }}">
+    <div class="purrkins-container as-inner">
+        {% if section.blocks.size > 0 %}
+            <div class="as-grid">
+                {% for block in section.blocks %}
+                    <div class="as-item" {{ block.shopify_attributes }}>
+                        <div class="as-value">{{ block.settings.value }}</div>
+                        <div class="as-label purrkins-subtext">{{ block.settings.label }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.purrkins-about-stats-block {
+    width: 100%;
+    background-color: var(--primary-slate-900, #21252A);
+}
+.as-inner {
+max-width: 1150px;
+    padding: 60px 20px;
+}
+.as-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    text-align: center;
+}
+.as-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+.as-value {
+margin-bottom: 16px;
+    color: var(--semantic-brand, #FFE330);
+    text-align: center;
+    font-family: var(--purrkins-heading-font);
+    font-size: 60px;
+    font-weight: 800;
+    line-height: 64px;
+    letter-spacing: -1.2px;
+}
+.as-label {
+    color: var(--neutral-white, #FFF);
+    font-family: var(--purrkins-primary-font);
+    font-weight: 500;
+    max-width: 213px;
+}
+
+@media(max-width: 1024px){
+        .as-value {
+        font-size: 40px;
+        margin-bottom: 8px;
+    }
+}
+
+@media (max-width: 992px) {
+    .as-grid {
+     grid-template-columns: repeat(2, 1fr);
+        gap: 40px;
+    }
+}
+
+@media (max-width: 767px) {
+    .as-inner{
+        padding: 60px 20px;
+    }
+    .as-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Purrkins About Stats",
+  "settings": [
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom CSS Class"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Stat",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Value",
+          "default": "30"
+        },
+        {
+          "type": "textarea",
+          "id": "label",
+          "label": "Label",
+          "default": "Years of experience"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purrkins About Stats",
+      "blocks": [
+        { "type": "stat" },
+        { "type": "stat" },
+        { "type": "stat" },
+        { "type": "stat" }
+      ]
+    }
+  ]
+}
+{% endschema %}
