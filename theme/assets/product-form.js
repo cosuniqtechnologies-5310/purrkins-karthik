@@ -432,8 +432,10 @@ class ProductFormComponent extends Component {
       if (item instanceof HTMLElement && item.dataset.sectionId) {
         cartItemComponentsSectionIds.push(item.dataset.sectionId);
       }
-      formData.append('sections', cartItemComponentsSectionIds.join(','));
     });
+    if (cartItemComponentsSectionIds.length > 0) {
+      formData.append('sections', cartItemComponentsSectionIds.join(','));
+    }
 
     const itemCount = Number(formData.get('quantity')) || Number(this.dataset.quantityDefault);
     const deferredEventPromise = CartLinesUpdateEvent.createPromise();
