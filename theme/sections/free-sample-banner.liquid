@@ -421,57 +421,67 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if(form) {
         form.addEventListener('submit', function(e) {
-            e.preventDefault();
+            e.preventDefault(); // Prevent normal browser submission
+            
             var btn = form.querySelector('.fs-submit-btn');
+            if (btn.disabled) return; // Prevent duplicate submissions
+            
             btn.innerHTML = 'Submitting...';
             btn.disabled = true;
 
             var formData = new FormData(form);
             
-            // Sync contact[first_name] with customer[first_name]
-            if (formData.has('contact[first_name]')) {
-                formData.set('customer[first_name]', formData.get('contact[first_name]'));
-            } else if (formData.has('fs_name')) {
-                formData.set('contact[first_name]', formData.get('fs_name'));
-                formData.set('customer[first_name]', formData.get('fs_name'));
-            }
+            // Extract Full Name
+            var fName = formData.get('contact[first_name]') || formData.get('fs_name') || '';
             
-            // Format phone number with country code
-            var finalPhone = '';
-            if (formData.has('contact[phone]')) {
-                var phone = formData.get('contact[phone]');
-                if (phone && phone.trim() !== '') {
-                    finalPhone = '+91' + phone.trim();
-                    formData.set('contact[phone]', finalPhone);
-                }
-            } else if (formData.has('fs_phone')) {
-                var phone = formData.get('fs_phone');
-                if (phone && phone.trim() !== '') {
-                    finalPhone = '+91' + phone.trim();
-                    formData.set('fs_phone', finalPhone);
-                }
-            }
+            // Extract and Normalize Phone Number
+            var rawPhone = formData.get('contact[phone]') || formData.get('fs_phone') || formData.get('fs_raw_phone') || '';
+            var finalPhone = rawPhone.trim();
             
-            if (finalPhone !== '') {
-                formData.set('customer[phone]', finalPhone);
-                formData.set('contact[note][Phone]', finalPhone);
+            if (finalPhone !== '' && !finalPhone.startsWith('+')) {
+                // If it doesn't start with '+', assume it's Indian and prepend +91
+                finalPhone = '+91' + finalPhone;
             }
 
+            // Determine Endpoint
+            // Defaults to App Proxy path unless overridden by section setting
             var endpointUrl = form.getAttribute('data-endpoint');
             if (!endpointUrl || endpointUrl.trim() === '') {
-                endpointUrl = form.getAttribute('action') || window.location.pathname;
+                endpointUrl = '/apps/free-sample/customer';
             }
+
+            // Create JSON payload for the backend
+            var payload = {
+                name: fName.trim(),
+                phone: finalPhone
+            };
 
             fetch(endpointUrl, {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
             })
             .then(response => {
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success === false) {
+                    throw new Error(data.message || 'Unable to save customer');
+                }
+                
+                // Show Success Message (keep existing UI)
                 var fields = form.querySelector('.fs-fields');
                 var successMsg = form.querySelector('.fs-form-success');
                 if (fields) fields.style.display = 'none';
                 if (successMsg) successMsg.style.display = 'flex';
                 
+                // Update Progress Bar
                 var currentLeftStr = countHighlight.innerText;
                 var currentLeft = parseInt(currentLeftStr, 10) || 0;
                 
@@ -498,7 +508,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error("Fetch error:", error);
                 btn.innerHTML = 'Claim Free Sample';
                 btn.disabled = false;
-                alert('Network error. Please try again.');
+                alert('Something went wrong: ' + error.message);
             });
         });
     }
