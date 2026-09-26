@@ -183,41 +183,33 @@
 
     <!-- Add to cart -->
     <div class="pf-qv-addtocart-wrapper">
-        <form method="post" action="{{ routes.cart_add_url }}" id="QuickViewForm-{{ product.id }}" accept-charset="UTF-8" class="pf-qv-form" enctype="multipart/form-data" onsubmit="return window.submitPfQvForm(event, this);">
-          <input type="hidden" name="form_type" value="product">
-          <input type="hidden" name="utf8" value="✓">
-          <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id | default: product.variants.first.id }}">
-          {% if product.selling_plan_groups.size > 0 %}
-            <input type="hidden" name="selling_plan" value="{{ product.selected_or_first_available_selling_plan_allocation.selling_plan.id | default: product.selling_plan_groups.first.selling_plans.first.id }}">
-          {% endif %}
-          <div class="pf-qv-error-message hidden" style="color: #EB001B; font-size: 13px; margin-bottom: 8px; text-align: center;"></div>
-          <div class="pf-qv-addtocart">
-            <select name="quantity" class="pf-qv-packs-select">
-              <option value="1">1 Pack</option>
-              <option value="2">2 Packs</option>
-              <option value="3">3 Packs</option>
-              <option value="4">4 Packs</option>
-              <option value="5">5 Packs</option>
-            </select>
-            <button
-              type="submit"
-              class="btn-add-to-cart pf-add-to-cart-btn"
-              {% unless product.available %}
-                disabled
-              {% endunless %}
-            >
-              <span class="pf-qv-price-display">
-                {{- product.price | money_without_trailing_zeros | replace: 'Rs. ', '₹' | replace: 'Rs.', '₹' -}}
-              </span>
-              | {% if product.available %}Add to Cart{% else %}Sold Out{% endif %}
-            </button>
-          </div>
-        </form>
+      {% form 'product', product %}
+        <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+        <div class="pf-qv-addtocart">
+          <select name="quantity" class="pf-qv-packs-select">
+            <option value="1">1 Pack</option>
+            <option value="2">2 Packs</option>
+            <option value="3">3 Packs</option>
+            <option value="4">4 Packs</option>
+            <option value="5">5 Packs</option>
+          </select>
+          <button
+            type="submit"
+            class="btn-add-to-cart pf-add-to-cart-btn"
+            {% unless product.available %}
+              disabled
+            {% endunless %}
+          >
+            <span class="pf-qv-price-display">
+              {{- product.price | money_without_trailing_zeros | replace: 'Rs. ', '₹' | replace: 'Rs.', '₹' -}}
+            </span>
+            | {% if product.available %}Add to Cart{% else %}Sold Out{% endif %}
+          </button>
+        </div>
+      {% endform %}
     </div>
   </div>
 </div>
-
-<script src="{{ 'product-form.js' | asset_url }}" type="module" defer="defer"></script>
 
 <style>
   /* ==========================================================================
