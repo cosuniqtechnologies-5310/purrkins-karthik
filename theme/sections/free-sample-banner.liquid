@@ -25,7 +25,6 @@
                     </p>
                 </div>
                 <div class="fs-form-container">
-                    {% if section.settings.api_endpoint != blank %}
                         <!-- Custom Endpoint Form -->
                         <form id="fs-raw-form-{{ section.id }}" class="fs-raw-form fs-ajax-form" data-endpoint="{{ section.settings.api_endpoint }}">
                             <div class="fs-form-success" style="display: none;">Claimed! We will reach out soon.</div>
@@ -41,34 +40,6 @@
                                 </div>
                             </div>
                         </form>
-                    {% else %}
-                        <!-- Native Shopify Form -->
-                        {% form 'customer', id: 'fs-contact-form', class: 'fs-raw-form fs-ajax-form' %}
-                            <div class="fs-form-success" style="display: none;">Claimed! We will reach out soon.</div>
-                            <div class="fs-fields">
-                                <input type="hidden" name="contact[tags]" value="free-sample-claim">
-                                {% assign random_id = "now" | date: "%N" %}
-                                <input type="hidden" name="contact[email]" value="lead-{{ random_id }}@noemail.purrkins.com">
-                                <input type="hidden" name="contact[last_name]" value=".">
-                                <input type="hidden" name="contact[accepts_sms]" value="true">
-                                <input type="hidden" name="customer[first_name]" value="">
-                                <input type="hidden" name="customer[last_name]" value=".">
-                                <input type="hidden" name="customer[phone]" value="">
-                                <input type="hidden" name="contact[note][Phone]" value="">
-                                <input type="hidden" name="customer[addresses][0][country]" value="India">
-                                <input type="hidden" name="address[country]" value="India">
-                                <div class="fs-form-group">
-                                    <input type="text" name="contact[first_name]" placeholder="Full Name" required />
-                                </div>
-                                <div class="fs-form-group">
-                                    <input type="tel" name="contact[phone]" placeholder="Mobile Number" required oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
-                                </div>
-                                <div class="fs-form-group fs-form-submit">
-                                    <button type="submit" class="fs-submit-btn">Claim Free Sample</button>
-                                </div>
-                            </div>
-                        {% endform %}
-                    {% endif %}
                 </div>
             </div>
 
@@ -444,16 +415,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Determine Endpoint
-            // Defaults to App Proxy path unless overridden by section setting
-            var endpointUrl = form.getAttribute('data-endpoint');
-            if (!endpointUrl || endpointUrl.trim() === '') {
-                endpointUrl = '/apps/free-sample/customer';
-            }
+            var endpointUrl = form.getAttribute('data-endpoint') || '/apps/purrkins/customer';
 
-            // Create JSON payload for the backend
             var payload = {
-                name: fName.trim(),
-                phone: finalPhone
+                name: fName,
+                phone: finalPhone,
+                tag: 'free-sample-claim'
             };
 
             fetch(endpointUrl, {
@@ -464,30 +431,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify(payload)
             })
-            .then(response => {
+            .then(async response => {
+                const data = await response.json().catch(() => ({}));
                 if (!response.ok) {
-                    throw new Error('API request failed');
+                    throw new Error(data.message || 'API request failed with status ' + response.status);
                 }
-                return response.json();
+                return data;
             })
             .then(data => {
-                if (data.success === false) {
-                    throw new Error(data.message || 'Unable to save customer');
-                }
+                if (data.success === false) throw new Error(data.message || 'Unable to save customer');
                 
-                // Show Success Message (keep existing UI)
+                // Show Success Message
                 var fields = form.querySelector('.fs-fields');
                 var successMsg = form.querySelector('.fs-form-success');
                 if (fields) fields.style.display = 'none';
                 if (successMsg) successMsg.style.display = 'flex';
                 
                 // Update Progress Bar
-                var currentLeftStr = countHighlight.innerText;
+                var currentLeftStr = countHighlight ? countHighlight.innerText : '0';
                 var currentLeft = parseInt(currentLeftStr, 10) || 0;
                 
                 if (currentLeft > 0) {
                     var newLeft = currentLeft - 1;
-                    countHighlight.innerText = newLeft;
+                    if (countHighlight) countHighlight.innerText = newLeft;
                     if (badgeText) badgeText.innerText = newLeft + ' left';
                     
                     var newClaimed = totalSamples - newLeft;
@@ -505,7 +471,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 8000);
             })
             .catch(error => {
-                console.error("Fetch error:", error);
+                console.error("Form error:", error.message);
                 btn.innerHTML = 'Claim Free Sample';
                 btn.disabled = false;
                 alert('Something went wrong: ' + error.message);
