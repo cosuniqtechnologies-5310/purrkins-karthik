@@ -200,10 +200,10 @@
               disabled
             {% endunless %}
           >
-            <span class="pf-qv-price-display">
+            <span class="pf-qv-price-display" data-base-price="{{ product.price }}">
               {{- product.price | money_without_trailing_zeros | replace: 'Rs. ', '₹' | replace: 'Rs.', '₹' -}}
             </span>
-            | {% if product.available %}Add to Cart{% else %}Sold Out{% endif %}
+            | <span class="pf-qv-add-text">{% if product.available %}Add to Cart{% else %}Sold Out{% endif %}</span>
           </button>
         </div>
       {% endform %}

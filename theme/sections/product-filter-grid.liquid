@@ -220,6 +220,88 @@
 
     // Event delegation for the Bowl Modal inside Quick View
     if (qvContainer) {
+      // Intercept Quick View Add to Cart form submissions
+      qvContainer.addEventListener('submit', function (e) {
+        const form = e.target;
+        if (form && form.action && form.action.includes('/cart/add')) {
+          e.preventDefault();
+          
+          const btn = form.querySelector('.btn-add-to-cart');
+          let originalText = 'Add to Cart';
+          if (btn) {
+            originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Adding...';
+          }
+          
+          const formData = new FormData(form);
+          
+          let resolvePromise, rejectPromise;
+          const promise = new Promise((resolve, reject) => {
+            resolvePromise = resolve;
+            rejectPromise = reject;
+          });
+          
+          const eventName = (window.StandardEvents && window.StandardEvents.cartLinesUpdate) ? window.StandardEvents.cartLinesUpdate : 'shopify:cart:lines-update';
+          const updateEvent = new CustomEvent(eventName, { bubbles: true });
+          updateEvent.action = 'add';
+          updateEvent.promise = promise;
+          
+          document.dispatchEvent(updateEvent);
+
+          fetch(window.Shopify.routes.root + 'cart/add.js', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          })
+          .then(res => res.json())
+          .then(data => {
+            resolvePromise({ detail: { items: [data] } });
+            
+            // Try to explicitly open the cart drawer if theme logic didn't catch it
+            setTimeout(() => {
+              const drawer = document.querySelector('theme-drawer#cart-drawer') || document.querySelector('theme-drawer');
+              if (drawer && typeof drawer.open === 'function') {
+                drawer.open();
+              }
+            }, 100);
+          })
+          .catch(err => {
+            console.error(err);
+            rejectPromise(err);
+          })
+          .finally(() => {
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = originalText;
+            }
+          });
+        }
+      });
+
+      // Listen for quantity changes to update price
+      qvContainer.addEventListener('change', function(e) {
+        const nativeSelect = e.target;
+        if (nativeSelect.name === 'quantity') {
+          const qty = parseInt(nativeSelect.value, 10);
+          const form = nativeSelect.closest('form');
+          if (form) {
+            const priceDisplay = form.querySelector('.pf-qv-price-display');
+            if (priceDisplay) {
+              const basePrice = parseInt(priceDisplay.getAttribute('data-base-price'), 10);
+              if (!isNaN(basePrice) && !isNaN(qty)) {
+                const newPrice = basePrice * qty;
+                // Shopify price is in cents/paise
+                const formattedPrice = '₹' + (newPrice / 100).toString();
+                priceDisplay.innerText = formattedPrice;
+              }
+            }
+          }
+        }
+      });
+
       qvContainer.addEventListener('click', function (e) {
         // Handle "What's in the bowl" click
         const btnBowl = e.target.closest('.pf-btn-bowl');
