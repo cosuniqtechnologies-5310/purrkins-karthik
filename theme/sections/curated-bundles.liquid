@@ -218,7 +218,25 @@ function initCBSwiper_{{ section.id | replace: '-', '_' }}() {
                     addBtn.innerHTML = originalText;
                     addBtn.disabled = false;
                     addBtn.style.opacity = '1';
+                    
+                    const eventName = (window.StandardEvents && window.StandardEvents.cartLinesUpdate) ? window.StandardEvents.cartLinesUpdate : 'shopify:cart:lines-update';
+                    const updateEvent = new CustomEvent(eventName, { bubbles: true });
+                    updateEvent.action = 'add';
+                    
+                    let resolvePromise;
+                    const promise = new Promise((resolve) => { resolvePromise = resolve; });
+                    updateEvent.promise = promise;
+                    document.dispatchEvent(updateEvent);
+                    resolvePromise({ detail: { items: data.items || [data] } });
+
                     document.documentElement.dispatchEvent(new CustomEvent('cart:build', {bubbles: true}));
+                    
+                    setTimeout(() => {
+                        const drawer = document.querySelector('theme-drawer#cart-drawer') || document.querySelector('theme-drawer');
+                        if (drawer && typeof drawer.open === 'function') {
+                            drawer.open();
+                        }
+                    }, 100);
                 })
                 .catch(err => {
                     console.error(err);
