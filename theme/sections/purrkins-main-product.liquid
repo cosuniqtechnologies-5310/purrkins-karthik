@@ -220,6 +220,8 @@
                         </div>
                     </label>
 
+                    <div class="subscriptions_app_embed_block"></div>
+
                     <div class="pf-qv-addtocart" id="pf-single-addtocart-container" data-product-id="{{ product.id }}" data-reg-price="{{ price }}" data-sub-price="{{ discount_price }}">
                         
                         <select name="id" class="pf-qv-packs-select" style="display:none;">
@@ -386,6 +388,9 @@
 }
 .pf-lightbox-prev {
     left: 0;
+}
+.subscriptions_app_embed_block {
+    display: none !important;
 }
 .pf-main-image-container, .pf-thumb-item, .pf-view-more-btn {
     cursor: pointer;
@@ -585,6 +590,21 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isRadio && selectedRadio) {
                 purchaseBox.querySelectorAll('.pf-purchase-option').forEach(el => el.classList.remove('active'));
                 selectedRadio.closest('.pf-purchase-option').classList.add('active');
+                
+                // Sync with subscription app widget manually when clicked
+                const appContainer = document.querySelector('.subscriptions_app_embed_block');
+                if (appContainer) {
+                    if (plan === 'subscription') {
+                        const subGroup = appContainer.querySelector('input[data-radio-type="selling_plan_group"]');
+                        if (subGroup && !subGroup.checked) subGroup.click();
+                        
+                        const subPlan = appContainer.querySelector('input[data-radio-type="selling_plan"]');
+                        if (subPlan && !subPlan.checked) subPlan.click();
+                    } else {
+                        const oneTime = appContainer.querySelector('input[data-radio-type="one_time_purchase"]');
+                        if (oneTime && !oneTime.checked) oneTime.click();
+                    }
+                }
             }
         }
     });
@@ -601,6 +621,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 clickable: true,
             },
         });
+    }
+
+    // Sync UI to subscription app when app loads
+    const syncSubscriptionWidget = () => {
+        const appContainer = document.querySelector('.subscriptions_app_embed_block');
+        if (!appContainer || !appContainer.innerHTML.trim()) return;
+        
+        const selectedRadio = document.querySelector('input[name="purchase_type"]:checked');
+        const plan = selectedRadio ? selectedRadio.value : 'subscription';
+        
+        if (plan === 'subscription') {
+            const subGroup = appContainer.querySelector('input[data-radio-type="selling_plan_group"]');
+            if (subGroup && !subGroup.checked) subGroup.click();
+            
+            const subPlan = appContainer.querySelector('input[data-radio-type="selling_plan"]');
+            if (subPlan && !subPlan.checked) subPlan.click();
+        } else {
+            const oneTime = appContainer.querySelector('input[data-radio-type="one_time_purchase"]');
+            if (oneTime && !oneTime.checked) oneTime.click();
+        }
+    };
+    
+    const subContainer = document.querySelector('.subscriptions_app_embed_block');
+    if (subContainer) {
+        const observer = new MutationObserver(syncSubscriptionWidget);
+        observer.observe(subContainer, { childList: true, subtree: true });
     }
 
     // Custom Select Logic
@@ -635,6 +681,71 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!customSelect.contains(e.target)) {
                 customSelect.classList.remove('open');
             }
+        });
+    }
+
+    // Add to cart AJAX Intercept
+    const productForm = document.querySelector('.pf-purchase-options form');
+    if (productForm) {
+        productForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = productForm.querySelector('.pf-add-to-cart-btn');
+            let originalText = 'Add to Cart';
+            
+            if (btn) {
+                originalText = btn.innerHTML;
+                btn.innerHTML = 'Adding...';
+                btn.disabled = true;
+            }
+
+            const formData = new FormData(productForm);
+            
+            let resolvePromise, rejectPromise;
+            const promise = new Promise((resolve, reject) => { 
+                resolvePromise = resolve; 
+                rejectPromise = reject;
+            });
+            
+            const eventName = (window.StandardEvents && window.StandardEvents.cartLinesUpdate) ? window.StandardEvents.cartLinesUpdate : 'shopify:cart:lines-update';
+            const updateEvent = new CustomEvent(eventName, { bubbles: true });
+            updateEvent.action = 'add';
+            updateEvent.promise = promise;
+            document.dispatchEvent(updateEvent);
+
+            fetch((window.Shopify && window.Shopify.routes) ? window.Shopify.routes.root + 'cart/add.js' : '/cart/add.js', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                resolvePromise({ detail: { items: data.items || [data] } });
+                
+                if (btn) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+                
+                setTimeout(() => {
+                    const drawer = document.querySelector('theme-drawer#cart-drawer') || document.querySelector('theme-drawer');
+                    if (drawer && typeof drawer.open === 'function') {
+                        drawer.open();
+                    } else if (drawer && typeof drawer.show === 'function') {
+                        drawer.show();
+                    }
+                }, 100);
+            })
+            .catch(err => {
+                console.error(err);
+                rejectPromise(err);
+                if (btn) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            });
         });
     }
 });
