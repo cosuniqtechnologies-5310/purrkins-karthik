@@ -50,6 +50,74 @@
     </div>
 </div>
 
+<script>
+  if (!window.pfCollectionCardAjaxInitialized) {
+    window.pfCollectionCardAjaxInitialized = true;
+    document.addEventListener('submit', function(e) {
+      if (e.target && e.target.matches('.pf-add-to-cart-form')) {
+        e.preventDefault();
+        const form = e.target;
+        const btn = form.querySelector('.pf-add-to-cart-btn');
+        let originalText = 'Add to Cart';
+        
+        if (btn) {
+          originalText = btn.innerHTML;
+          btn.innerHTML = 'Adding...';
+          btn.disabled = true;
+        }
+
+        const formData = new FormData(form);
+        
+        let resolvePromise, rejectPromise;
+        const promise = new Promise((resolve, reject) => { 
+          resolvePromise = resolve; 
+          rejectPromise = reject;
+        });
+        
+        const eventName = (window.StandardEvents && window.StandardEvents.cartLinesUpdate) ? window.StandardEvents.cartLinesUpdate : 'shopify:cart:lines-update';
+        const updateEvent = new CustomEvent(eventName, { bubbles: true });
+        updateEvent.action = 'add';
+        updateEvent.promise = promise;
+        document.dispatchEvent(updateEvent);
+
+        fetch((window.Shopify && window.Shopify.routes) ? window.Shopify.routes.root + 'cart/add.js' : '/cart/add.js', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          resolvePromise({ detail: { items: data.items || [data] } });
+          
+          if (btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          }
+          
+          setTimeout(() => {
+            const drawer = document.querySelector('theme-drawer#cart-drawer') || document.querySelector('theme-drawer');
+            if (drawer && typeof drawer.open === 'function') {
+              drawer.open();
+            } else if (drawer && typeof drawer.show === 'function') {
+              drawer.show();
+            }
+          }, 100);
+        })
+        .catch(err => {
+          console.error(err);
+          rejectPromise(err);
+          if (btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          }
+        });
+      }
+    });
+  }
+</script>
+
 <style>
 /* Scoped styles for collection card */
 .pf-collection-card-wrap {
