@@ -1,6 +1,200 @@
-<div class="purrkins-container purrkins-section-block" style="padding: 60px 0;">
+<div class="purrkins-judgeme-section purrkins-container purrkins-section-block" style="padding: 60px 0;">
 <!-- Start of Judge.me code -->{% assign has_legacy = false %}{% if product.metafields.judgeme.widget.size > 20 %}{% assign has_legacy = true %}{% endif %}<div style='clear:both'></div><div id='judgeme_product_reviews' class='jdgm-widget jdgm-review-widget' data-product-title='{{ product.title | escape }}' data-id='{{ product.id }}' data-product-id='{{ product.id }}' data-widget='review' data-auto-install='false' data-shop-reviews-count='{{ shop.metafields.judgeme.shop_reviews_count | default: 0 | escape }}' data-entry-point='review_widget.js' data-entry-key='review-widget/main.js'>{% if has_legacy %}<div class='jdgm-legacy-widget-content' style='display: none;'>{{ product.metafields.judgeme.widget }}</div>{% endif %}</div>{% if product.metafields.judgeme.review_widget_data %}<script>jdgm.data ||= {}; jdgm.data.reviewWidget ||= {}; jdgm.data.reviewWidget[{{ product.id }}] = {{ product.metafields.judgeme.review_widget_data }}</script>{% endif %}<!-- End of Judge.me code -->
 </div>
+
+<style>
+/* 
+  =========================================
+  PURRKINS EXACT DESIGN FOR JUDGE.ME WIDGET
+  ========================================= 
+*/
+
+/* Hide default Judge.me header elements that clutter the design */
+.purrkins-judgeme-section .jdgm-rev-widg__header {
+    border: none !important;
+    margin-bottom: 40px !important;
+}
+.purrkins-judgeme-section .jdgm-rev-widg__title {
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    color: #21252A !important;
+    text-align: left !important;
+    margin-bottom: 40px !important;
+    font-family: var(--purrkins-heading-font) !important;
+}
+
+/* Top Summary Box */
+.purrkins-judgeme-section .jdgm-rev-widg__summary {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    margin-bottom: 40px !important;
+    border: none !important;
+    gap: 60px !important;
+}
+
+/* Overall Rating */
+.purrkins-judgeme-section .jdgm-rev-widg__summary-stars {
+    text-align: left !important;
+}
+.purrkins-judgeme-section .jdgm-rev-widg__summary-average {
+    font-size: 48px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    color: #21252A !important;
+    font-family: var(--purrkins-heading-font) !important;
+    display: block !important;
+    margin-bottom: 4px !important;
+}
+.purrkins-judgeme-section .jdgm-rev-widg__summary-text {
+    display: none !important; /* Hide "Based on X reviews" */
+}
+
+/* Write Review Button (Yellow Pill) */
+.purrkins-judgeme-section .jdgm-write-rev-link {
+    background-color: #FFE330 !important;
+    color: #21252A !important;
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+    padding: 12px 24px !important;
+    text-transform: none !important;
+    border: none !important;
+    margin-left: auto !important; /* Push to right */
+    box-shadow: none !important;
+}
+
+/* Reviews List Area */
+.purrkins-judgeme-section .jdgm-rev-widg__reviews {
+    border-top: 1px solid #E0E0E3 !important;
+    padding-top: 20px !important;
+}
+
+/* 
+  INDIVIDUAL REVIEW GRID LAYOUT 
+  Using display: contents to flatten Judge.me's nested DOM 
+  so we can place children precisely in our grid.
+*/
+.purrkins-judgeme-section .jdgm-rev {
+    display: grid !important;
+    grid-template-columns: 225px 1fr !important;
+    grid-template-rows: auto auto auto auto !important;
+    column-gap: 60px !important;
+    row-gap: 8px !important;
+    padding: 30px 0 !important;
+    border-bottom: 1px solid #F0F0F1 !important;
+    border-top: none !important;
+}
+
+.purrkins-judgeme-section .jdgm-rev__header,
+.purrkins-judgeme-section .jdgm-rev__content {
+    display: contents !important;
+}
+
+/* Hide avatar */
+.purrkins-judgeme-section .jdgm-rev__icon {
+    display: none !important;
+}
+
+/* Left Column Items */
+.purrkins-judgeme-section .jdgm-rev__author-wrapper,
+.purrkins-judgeme-section .jdgm-rev__author {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #21252A !important;
+    margin: 0 !important;
+    align-self: start !important;
+}
+.purrkins-judgeme-section .jdgm-rev__buyer-badge {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    font-size: 12px !important;
+    color: #595961 !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 0 0 8px !important;
+    align-self: start !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+.purrkins-judgeme-section .jdgm-rev__timestamp {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    font-size: 14px !important;
+    color: #595961 !important;
+    margin: 0 !important;
+    align-self: start !important;
+}
+
+/* Right Column Items */
+.purrkins-judgeme-section .jdgm-rev__rating {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    margin: 0 !important;
+    align-self: start !important;
+}
+.purrkins-judgeme-section .jdgm-rev__title {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    font-family: var(--purrkins-heading-font) !important;
+    color: #21252A !important;
+    margin: 4px 0 0 0 !important;
+    align-self: start !important;
+}
+.purrkins-judgeme-section .jdgm-rev__body {
+    grid-column: 2 !important;
+    grid-row: 3 !important;
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+    color: #595961 !important;
+    margin: 0 !important;
+    align-self: start !important;
+}
+.purrkins-judgeme-section .jdgm-rev__pics {
+    grid-column: 2 !important;
+    grid-row: 4 !important;
+}
+
+/* Custom Yellow Stars Everywhere */
+.purrkins-judgeme-section .jdgm-star {
+    color: #FFE330 !important;
+}
+
+/* Mobile Responsive */
+@media(max-width: 991px) {
+    .purrkins-judgeme-section .jdgm-rev {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: auto auto auto auto auto !important;
+        column-gap: 0 !important;
+        row-gap: 12px !important;
+    }
+    
+    .purrkins-judgeme-section .jdgm-rev__rating { grid-column: 1 !important; grid-row: 1 !important; }
+    .purrkins-judgeme-section .jdgm-rev__title { grid-column: 1 !important; grid-row: 2 !important; }
+    .purrkins-judgeme-section .jdgm-rev__body { grid-column: 1 !important; grid-row: 3 !important; }
+    .purrkins-judgeme-section .jdgm-rev__pics { grid-column: 1 !important; grid-row: 4 !important; }
+    
+    .purrkins-judgeme-section .jdgm-rev__author-wrapper,
+    .purrkins-judgeme-section .jdgm-rev__author { grid-column: 1 !important; grid-row: 5 !important; }
+    .purrkins-judgeme-section .jdgm-rev__timestamp { grid-column: 1 !important; grid-row: 6 !important; }
+
+    .purrkins-judgeme-section .jdgm-rev-widg__summary {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 24px !important;
+    }
+    .purrkins-judgeme-section .jdgm-write-rev-link {
+        margin-left: 0 !important;
+        width: 100% !important;
+        text-align: center !important;
+    }
+}
+</style>
 
 {% schema %}
 {
