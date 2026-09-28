@@ -172,7 +172,9 @@ function initCBSwiper_{{ section.id | replace: '-', '_' }}() {
         },
         autoHeight: true
     });
+}
 
+function initCBAddToCart_{{ section.id | replace: '-', '_' }}() {
     const cbBlock = document.getElementById('cb-{{ section.id }}');
     if (cbBlock && !cbBlock.dataset.listenerAdded) {
         cbBlock.dataset.listenerAdded = 'true';
@@ -250,6 +252,7 @@ function initCBSwiper_{{ section.id | replace: '-', '_' }}() {
     }
 }
 
+
 function tryInitCBSwiper_{{ section.id | replace: '-', '_' }}() {
     if (typeof Swiper !== 'undefined') {
         initCBSwiper_{{ section.id | replace: '-', '_' }}();
@@ -258,20 +261,25 @@ function tryInitCBSwiper_{{ section.id | replace: '-', '_' }}() {
     }
 }
 
-{% if use_slider %}
-document.addEventListener("DOMContentLoaded", tryInitCBSwiper_{{ section.id | replace: '-', '_' }});
-{% endif %}
+document.addEventListener("DOMContentLoaded", function() {
+    {% if use_slider %}
+    tryInitCBSwiper_{{ section.id | replace: '-', '_' }}();
+    {% endif %}
+    initCBAddToCart_{{ section.id | replace: '-', '_' }}();
+});
 
 if (window.Shopify && window.Shopify.designMode) {
     {% if use_slider %}
     tryInitCBSwiper_{{ section.id | replace: '-', '_' }}();
     {% endif %}
+    initCBAddToCart_{{ section.id | replace: '-', '_' }}();
     
     document.addEventListener('shopify:section:load', function(event) {
         if (event.detail.sectionId === '{{ section.id }}') {
             {% if use_slider %}
             tryInitCBSwiper_{{ section.id | replace: '-', '_' }}();
             {% endif %}
+            initCBAddToCart_{{ section.id | replace: '-', '_' }}();
         }
     });
 }
