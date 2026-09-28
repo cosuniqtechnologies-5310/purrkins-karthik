@@ -36,93 +36,158 @@
                 <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </button>
-        
+
         <h2 class="pf-ub-modal-title">{{ section.settings.modal_title }}</h2>
-        
+
         <div class="pf-ub-modal-form-wrapper">
-            {% form 'contact', id: 'UnlockBenefitForm' %}
-              {% if form.posted_successfully? %}
-                <div class="form-success" style="color: #25D366; text-align: center; margin-bottom: 20px; font-weight: bold;">
-                  Thank you! We've received your request.
+            <!-- Plain HTML form — submits JSON to app proxy, no page reload -->
+            <form id="ub-claim-form-{{ section.id }}" class="ub-ajax-form">
+                <div class="ub-form-success" id="ub-success-{{ section.id }}" style="display:none; color:#25D366; text-align:center; margin-bottom:20px; font-weight:bold;">
+                    Thank you! We've received your request.
                 </div>
-              {% endif %}
-              
-              {{ form.errors | default_errors }}
-              
-              <div class="ub-placeholder-form">
-                  <div class="ub-form-row">
-                      <div class="ub-form-col">
-                          <label for="ContactFormName">Your Name *</label>
-                          <input type="text" id="ContactFormName" name="contact[name]" placeholder="Full Name" required>
-                      </div>
-                      <div class="ub-form-col">
-                          <label for="ContactFormPhone">Mobile Number *</label>
-                          <input type="tel" id="ContactFormPhone" name="contact[phone]" placeholder="+91" required>
-                      </div>
-                  </div>
-                  <div class="ub-form-row">
-                      <div class="ub-form-col" style="flex:1;">
-                          <label for="ContactFormEmail">Your Email *</label>
-                          <input type="email" id="ContactFormEmail" name="contact[email]" placeholder="yourname@example.com" required>
-                      </div>
-                  </div>
-                  
-                  <input type="hidden" name="contact[subject]" value="Unlock Benefit Claim">
-                  <input type="hidden" name="contact[product]" value="{{ product.title | escape }}">
-                  
-                  <div class="ub-form-action">
-                      <button type="submit" class="pf-ub-btn purrkins-btn-primary">Claim</button>
-                  </div>
-              </div>
-            {% endform %}
+                <div class="ub-form-error" id="ub-error-{{ section.id }}" style="display:none; color:#D32F2F; text-align:center; margin-bottom:16px; font-size:14px;"></div>
+
+                <div class="ub-placeholder-form" id="ub-fields-{{ section.id }}">
+                    <div class="ub-form-row">
+                        <div class="ub-form-col">
+                            <label for="ubName-{{ section.id }}">Your Name *</label>
+                            <input type="text" id="ubName-{{ section.id }}" name="ub_name" placeholder="Full Name" required>
+                        </div>
+                        <div class="ub-form-col">
+                            <label for="ubPhone-{{ section.id }}">Mobile Number *</label>
+                            <input type="tel" id="ubPhone-{{ section.id }}" name="ub_phone" placeholder="10-digit number" required
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+                    </div>
+                    <div class="ub-form-row">
+                        <div class="ub-form-col" style="flex:1;">
+                            <label for="ubEmail-{{ section.id }}">Your Email *</label>
+                            <input type="email" id="ubEmail-{{ section.id }}" name="ub_email" placeholder="yourname@example.com" required>
+                        </div>
+                    </div>
+
+                    <div class="ub-form-action">
+                        <button type="submit" class="pf-ub-btn purrkins-btn-primary" id="ub-submit-{{ section.id }}">Claim</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Video Lazy Loading
-    var lazyVideos = [].slice.call(document.querySelectorAll(".pf-ub-section video"));
-    
-    if ("IntersectionObserver" in window) {
-        var lazyVideoObserver = new IntersectionObserver(function(entries, observer) {
-            entries.forEach(function(video) {
-                if (video.isIntersecting) {
-                    video.target.play();
+    var lazyVideos = [].slice.call(document.querySelectorAll('.pf-ub-section video'));
+    if ('IntersectionObserver' in window) {
+        var lazyVideoObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.play();
                 } else {
-                    video.target.pause();
+                    entry.target.pause();
                 }
             });
         });
-        
-        lazyVideos.forEach(function(lazyVideo) {
-            lazyVideoObserver.observe(lazyVideo);
-        });
+        lazyVideos.forEach(function (v) { lazyVideoObserver.observe(v); });
     }
 
     // Modal Logic
-    const openBtn = document.querySelector('.js-ub-open-modal');
-    const overlay = document.getElementById('ubModalOverlay-{{ section.id }}');
-    const closeBtn = document.getElementById('ubModalClose-{{ section.id }}');
+    var openBtn = document.querySelector('.js-ub-open-modal');
+    var overlay = document.getElementById('ubModalOverlay-{{ section.id }}');
+    var closeBtn = document.getElementById('ubModalClose-{{ section.id }}');
 
     if (openBtn && overlay && closeBtn) {
-        openBtn.addEventListener('click', function(e) {
+        openBtn.addEventListener('click', function (e) {
             e.preventDefault();
             overlay.classList.add('is-active');
             document.body.style.overflow = 'hidden';
         });
-
-        closeBtn.addEventListener('click', function() {
+        closeBtn.addEventListener('click', function () {
             overlay.classList.remove('is-active');
             document.body.style.overflow = '';
         });
-
-        overlay.addEventListener('click', function(e) {
+        overlay.addEventListener('click', function (e) {
             if (e.target === overlay) {
                 overlay.classList.remove('is-active');
                 document.body.style.overflow = '';
             }
         });
+    }
+
+    // Form Submit → App Proxy API
+    var ubForm = document.getElementById('ub-claim-form-{{ section.id }}');
+    if (ubForm) {
+        ubForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            var submitBtn = document.getElementById('ub-submit-{{ section.id }}');
+            var fieldsEl = document.getElementById('ub-fields-{{ section.id }}');
+            var successEl = document.getElementById('ub-success-{{ section.id }}');
+            var errorEl = document.getElementById('ub-error-{{ section.id }}');
+
+            if (submitBtn.disabled) return false;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            errorEl.style.display = 'none';
+
+            try {
+                var name = ubForm.querySelector('[name="ub_name"]').value.trim();
+                var rawPhone = ubForm.querySelector('[name="ub_phone"]').value.trim();
+                var email = ubForm.querySelector('[name="ub_email"]').value.trim();
+
+                if (!name || !rawPhone || !email) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Claim';
+                    return false;
+                }
+
+                // Format phone with +91 country code
+                var phone = '+91' + rawPhone.replace(/^\+91/, '');
+
+                var payload = {
+                    name: name,
+                    phone: phone,
+                    email: email,
+                    tag: 'unlock-benefit',
+                    accepts_marketing: true
+                };
+
+                console.log('[UnlockBenefit] Sending:', JSON.stringify(payload));
+
+                fetch('/apps/purrkins/unlock-benefit/customer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(function (response) {
+                    return response.json().catch(function () { return {}; });
+                })
+                .then(function (data) {
+                    console.log('[UnlockBenefit] Response:', data);
+                    // Show success, hide form fields
+                    if (fieldsEl) fieldsEl.style.display = 'none';
+                    if (successEl) successEl.style.display = 'block';
+                    submitBtn.textContent = 'Claim';
+                    submitBtn.disabled = false;
+                })
+                .catch(function (err) {
+                    console.error('[UnlockBenefit] Error:', err);
+                    errorEl.textContent = 'Something went wrong. Please try again.';
+                    errorEl.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Claim';
+                });
+
+            } catch (err) {
+                console.error('[UnlockBenefit] Submit error:', err);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Claim';
+            }
+
+            return false;
+        }, false);
     }
 });
 </script>

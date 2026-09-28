@@ -28,48 +28,146 @@
 
             <div class="contact-us-form-col">
                 <div class="contact-us-form-card">
-                    {% form 'contact', class: 'wpcf7-form' %}
-                        {% if form.posted_successfully? %}
-                            <p style="color: #5fa99e; font-weight: bold; text-align: center;">Thanks for contacting us! We'll get back to you soon.</p>
-                        {% endif %}
-                        {{ form.errors | default_errors }}
-                        
-                        <div class="form-row-2">
-                            <div>
-                                <label for="ContactFormName">Your Name *</label>
-                                <input type="text" id="ContactFormName" name="contact[name]" value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}" placeholder="Full Name" required>
+                    <!-- Plain HTML form — submits JSON to app proxy, no page reload -->
+                    <form id="cu-form-{{ section.id }}" class="wpcf7-form" novalidate>
+                        <div class="cu-form-success" id="cu-success-{{ section.id }}" style="display:none; color:#5fa99e; font-weight:bold; text-align:center; padding: 20px 0;">
+                            Thanks for contacting us! We'll get back to you soon.
+                        </div>
+                        <div class="cu-form-error" id="cu-error-{{ section.id }}" style="display:none; color:#D32F2F; text-align:center; margin-bottom:16px; font-size:14px;"></div>
+
+                        <div id="cu-fields-{{ section.id }}">
+                            <div class="form-row-2">
+                                <div>
+                                    <label for="cuName-{{ section.id }}">Your Name *</label>
+                                    <input type="text" id="cuName-{{ section.id }}" name="cu_name"
+                                        value="{% if customer %}{{ customer.name }}{% endif %}"
+                                        placeholder="Full Name" required>
+                                </div>
+                                <div>
+                                    <label for="cuPhone-{{ section.id }}">Mobile Number *</label>
+                                    <input type="tel" id="cuPhone-{{ section.id }}" name="cu_phone"
+                                        value="{% if customer %}{{ customer.phone }}{% endif %}"
+                                        placeholder="+91 |" required
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                                </div>
                             </div>
+
                             <div>
-                                <label for="ContactFormPhone">Mobile Number *</label>
-                                <input type="tel" id="ContactFormPhone" name="contact[phone]" value="{% if form.phone %}{{ form.phone }}{% elsif customer %}{{ customer.phone }}{% endif %}" placeholder="+91 |" required>
+                                <label for="cuEmail-{{ section.id }}">Your Email *</label>
+                                <input type="email" id="cuEmail-{{ section.id }}" name="cu_email"
+                                    value="{% if customer %}{{ customer.email }}{% endif %}"
+                                    placeholder="yourname@example.com" autocorrect="off" autocapitalize="off" required>
+                            </div>
+
+                            <div>
+                                <label for="cuSubject-{{ section.id }}">What is this about? *</label>
+                                <select id="cuSubject-{{ section.id }}" name="cu_topic" required>
+                                    <option value="" disabled selected>Select an option</option>
+                                    <option value="Kitten Related">Kitten Related</option>
+                                    <option value="Adult Cat">Adult Cat</option>
+                                    <option value="Order Issue">Order Issue</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="cuMessage-{{ section.id }}">Message *</label>
+                                <textarea rows="4" id="cuMessage-{{ section.id }}" name="cu_message"
+                                    placeholder="My kitten is always sleepy..." required></textarea>
+                            </div>
+
+                            <div class="submit-wrapper">
+                                <button type="submit" class="wpcf7-submit" id="cu-submit-{{ section.id }}">Send Message</button>
                             </div>
                         </div>
-                        
-                        <div>
-                            <label for="ContactFormEmail">Your Email *</label>
-                            <input type="email" id="ContactFormEmail" name="contact[email]" autocorrect="off" autocapitalize="off" value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}" placeholder="yourname@example.com" required>
-                        </div>
-                        
-                        <div>
-                            <label for="ContactFormSubject">What is this about? *</label>
-                            <select id="ContactFormSubject" name="contact[Topic]" required>
-                                <option value="" disabled selected>Select an option</option>
-                                <option value="Kitten Related">Kitten Related</option>
-                                <option value="Adult Cat">Adult Cat</option>
-                                <option value="Order Issue">Order Issue</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label for="ContactFormMessage">Message *</label>
-                            <textarea rows="4" id="ContactFormMessage" name="contact[body]" placeholder="My kitten is always sleepy..." required>{% if form.body %}{{ form.body }}{% endif %}</textarea>
-                        </div>
-                        
-                        <div class="submit-wrapper">
-                            <button type="submit" class="wpcf7-submit">Send Message</button>
-                        </div>
-                    {% endform %}
+                    </form>
+
+                    <script>
+                    (function() {
+                        var form = document.getElementById('cu-form-{{ section.id }}');
+                        if (!form) return;
+
+                        form.addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            var submitBtn = document.getElementById('cu-submit-{{ section.id }}');
+                            var fieldsEl = document.getElementById('cu-fields-{{ section.id }}');
+                            var successEl = document.getElementById('cu-success-{{ section.id }}');
+                            var errorEl = document.getElementById('cu-error-{{ section.id }}');
+
+                            if (submitBtn.disabled) return false;
+                            submitBtn.disabled = true;
+                            submitBtn.textContent = 'Sending...';
+                            errorEl.style.display = 'none';
+
+                            try {
+                                var name = form.querySelector('[name="cu_name"]').value.trim();
+                                var rawPhone = form.querySelector('[name="cu_phone"]').value.trim();
+                                var email = form.querySelector('[name="cu_email"]').value.trim();
+                                var topic = form.querySelector('[name="cu_topic"]').value;
+                                var message = form.querySelector('[name="cu_message"]').value.trim();
+
+                                if (!name || !rawPhone || !email || !topic || !message) {
+                                    errorEl.textContent = 'Please fill in all required fields.';
+                                    errorEl.style.display = 'block';
+                                    submitBtn.disabled = false;
+                                    submitBtn.textContent = 'Send Message';
+                                    return false;
+                                }
+
+                                var phone = '+91' + rawPhone.replace(/^\+91/, '');
+
+                                var payload = {
+                                    name: name,
+                                    phone: phone,
+                                    email: email,
+                                    topic: topic,
+                                    message: message,
+                                    tag: 'contact-us',
+                                    accepts_marketing: true
+                                };
+
+                                console.log('[ContactUs] Sending:', JSON.stringify(payload));
+
+                                fetch('/apps/purrkins/contact-us/customer', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                                    body: JSON.stringify(payload)
+                                })
+                                .then(function(response) {
+                                    return response.json().catch(function() { return {}; });
+                                })
+                                .then(function(data) {
+                                    console.log('[ContactUs] Response:', data);
+                                    // Show success message at top — keep fields visible
+                                    if (successEl) successEl.style.display = 'block';
+                                    submitBtn.textContent = 'Send Message';
+                                    submitBtn.disabled = false;
+                                    // Reset form and hide success after 5s
+                                    setTimeout(function() {
+                                        if (successEl) successEl.style.display = 'none';
+                                        form.reset();
+                                    }, 5000);
+                                })
+                                .catch(function(err) {
+                                    console.error('[ContactUs] Error:', err);
+                                    errorEl.textContent = 'Something went wrong. Please try again.';
+                                    errorEl.style.display = 'block';
+                                    submitBtn.disabled = false;
+                                    submitBtn.textContent = 'Send Message';
+                                });
+
+                            } catch(err) {
+                                console.error('[ContactUs] Submit error:', err);
+                                submitBtn.disabled = false;
+                                submitBtn.textContent = 'Send Message';
+                            }
+
+                            return false;
+                        }, false);
+                    })();
+                    </script>
                 </div>
             </div>
         </div>
