@@ -1,158 +1,142 @@
 <div id="purrkins-free-sample-{{ section.id }}" class="free-sample-block {{ section.settings.custom_class }}">
-    <div class="purrkins-container fs-free-banner">
-        <div class="fs-inner">
-            <div class="fs-content-wrap">
-                <div class="fs-illustration">
-                    {% if section.settings.image != blank %}
-                        <img src="{{ section.settings.image | image_url: width: 800 }}" alt="{{ section.settings.image.alt | escape }}" width="692" height="auto" />
-                    {% else %}
-                        <div class="fs-placeholder">Image</div>
-                    {% endif %}
-                </div>
-                
-                <div class="fs-text">
-                    {% if shop.metafields.custom.samples_left != blank %}
-                        {% assign active_samples_left = shop.metafields.custom.samples_left %}
-                    {% else %}
-                        {% assign active_samples_left = 128 %}
-                    {% endif %}
-                    
-                    <h2 class="fs-heading">{{ section.settings.heading }}</h2>
-                    <p class="fs-subheading">
-                        {{ section.settings.subheading_prefix }} 
-                        <span class="fs-highlight-number" id="fs-count-highlight-{{ section.id }}">{{ active_samples_left }}</span> 
-                        {{ section.settings.subheading_suffix }}
-                    </p>
-                </div>
-                <div class="fs-form-container">
-                    {% if section.settings.api_endpoint != blank %}
-                        <!-- Custom Endpoint Form -->
-                        <form id="fs-raw-form-{{ section.id }}" class="fs-raw-form fs-ajax-form" data-endpoint="{{ section.settings.api_endpoint }}">
-                            <div class="fs-form-success" style="display: none;">Claimed! We will reach out soon.</div>
-                            <div class="fs-fields">
-                                <div class="fs-form-group">
-                                    <input type="text" name="fs_name" placeholder="Full Name" required />
-                                </div>
-                                <div class="fs-form-group">
-                                    <input type="tel" name="fs_phone" placeholder="Mobile Number" required oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
-                                </div>
-                                <div class="fs-form-group fs-form-submit">
-                                    <button type="submit" class="fs-submit-btn">Claim Free Sample</button>
-                                </div>
-                            </div>
-                        </form>
-                    {% else %}
-                        <!-- Native Shopify Form -->
-                        {% form 'customer', id: 'fs-contact-form', class: 'fs-raw-form fs-ajax-form' %}
-                            <div class="fs-form-success" style="display: none;">Claimed! We will reach out soon.</div>
-                            <div class="fs-fields">
-                                <input type="hidden" name="contact[tags]" value="free-sample-claim">
-                                {% assign random_id = "now" | date: "%N" %}
-                                <input type="hidden" name="contact[email]" value="lead-{{ random_id }}@noemail.purrkins.com">
-                                <input type="hidden" name="customer[email]" value="lead-{{ random_id }}@noemail.purrkins.com">
-                                <input type="hidden" name="customer[accepts_marketing]" value="true">
-                                <input type="hidden" name="contact[last_name]" value=".">
-                                <input type="hidden" name="contact[accepts_sms]" value="true">
-                                <input type="hidden" name="customer[first_name]" value="">
-                                <input type="hidden" name="customer[last_name]" value=".">
-                                <input type="hidden" name="customer[phone]" value="">
-                                <input type="hidden" name="contact[note][Phone]" value="">
-                                <input type="hidden" name="customer[addresses][0][country]" value="India">
-                                <input type="hidden" name="address[country]" value="India">
-                                <div class="fs-form-group">
-                                    <input type="text" name="contact[first_name]" placeholder="Full Name" required />
-                                </div>
-                                <div class="fs-form-group">
-                                    <input type="tel" name="contact[phone]" placeholder="Mobile Number" required oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
-                                </div>
-                                <div class="fs-form-group fs-form-submit">
-                                    <button type="submit" class="fs-submit-btn">Claim Free Sample</button>
-                                </div>
-                            </div>
-                        {% endform %}
-                    {% endif %}
-                </div>
-            </div>
-
-            {% assign total = section.settings.total_samples | plus: 0 %}
-            {% assign left = active_samples_left | plus: 0 %}
-            {% assign claimed = total | minus: left %}
-            {% if total > 0 %}
-                {% assign progress_percent = claimed | times: 100.0 | divided_by: total %}
-            {% else %}
-                {% assign progress_percent = 0 %}
-            {% endif %}
-            
-            {% if progress_percent > 100 %}{% assign progress_percent = 100 %}{% endif %}
-            {% if progress_percent < 0 %}{% assign progress_percent = 0 %}{% endif %}
-
-            <div class="fs-progress-container">
-                <div class="fs-progress-bar">
-                    <div class="fs-progress-fill" id="fs-progress-fill-{{ section.id }}" style="width: {{ progress_percent }}%;">
-                        <div class="fs-progress-badge">
-                            <span class="fs-badge-text" id="fs-badge-text-{{ section.id }}">{{ left }} left</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <div class="purrkins-container fs-free-banner">
+    <div class="fs-inner">
+      <div class="fs-content-wrap">
+        <div class="fs-illustration">
+          {% if section.settings.image != blank %}
+            <img
+              src="{{ section.settings.image | image_url: width: 800 }}"
+              alt="{{ section.settings.image.alt | escape }}"
+              width="692"
+              height="auto"
+            />
+          {% else %}
+            <div class="fs-placeholder">Image</div>
+          {% endif %}
         </div>
+
+        <div class="fs-text">
+          {% if shop.metafields.custom.samples_left != blank %}
+            {% assign active_samples_left = shop.metafields.custom.samples_left %}
+          {% else %}
+            {% assign active_samples_left = 128 %}
+          {% endif %}
+
+          <h2 class="fs-heading">{{ section.settings.heading }}</h2>
+          <p class="fs-subheading">
+            {{ section.settings.subheading_prefix }}
+            <span class="fs-highlight-number" id="fs-count-highlight-{{ section.id }}">{{ active_samples_left }}</span>
+            {{ section.settings.subheading_suffix }}
+          </p>
+        </div>
+        <div class="fs-form-container">
+          <!-- Single form — always posts to the app proxy API -->
+          <form
+            id="fs-raw-form-{{ section.id }}"
+            class="fs-raw-form fs-ajax-form"
+            data-endpoint="{{ section.settings.api_endpoint | default: '/apps/purrkins/customer' }}"
+          >
+            <div class="fs-form-success" style="display: none;">Claimed! We will reach out soon.</div>
+            <div class="fs-fields">
+              <div class="fs-form-group">
+                <input type="text" name="fs_name" placeholder="Full Name" required />
+              </div>
+              <div class="fs-form-group">
+                <input
+                  type="tel"
+                  name="fs_phone"
+                  placeholder="Mobile Number"
+                  required
+                  oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                />
+              </div>
+              <div class="fs-form-group fs-form-submit">
+                <button type="submit" class="fs-submit-btn">Claim Free Sample</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {% assign total = section.settings.total_samples | plus: 0 %}
+      {% assign left = active_samples_left | plus: 0 %}
+      {% assign claimed = total | minus: left %}
+      {% if total > 0 %}
+        {% assign progress_percent = claimed | times: 100.0 | divided_by: total %}
+      {% else %}
+        {% assign progress_percent = 0 %}
+      {% endif %}
+
+      {% if progress_percent > 100 %}{% assign progress_percent = 100 %}{% endif %}
+      {% if progress_percent < 0 %}{% assign progress_percent = 0 %}{% endif %}
+
+      <div class="fs-progress-container">
+        <div class="fs-progress-bar">
+          <div class="fs-progress-fill" id="fs-progress-fill-{{ section.id }}" style="width: {{ progress_percent }}%;">
+            <div class="fs-progress-badge">
+              <span class="fs-badge-text" id="fs-badge-text-{{ section.id }}">{{ left }} left</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <style>
-.free-sample-block {
+  .free-sample-block {
     margin: 8px auto 80px;
     width: 100%;
-}
-.fs-inner {
+  }
+  .fs-inner {
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     border-radius: var(--border-radius-purrkins, 12px);
-    background: var(--accent-purple-light, #EAE8F9);
+    background: var(--accent-purple-light, #eae8f9);
     align-items: center;
-}
+  }
 
-.purrkins-container.fs-free-banner {
+  .purrkins-container.fs-free-banner {
     padding: 0 20px;
-}
+  }
 
-.fs-content-wrap {
+  .fs-content-wrap {
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
     max-width: 1108px;
     padding: 38px 30px 60px 0;
-}
-.fs-illustration {
+  }
+  .fs-illustration {
     flex: 0 0 360px;
     display: flex;
     align-items: flex-end;
-}
-.fs-illustration img {
+  }
+  .fs-illustration img {
     display: block;
     bottom: 0;
     position: absolute;
     max-width: 692px;
     left: 0;
     object-fit: cover;
-}
-.fs-placeholder {
+  }
+  .fs-placeholder {
     width: 150px;
     height: 150px;
     background: #ccc;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-.fs-text {
+  }
+  .fs-text {
     flex: 1;
     min-width: 300px;
     max-width: 330px;
     z-index: 1;
-}
-.fs-heading {
+  }
+  .fs-heading {
     margin: 0 0 8px;
     color: var(--color-text-primary, #121217);
     font-family: var(--purrkins-heading-font);
@@ -160,43 +144,43 @@
     font-weight: 700;
     line-height: 1.25;
     letter-spacing: -0.32px;
-}
-.fs-subheading {
+  }
+  .fs-subheading {
     margin: 0;
-    color: var(--purple-600, #5F4785);
+    color: var(--purple-600, #5f4785);
     font-size: 18px;
     font-weight: 400;
     line-height: 1.44;
-}
+  }
 
-.fs-form-group {
+  .fs-form-group {
     display: flex;
-}
+  }
 
-.fs-form-container {
+  .fs-form-container {
     flex: 0 0 225px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-}
-.fs-raw-form {
+  }
+  .fs-raw-form {
     display: flex;
     flex-direction: column;
     gap: 8px;
-}
-.fs-fields {
+  }
+  .fs-fields {
     display: flex;
     flex-direction: column;
     gap: 8px;
-}
-.fs-form-success {
-    color: var(--purple-600, #5F4785);
+  }
+  .fs-form-success {
+    color: var(--purple-600, #5f4785);
     font-family: var(--purrkins-heading-font);
     font-size: 16px;
     font-weight: 700;
     line-height: 1.4;
     text-align: center;
-    background: #FFF;
+    background: #fff;
     padding: 30px 20px;
     border-radius: var(--border-radius-purrkins, 12px);
     display: flex;
@@ -204,37 +188,37 @@
     justify-content: center;
     height: 100%;
     min-height: 130px;
-}
-.fs-raw-form input {
+  }
+  .fs-raw-form input {
     width: 100%;
     outline: none;
     padding: 6.803px 13.606px;
-    color: var(--semantic-text-primary, #21252A);
+    color: var(--semantic-text-primary, #21252a);
     font-size: 14px;
     font-weight: 400;
     line-height: 22px;
     border-radius: var(--border-radius-purrkins, 12px);
     border: 0.3px solid var(--color-text-secondary, #595961);
-    background: var(--neutral-white, #FFF);
-}
+    background: var(--neutral-white, #fff);
+  }
 
-.fs-raw-form input::placeholder {
+  .fs-raw-form input::placeholder {
     color: var(--semantic-text-secondary, #424953);
-}
+  }
 
-.fs-raw-form input:focus {
-    border-color: #7D8DF5;
-}
-.fs-submit-btn {
+  .fs-raw-form input:focus {
+    border-color: #7d8df5;
+  }
+  .fs-submit-btn {
     text-decoration: none;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     border-radius: 999px;
-    background: var(--brand-slate-900, #21252A);
+    background: var(--brand-slate-900, #21252a);
     display: inline-flex;
     padding: 12px 22px;
     justify-content: center;
     align-items: center;
-    color: #FFF;
+    color: #fff;
     font-family: var(--purrkins-heading-font);
     font-size: 14px;
     font-weight: 700;
@@ -243,31 +227,31 @@
     border: none;
     cursor: pointer;
     margin-top: 10px;
-}
-.fs-submit-btn:hover {
+  }
+  .fs-submit-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgb(33 37 42 / 40%);
-}
-.fs-submit-btn:disabled {
+  }
+  .fs-submit-btn:disabled {
     opacity: 0.7;
     cursor: not-allowed;
-}
+  }
 
-/* Progress bar section */
-.fs-progress-container {
+  /* Progress bar section */
+  .fs-progress-container {
     position: relative;
     width: 100%;
     height: 5px;
     margin-top: auto;
-    background: var(--accent-purple-light, #EAE8F9);
-}
-.fs-progress-fill {
+    background: var(--accent-purple-light, #eae8f9);
+  }
+  .fs-progress-fill {
     height: 5px;
     position: relative;
-    background: var(--accent-purple-600, #717EEF);
+    background: var(--accent-purple-600, #717eef);
     transition: width 0.5s ease-out;
-}
-.fs-progress-badge {
+  }
+  .fs-progress-badge {
     position: absolute;
     right: 0;
     top: -50px;
@@ -281,15 +265,15 @@
     align-items: center;
     gap: 5.507px;
     border-radius: 11.014px;
-    background: var(--neutral-white, #FFF);
-    color: var(--accent-purple-500, #A49CDE);
+    background: var(--neutral-white, #fff);
+    color: var(--accent-purple-500, #a49cde);
     font-size: 14px;
     font-weight: 600;
     line-height: 1.3;
     letter-spacing: 0.14px;
-}
-/* Triangle pointing down */
-.fs-progress-badge::after {
+  }
+  /* Triangle pointing down */
+  .fs-progress-badge::after {
     content: '';
     position: absolute;
     bottom: -6px;
@@ -297,261 +281,224 @@
     transform: translateX(-50%);
     border-width: 6px 6px 0;
     border-style: solid;
-    border-color: #FFF transparent transparent transparent;
-}
+    border-color: #fff transparent transparent transparent;
+  }
 
-/* Error Message Styling */
-.fs-error-msg {
-    background: #FFF0F0;
-    border: 1px solid #FFCDD2;
+  /* Error Message Styling */
+  .fs-error-msg {
+    background: #fff0f0;
+    border: 1px solid #ffcdd2;
     border-radius: 8px;
     padding: 12px 16px;
     margin-bottom: 16px;
-    color: #D32F2F;
+    color: #d32f2f;
     font-size: 14px;
     line-height: 1.4;
-}
-.fs-error-msg ul {
+  }
+  .fs-error-msg ul {
     margin: 0;
     padding-left: 20px;
-}
-.fs-error-msg li {
+  }
+  .fs-error-msg li {
     margin-bottom: 4px;
-}
-.fs-error-msg li:last-child {
+  }
+  .fs-error-msg li:last-child {
     margin-bottom: 0;
-}
+  }
 
-@media(max-width: 1200px){
-    .fs-illustration img{
-        max-width: 560px;
+  @media (max-width: 1200px) {
+    .fs-illustration img {
+      max-width: 560px;
     }
-}
+  }
 
-@media(max-width: 1024px){
-    .fs-content-wrap{
-          padding: 38px 24px 80px 0;
-    }
-    .fs-heading{
-        font-size: 28px;
-    }
-    .free-sample-block{
-        margin: 8px auto 60px;
-    }
-}
-
-@media (max-width: 991px) {
+  @media (max-width: 1024px) {
     .fs-content-wrap {
-        padding: 40px 20px 150px;
-        flex-direction: column;
-        text-align: center;
-    }
-    .fs-form-container {
-        flex: 1;
-        width: 100%;
-        z-index: 1;
-    }
-    .fs-illustration {
-        flex: none;
-    }
-    .fs-illustration img{
-        margin-bottom: 0;
-        height: auto;
-    }
-    .fs-text {
-        max-width: 600px;
-    }
-    .fs-form-container {
-        max-width: 600px;
-        margin: 0 0 40px;
-    }
-}
-
-@media(max-width: 767px){
-    .fs-content-wrap {
-                padding: 28px 20px 90px;
-        gap: 0;
-    }
-    .fs-illustration img{
-     max-width: max-content;
-        max-height: 130px;
-
+      padding: 38px 24px 80px 0;
     }
     .fs-heading {
-        font-size: 24px;
-        max-width: 236px;
-        margin: auto;
-        margin-bottom: 7px;
+      font-size: 28px;
     }
-    .fs-progress-badge{
-        top: -40px;
-        width: auto;
-        height: auto;
+    .free-sample-block {
+      margin: 8px auto 60px;
     }
-    .fs-text{
-        margin-bottom: 16px;
+  }
+
+  @media (max-width: 991px) {
+    .fs-content-wrap {
+      padding: 40px 20px 150px;
+      flex-direction: column;
+      text-align: center;
     }
-    .fs-subheading{
-        font-size: 16px;
+    .fs-form-container {
+      flex: 1;
+      width: 100%;
+      z-index: 1;
+    }
+    .fs-illustration {
+      flex: none;
+    }
+    .fs-illustration img {
+      margin-bottom: 0;
+      height: auto;
+    }
+    .fs-text {
+      max-width: 600px;
+    }
+    .fs-form-container {
+      max-width: 600px;
+      margin: 0 0 40px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .fs-content-wrap {
+      padding: 28px 20px 90px;
+      gap: 0;
+    }
+    .fs-illustration img {
+      max-width: max-content;
+      max-height: 130px;
+    }
+    .fs-heading {
+      font-size: 24px;
+      max-width: 236px;
+      margin: auto;
+      margin-bottom: 7px;
+    }
+    .fs-progress-badge {
+      top: -40px;
+      width: auto;
+      height: auto;
+    }
+    .fs-text {
+      margin-bottom: 16px;
+    }
+    .fs-subheading {
+      font-size: 16px;
     }
     .fs-form-group {
-        display: flex;
-        justify-content: center;
+      display: flex;
+      justify-content: center;
     }
-}
+  }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     var form = document.querySelector('#purrkins-free-sample-{{ section.id }} .fs-ajax-form');
-    var totalSamples = parseInt("{{ section.settings.total_samples }}", 10) || 1000;
-    var initialLeft = parseInt("{{ active_samples_left }}", 10) || 128;
-    
+    var totalSamples = parseInt('{{ section.settings.total_samples }}', 10) || 1000;
+    var initialLeft = parseInt('{{ active_samples_left }}', 10) || 128;
+
     var countHighlight = document.getElementById('fs-count-highlight-{{ section.id }}');
     var badgeText = document.getElementById('fs-badge-text-{{ section.id }}');
     var progressFill = document.getElementById('fs-progress-fill-{{ section.id }}');
-    
+
     if (countHighlight) countHighlight.innerText = initialLeft;
     if (badgeText) badgeText.innerText = initialLeft + ' left';
-    
+
     if (progressFill) {
-        var claimed = totalSamples - initialLeft;
-        var progress = totalSamples > 0 ? (claimed / totalSamples) * 100 : 0;
-        if(progress > 100) progress = 100;
-        progressFill.style.width = progress + '%';
+      var claimed = totalSamples - initialLeft;
+      var progress = totalSamples > 0 ? (claimed / totalSamples) * 100 : 0;
+      if (progress > 100) progress = 100;
+      progressFill.style.width = progress + '%';
     }
 
-    if(form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+    if (form) {
+      form.addEventListener(
+        'submit',
+        function (e) {
+          e.preventDefault();
+          e.stopPropagation();
 
-            var btn = form.querySelector('.fs-submit-btn');
-            if (btn.disabled) return false;
-            btn.innerHTML = 'Submitting...';
-            btn.disabled = true;
+          var btn = form.querySelector('.fs-submit-btn');
+          if (btn.disabled) return false;
+          btn.innerHTML = 'Submitting...';
+          btn.disabled = true;
 
-            try {
-                var formData = new FormData(form);
-                
-                // Sync contact[first_name] with customer[first_name]
-                if (formData.has('contact[first_name]')) {
-                    formData.set('customer[first_name]', formData.get('contact[first_name]'));
-                } else if (formData.has('fs_name')) {
-                    formData.set('contact[first_name]', formData.get('fs_name'));
-                    formData.set('customer[first_name]', formData.get('fs_name'));
-                }
-                
-                // Format phone number with country code
-                var finalPhone = '';
-                if (formData.has('contact[phone]')) {
-                    var rawPhone = formData.get('contact[phone]');
-                    if (rawPhone && rawPhone.trim() !== '') {
-                        finalPhone = '+91' + rawPhone.trim().replace(/^\+91/, '');
-                        formData.set('contact[phone]', finalPhone);
-                    }
-                } else if (formData.has('fs_phone')) {
-                    var rawPhone = formData.get('fs_phone');
-                    if (rawPhone && rawPhone.trim() !== '') {
-                        finalPhone = '+91' + rawPhone.trim().replace(/^\+91/, '');
-                        formData.set('fs_phone', finalPhone);
-                    }
-                }
-                
-                if (finalPhone !== '') {
-                    formData.set('customer[phone]', finalPhone);
-                    formData.set('contact[note][Phone]', finalPhone);
-                }
-                
-                // Ensure subscription fields
-                formData.set('customer[accepts_marketing]', 'true');
-                formData.set('contact[accepts_sms]', 'true');
-                if (!formData.has('contact[tags]')) {
-                    formData.set('contact[tags]', 'free-sample-claim');
-                }
-                if (!formData.has('contact[email]')) {
-                    var leadEmail = 'lead-' + Date.now() + '@noemail.purrkins.com';
-                    formData.set('contact[email]', leadEmail);
-                    formData.set('customer[email]', leadEmail);
-                }
+          try {
+            // Read form inputs
+            var name = form.querySelector('[name="fs_name"]').value.trim();
+            var rawPhone = form.querySelector('[name="fs_phone"]').value.trim();
 
-                var endpointUrl = form.getAttribute('data-endpoint');
-                var isProxyApi = endpointUrl && endpointUrl.indexOf('/apps/') !== -1;
-                
-                if (!endpointUrl || endpointUrl.trim() === '') {
-                    endpointUrl = form.getAttribute('action') || window.location.pathname;
-                    isProxyApi = false;
-                }
-
-                var fetchOptions = {};
-                if (isProxyApi) {
-                    var payload = {
-                        name: formData.get('contact[first_name]') || formData.get('fs_name') || '',
-                        phone: finalPhone,
-                        tag: 'free-sample-claim',
-                        email: formData.get('contact[email]') || formData.get('customer[email]') || '',
-                        accepts_marketing: true
-                    };
-                    console.log('[FreeSample] Sending payload to API:', JSON.stringify(payload));
-                    fetchOptions = {
-                        method: 'POST',
-                        redirect: 'manual',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify(payload)
-                    };
-                } else {
-                    fetchOptions = {
-                        method: 'POST',
-                        redirect: 'manual',
-                        body: formData
-                    };
-                }
-
-                fetch(endpointUrl, fetchOptions)
-                .then(function(response) {
-                    // Show success regardless of response type (handles redirects from Shopify native form)
-                    var fields = form.querySelector('.fs-fields');
-                    var successMsg = form.querySelector('.fs-form-success');
-                    if (fields) fields.style.display = 'none';
-                    if (successMsg) successMsg.style.display = 'flex';
-                    
-                    var currentLeft = parseInt((countHighlight && countHighlight.innerText) || '0', 10) || 0;
-                    if (currentLeft > 0) {
-                        var newLeft = currentLeft - 1;
-                        if (countHighlight) countHighlight.innerText = newLeft;
-                        if (badgeText) badgeText.innerText = newLeft + ' left';
-                        var newProgress = totalSamples > 0 ? ((totalSamples - newLeft) / totalSamples) * 100 : 0;
-                        if (newProgress > 100) newProgress = 100;
-                        if (progressFill) progressFill.style.width = newProgress + '%';
-                    }
-
-                    setTimeout(function() {
-                        if (successMsg) successMsg.style.display = 'none';
-                        if (fields) fields.style.display = 'flex';
-                        form.reset();
-                        btn.innerHTML = 'Claim Free Sample';
-                        btn.disabled = false;
-                    }, 8000);
-                })
-                .catch(function(error) {
-                    console.error('[FreeSample] Fetch error:', error);
-                    btn.innerHTML = 'Claim Free Sample';
-                    btn.disabled = false;
-                });
-
-            } catch(err) {
-                console.error('[FreeSample] Submit error:', err);
-                btn.innerHTML = 'Claim Free Sample';
-                btn.disabled = false;
+            if (!name || !rawPhone) {
+              btn.innerHTML = 'Claim Free Sample';
+              btn.disabled = false;
+              return false;
             }
 
-            return false;
-        }, false);
+            // Format phone with +91 country code
+            var phone = '+91' + rawPhone.replace(/^\+91/, '');
+
+            // Generate a rogue email (required for email marketing subscription)
+            var email = 'lead-' + Date.now() + '@noemail.purrkins.com';
+
+            var endpointUrl = form.getAttribute('data-endpoint') || '/apps/purrkins/customer';
+
+            var payload = {
+              name: name,
+              phone: phone,
+              tag: 'free-sample-claim',
+              email: email,
+              accepts_marketing: true,
+            };
+
+            console.log('[FreeSample] Sending:', JSON.stringify(payload), '→', endpointUrl);
+
+            fetch(endpointUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+              body: JSON.stringify(payload),
+            })
+              .then(function (response) {
+                return response.json().catch(function () {
+                  return {};
+                });
+              })
+              .then(function (data) {
+                console.log('[FreeSample] Response:', data);
+                // Show success
+                var fields = form.querySelector('.fs-fields');
+                var successMsg = form.querySelector('.fs-form-success');
+                if (fields) fields.style.display = 'none';
+                if (successMsg) successMsg.style.display = 'flex';
+
+                // Update counter
+                var currentLeft = parseInt((countHighlight && countHighlight.innerText) || '0', 10) || 0;
+                if (currentLeft > 0) {
+                  var newLeft = currentLeft - 1;
+                  if (countHighlight) countHighlight.innerText = newLeft;
+                  if (badgeText) badgeText.innerText = newLeft + ' left';
+                  var newProgress = totalSamples > 0 ? ((totalSamples - newLeft) / totalSamples) * 100 : 0;
+                  if (newProgress > 100) newProgress = 100;
+                  if (progressFill) progressFill.style.width = newProgress + '%';
+                }
+
+                setTimeout(function () {
+                  if (successMsg) successMsg.style.display = 'none';
+                  if (fields) fields.style.display = 'flex';
+                  form.reset();
+                  btn.innerHTML = 'Claim Free Sample';
+                  btn.disabled = false;
+                }, 8000);
+              })
+              .catch(function (err) {
+                console.error('[FreeSample] Error:', err);
+                btn.innerHTML = 'Claim Free Sample';
+                btn.disabled = false;
+              });
+          } catch (err) {
+            console.error('[FreeSample] Submit error:', err);
+            btn.innerHTML = 'Claim Free Sample';
+            btn.disabled = false;
+          }
+
+          return false;
+        },
+        false
+      );
     }
-});
+  });
 </script>
 
 {% schema %}
