@@ -266,7 +266,7 @@
           </a>
           {% if shop.customer_accounts_enabled %}
             <a
-              href="{% if customer %}/pages/my-dashboard{% else %}{{ routes.account_login_url }}?return_to=/pages/my-dashboard{% endif %}"
+              href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}"
               aria-label="User Account"
             >
               <svg
