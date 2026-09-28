@@ -47,11 +47,15 @@
 
         {% if section.settings.button_text != blank %}
           <div class="byob-rhythm-btn-wrapper">
-            <form action="{{ section.settings.button_link | default: '#' }}" method="get" style="width: 100%; display: flex; justify-content: center;">
-              <button type="submit" class="purrkins-btn-secondary byob-trigger-quiz">
+            {% if customer %}
+              <button type="button" class="purrkins-btn-secondary byob-trigger-quiz">
                 {{ section.settings.button_text }}
               </button>
-            </form>
+            {% else %}
+              <a href="/account/login?checkout_url=/pages/byob" class="purrkins-btn-secondary" style="text-decoration: none;">
+                {{ section.settings.button_text }}
+              </a>
+            {% endif %}
           </div>
         {% endif %}
       </div>

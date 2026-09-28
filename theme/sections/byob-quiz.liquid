@@ -1022,13 +1022,17 @@
       submitBtn.disabled = true;
 
       const payload = {
-        name: {% if customer %}"{{ customer.name | escape }}"{% else %}form.querySelector('[name="owner_name"]')?.value || ""{% endif %},
-        email: {% if customer %}"{{ customer.email | escape }}"{% else %}form.querySelector('[name="owner_email"]')?.value || ""{% endif %},
-        phone: {% if customer %}"{{ customer.phone | escape }}"{% else %}form.querySelector('[name="owner_phone"]')?.value || ""{% endif %},
+        customerId: "{{ customer.id }}",
         tag: "byob-quiz-completed",
-        quiz_data: quizData,
-        accepts_marketing: true
+        quiz_data: quizData
       };
+
+      if (!payload.customerId) {
+        alert('You must be logged in to save this quiz!');
+        submitBtn.textContent = 'Submit';
+        submitBtn.disabled = false;
+        return;
+      }
 
 
       fetch('/apps/purrkins/byob/customer', {
