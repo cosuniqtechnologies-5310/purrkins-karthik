@@ -426,41 +426,6 @@
                     ></textarea>
                   </div>
 
-                  {% unless customer %}
-                    <div style="margin-top: 40px;">
-                      <h2 class="quiz-subtitle">Where should we send your custom box plan?</h2>
-                      <div class="quiz-input-group row-group" style="margin-bottom: 20px;">
-                        <label class="quiz-label-inline quiz-subtitle" style="font-size: 16px;">Your Name *</label>
-                        <input
-                          type="text"
-                          name="owner_name"
-                          class="quiz-text-input underline-input"
-                          placeholder="Enter full name"
-                          required
-                        >
-                      </div>
-                      <div class="quiz-input-group row-group" style="margin-bottom: 20px;">
-                        <label class="quiz-label-inline quiz-subtitle" style="font-size: 16px;">Your Phone *</label>
-                        <input
-                          type="tel"
-                          name="owner_phone"
-                          class="quiz-text-input underline-input"
-                          placeholder="Enter phone number"
-                          required
-                        >
-                      </div>
-                      <div class="quiz-input-group row-group" style="margin-bottom: 20px;">
-                        <label class="quiz-label-inline quiz-subtitle" style="font-size: 16px;">Your Email *</label>
-                        <input
-                          type="email"
-                          name="owner_email"
-                          class="quiz-text-input underline-input"
-                          placeholder="Enter email address"
-                          required
-                        >
-                      </div>
-                    </div>
-                  {% endunless %}
 
                   <div class="quiz-submit-wrapper">
                     <button type="submit" class="quiz-submit-btn purrkins-btn-secondary">Submit</button>
@@ -1065,12 +1030,6 @@
         accepts_marketing: true
       };
 
-      if (!payload.email && !payload.phone) {
-        alert('Please provide an email or phone number.');
-        submitBtn.textContent = 'Submit';
-        submitBtn.disabled = false;
-        return;
-      }
 
       fetch('/apps/purrkins/byob/customer', {
         method: 'POST',

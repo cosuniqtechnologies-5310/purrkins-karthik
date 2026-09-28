@@ -47,9 +47,11 @@
 
         {% if section.settings.button_text != blank %}
           <div class="byob-rhythm-btn-wrapper">
-            <button type="button" class="purrkins-btn-secondary byob-trigger-quiz">
-              {{ section.settings.button_text }}
-            </button>
+            <form action="{{ section.settings.button_link | default: '#' }}" method="get" style="width: 100%; display: flex; justify-content: center;">
+              <button type="submit" class="purrkins-btn-secondary byob-trigger-quiz">
+                {{ section.settings.button_text }}
+              </button>
+            </form>
           </div>
         {% endif %}
       </div>
