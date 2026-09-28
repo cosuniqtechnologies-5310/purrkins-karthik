@@ -1,24 +1,34 @@
 <div class="purrkins-section-block">
   <div class="purrkins-container">
     <div class="byob-rhythm-wrapper" style="background-color: {{ section.settings.bg_color | default: '#F9FBFE' }};">
-      
       <div class="byob-rhythm-image">
         {% if section.settings.image != blank %}
-          <img src="{{ section.settings.image | image_url: width: 800 }}" alt="{{ section.settings.heading | escape }}" width="400" height="400" loading="lazy">
+          <img
+            src="{{ section.settings.image | image_url: width: 800 }}"
+            alt="{{ section.settings.heading | escape }}"
+            width="400"
+            height="400"
+            loading="lazy"
+          >
         {% endif %}
       </div>
 
       <div class="byob-rhythm-content">
-      <div class="top-wrapper">
-        <h3 class="purrkins-h3-text">{{ section.settings.heading }}</h3>
-        <p class="purrkins-subtext">{{ section.settings.text }}</p>
-</div>
+        <div class="top-wrapper">
+          <h3 class="purrkins-h3-text">{{ section.settings.heading }}</h3>
+          <p class="purrkins-subtext">{{ section.settings.text }}</p>
+        </div>
         <div class="byob-rhythm-blocks">
           {% for block in section.blocks %}
             <div class="byob-rhythm-block" {{ block.shopify_attributes }}>
               <div class="byob-rhythm-block-icon">
                 {% if block.settings.icon != blank %}
-                  <img src="{{ block.settings.icon | image_url: width: 60 }}" alt="{{ block.settings.heading | escape }}" width="30" height="30">
+                  <img
+                    src="{{ block.settings.icon | image_url: width: 60 }}"
+                    alt="{{ block.settings.heading | escape }}"
+                    width="30"
+                    height="30"
+                  >
                 {% endif %}
               </div>
               <div class="byob-rhythm-block-text">
@@ -37,24 +47,21 @@
 
         {% if section.settings.button_text != blank %}
           <div class="byob-rhythm-btn-wrapper">
-            {% if customer %}
-              <button type="button" class="purrkins-btn-secondary byob-trigger-quiz">{{ section.settings.button_text }}</button>
-            {% else %}
-              <a href="{{ routes.account_login_url }}?return_to={{ request.path }}" class="purrkins-btn-secondary">{{ section.settings.button_text }}</a>
-            {% endif %}
+            <button type="button" class="purrkins-btn-secondary byob-trigger-quiz">
+              {{ section.settings.button_text }}
+            </button>
           </div>
         {% endif %}
       </div>
-
     </div>
   </div>
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     var toggles = document.querySelectorAll('.byob-rhythm-block-toggle');
-    toggles.forEach(function(toggle) {
-      toggle.addEventListener('click', function() {
+    toggles.forEach(function (toggle) {
+      toggle.addEventListener('click', function () {
         var block = this.closest('.byob-rhythm-block');
         if (block) {
           block.classList.toggle('collapsed');
@@ -64,8 +71,8 @@
 
     const quizBtns = document.querySelectorAll('.byob-trigger-quiz');
     const quizSection = document.getElementById('byob-quiz-section');
-    quizBtns.forEach(btn => {
-      btn.addEventListener('click', function(e) {
+    quizBtns.forEach((btn) => {
+      btn.addEventListener('click', function (e) {
         e.preventDefault();
         if (quizSection) {
           quizSection.style.display = 'block';
@@ -77,86 +84,86 @@
 </script>
 
 <style>
-.byob-rhythm-wrapper {
+  .byob-rhythm-wrapper {
     display: flex;
     flex-direction: column;
     border-radius: var(--border-radius-purrkins);
     overflow: hidden;
     margin: 0 auto;
-}
+  }
 
-.byob-rhythm-content h3 {
+  .byob-rhythm-content h3 {
     margin: 0;
-}
+  }
 
-.byob-rhythm-content .top-wrapper p {
+  .byob-rhythm-content .top-wrapper p {
     margin-top: 8px;
     color: #121217;
-}
+  }
 
-.byob-rhythm-image {
-flex: 1;
+  .byob-rhythm-image {
+    flex: 1;
     display: flex;
     align-items: flex-end;
     justify-content: center;
     padding: 40px 40px 0 40px;
     position: relative;
     max-width: 541px;
-}
-.byob-rhythm-image img {
-  max-width: 100%;
-  height: auto;
-  object-fit: contain;
-  display: block;
-}
-.byob-rhythm-content {
-  flex: 1;
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
+  }
+  .byob-rhythm-image img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+  }
+  .byob-rhythm-content {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
 
-.byob-rhythm-content > p {
-margin: 0;
+  .byob-rhythm-content > p {
+    margin: 0;
     color: #121217;
-}
-.byob-rhythm-blocks {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.byob-rhythm-block {
+  }
+  .byob-rhythm-blocks {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .byob-rhythm-block {
     display: flex;
     align-items: flex-start;
     gap: 24px;
     padding: var(--spacing-32, 32px) 36px;
     border-radius: var(--radius-medium, 16px);
-    border: 0.5px solid #E0E0E3;
-    background: var(--color-background, #FFF);
-}
+    border: 0.5px solid #e0e0e3;
+    background: var(--color-background, #fff);
+  }
 
-.byob-rhythm-block-icon img {
+  .byob-rhythm-block-icon img {
     width: 54px;
     height: 54px;
     object-fit: contain;
-}
+  }
 
-.byob-rhythm-block-text {
+  .byob-rhythm-block-text {
     flex: 1;
     display: flex;
     flex-direction: column;
-}
+  }
 
-.byob-rhythm-block-heading {
+  .byob-rhythm-block-heading {
     margin: 0;
     color: var(--color-text-primary, #121217);
     font-family: var(--purrkins-heading-font);
     font-size: 20px;
     font-weight: 700;
-}
+  }
 
-.byob-rhythm-block-paragraph {
+  .byob-rhythm-block-paragraph {
     margin: 8px 0 0 0;
     color: var(--color-text-secondary, #595961);
     font-size: 18px;
@@ -165,10 +172,10 @@ margin: 0;
     transition: all 0.3s ease;
     overflow: hidden;
     max-height: 300px;
-}
-.byob-rhythm-block-toggle {
+  }
+  .byob-rhythm-block-toggle {
     border-radius: 9.116px;
-    border: 0.912px solid var(--brand-slate-900, #21252A);
+    border: 0.912px solid var(--brand-slate-900, #21252a);
     display: flex;
     width: 45px;
     height: 45px;
@@ -179,88 +186,87 @@ margin: 0;
     flex-shrink: 0;
     cursor: pointer;
     transition: background-color 0.2s ease;
-}
+  }
 
-.byob-rhythm-block-toggle:hover {
+  .byob-rhythm-block-toggle:hover {
     background-color: #f3f4f6;
-}
+  }
 
-.byob-rhythm-block:not(.collapsed) .vertical-line {
+  .byob-rhythm-block:not(.collapsed) .vertical-line {
     display: none;
-}
+  }
 
-.byob-rhythm-block.collapsed {
+  .byob-rhythm-block.collapsed {
     align-items: center;
-}
+  }
 
-.byob-rhythm-block.collapsed .byob-rhythm-block-paragraph {
+  .byob-rhythm-block.collapsed .byob-rhythm-block-paragraph {
     max-height: 0;
     margin-top: 0;
     opacity: 0;
-}
+  }
 
-.byob-rhythm-btn-wrapper .purrkins-btn-secondary {
+  .byob-rhythm-btn-wrapper .purrkins-btn-secondary {
     font-size: 20px;
-}
+  }
 
-.byob-rhythm-btn-wrapper {
+  .byob-rhythm-btn-wrapper {
     display: flex;
     justify-content: center;
-}
-
-@media (min-width: 990px) {
-  .byob-rhythm-wrapper {
-    flex-direction: row;
   }
-}
 
-@media (min-width: 990px) {
-  .byob-rhythm-content {
-    padding: 80px 53px 80px 40px;
+  @media (min-width: 990px) {
+    .byob-rhythm-wrapper {
+      flex-direction: row;
+    }
   }
-}
 
-@media(max-width: 991px){
-  .byob-rhythm-image {
-    display: none;
-}
-}
+  @media (min-width: 990px) {
+    .byob-rhythm-content {
+      padding: 80px 53px 80px 40px;
+    }
+  }
 
-@media(max-width: 767px){
+  @media (max-width: 991px) {
+    .byob-rhythm-image {
+      display: none;
+    }
+  }
 
-.top-wrapper {
-    text-align: center;
-}
-.byob-rhythm-content{
+  @media (max-width: 767px) {
+    .top-wrapper {
+      text-align: center;
+    }
+    .byob-rhythm-content {
       gap: 25px;
       padding: 40px 16px;
-}
-.byob-rhythm-content .top-wrapper p {
-    font-size: 16px;
-}
-.byob-rhythm-block-icon img {
-    width: 32px;
-    height: 32px;
-}
-.byob-rhythm-block-heading {
-    font-size: 16px;
-}
-.byob-rhythm-block-paragraph {
-    font-size: 14px;
-}
-.byob-rhythm-block {
-    padding: 16px;
-    gap: 16px;
-}
-.byob-rhythm-block-toggle{
-  width: 27px;
-    height: 27px;
-    padding: 8px; 
-}
-byob-rhythm-btn-wrapper .purrkins-btn-secondary {
-    font-size: 18px;
-}
-}
+    }
+    .byob-rhythm-content .top-wrapper p {
+      font-size: 16px;
+    }
+    .byob-rhythm-block-icon img {
+      width: 32px;
+      height: 32px;
+    }
+    .byob-rhythm-block-heading {
+      font-size: 16px;
+    }
+    .byob-rhythm-block-paragraph {
+      font-size: 14px;
+    }
+    .byob-rhythm-block {
+      padding: 16px;
+      gap: 16px;
+    }
+    .byob-rhythm-block-toggle {
+      width: 27px;
+      height: 27px;
+      padding: 8px;
+    }
+    byob-rhythm-btn-wrapper .purrkins-btn-secondary {
+      font-size: 18px;
+    }
+  }
 </style>
 
 {% schema %}
@@ -330,10 +336,7 @@ byob-rhythm-btn-wrapper .purrkins-btn-secondary {
   "presets": [
     {
       "name": "BYOB Daily Rhythm",
-      "blocks": [
-        { "type": "feature_block" },
-        { "type": "feature_block" }
-      ]
+      "blocks": [{ "type": "feature_block" }, { "type": "feature_block" }]
     }
   ]
 }

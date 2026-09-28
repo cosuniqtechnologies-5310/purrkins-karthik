@@ -236,6 +236,25 @@
               <div class="quiz-textarea-wrapper">
               <textarea name="quiz_allergies" class="quiz-textarea" placeholder="Mention here in detail"></textarea>
 </div>
+
+              {% unless customer %}
+              <div style="margin-top: 40px;">
+                <h2 class="quiz-subtitle">Where should we send your custom box plan?</h2>
+                <div class="quiz-input-group row-group" style="margin-bottom: 20px;">
+                  <label class="quiz-label-inline quiz-subtitle" style="font-size: 16px;">Your Name *</label>
+                  <input type="text" name="owner_name" class="quiz-text-input underline-input" placeholder="Enter full name" required>
+                </div>
+                <div class="quiz-input-group row-group" style="margin-bottom: 20px;">
+                  <label class="quiz-label-inline quiz-subtitle" style="font-size: 16px;">Your Phone *</label>
+                  <input type="tel" name="owner_phone" class="quiz-text-input underline-input" placeholder="Enter phone number" required>
+                </div>
+                <div class="quiz-input-group row-group" style="margin-bottom: 20px;">
+                  <label class="quiz-label-inline quiz-subtitle" style="font-size: 16px;">Your Email *</label>
+                  <input type="email" name="owner_email" class="quiz-text-input underline-input" placeholder="Enter email address" required>
+                </div>
+              </div>
+              {% endunless %}
+
               <div class="quiz-submit-wrapper">
                 <button type="submit" class="quiz-submit-btn purrkins-btn-secondary">Submit</button>
               </div>
@@ -804,46 +823,66 @@ label.quiz-image-option {
         return;
       }
 
-      // Build tags array dynamically
-      const tagsArray = [];
+      // Build quiz data object dynamically
+      const quizData = {};
       const formData = new FormData(form);
       for (const [key, value] of formData.entries()) {
         if (key.startsWith('quiz_') && value.trim() !== '') {
-          tagsArray.push(value.trim());
+          // If it's a checkbox array (like quiz_focus[]), handle multiple values
+          const cleanKey = key.replace('quiz_', '').replace('[]', '');
+          if (quizData[cleanKey]) {
+            quizData[cleanKey] = quizData[cleanKey] + ', ' + value.trim();
+          } else {
+            quizData[cleanKey] = value.trim();
+          }
         }
       }
       
-      const hiddenTagsInput = document.createElement('input');
-      hiddenTagsInput.type = 'hidden';
-      hiddenTagsInput.name = 'customer[note]';
-      hiddenTagsInput.value = tagsArray.join(', ');
-      form.appendChild(hiddenTagsInput);
-
       const submitBtn = form.querySelector('.quiz-submit-btn');
       submitBtn.textContent = 'Submitting...';
       submitBtn.disabled = true;
 
-      {% if customer %}
-      // 1. Send data to our custom Remix App Proxy to save to Metafields (so Dashboard can read it)
-      const proxyFormData = new FormData();
-      proxyFormData.append("customer_id", "{{ customer.id }}");
-      proxyFormData.append("customer[tags]", tagsArray.join(', '));
+      const payload = {
+        name: {% if customer %}"{{ customer.name | escape }}"{% else %}form.querySelector('[name="owner_name"]')?.value || ""{% endif %},
+        email: {% if customer %}"{{ customer.email | escape }}"{% else %}form.querySelector('[name="owner_email"]')?.value || ""{% endif %},
+        phone: {% if customer %}"{{ customer.phone | escape }}"{% else %}form.querySelector('[name="owner_phone"]')?.value || ""{% endif %},
+        tag: "byob-quiz-completed",
+        quiz_data: quizData,
+        accepts_marketing: true
+      };
 
-      fetch('/apps/purrkins/api/quiz', {
+      if (!payload.email && !payload.phone) {
+        alert('Please provide an email or phone number.');
+        submitBtn.textContent = 'Submit';
+        submitBtn.disabled = false;
+        return;
+      }
+
+      fetch('/apps/purrkins/byob/customer', {
         method: 'POST',
-        body: proxyFormData
-      }).finally(() => {
-        // 2. Submit natively to hidden iframe to save to Customer Note as backup
-        form.submit();
-        
-        // 3. Update button text instead of redirecting
-        submitBtn.textContent = 'Submitted!';
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(function(res) { 
+        if (!res.ok) throw new Error('Network error');
+        return res.json().catch(function(){ return {}; }); 
+      })
+      .then(function(data) {
+        console.log('[BYOB Quiz] Response:', data);
+        if (data && data.success) {
+          window.location.href = '/pages/thank-you'; // Redirect only on success
+        } else {
+          alert('Failed to save quiz: ' + (data.message || 'Unknown error'));
+          submitBtn.textContent = 'Submit';
+          submitBtn.disabled = false;
+        }
+      })
+      .catch(function(err) {
+        console.error('[BYOB Quiz] Error:', err);
+        alert('An error occurred. Please try again.');
+        submitBtn.textContent = 'Submit';
+        submitBtn.disabled = false;
       });
-      {% else %}
-        // If not logged in, just submit natively
-        form.submit();
-        submitBtn.textContent = 'Submitted!';
-      {% endif %}
     });
   }
 
