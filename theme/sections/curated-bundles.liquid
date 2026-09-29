@@ -235,28 +235,6 @@ function initCBAddToCart_{{ section.id | replace: '-', '_' }}() {
                     const cartData = await fetch(window.Shopify.routes ? window.Shopify.routes.root + 'cart.js' : '/cart.js').then(r => r.json()).catch(() => null);
                     resolvePromise({ cart: cartData, detail: { items: data.items || [data], sections: data.sections, itemCount: cartData ? cartData.item_count : 0 } });
 
-                    // Forcefully update the cart drawer to ensure immediate sync
-                    try {
-                        const sectionRes = await fetch((window.Shopify.routes ? window.Shopify.routes.root : '/') + '?section_id=cart-drawer-section');
-                        const sectionHtmlText = await sectionRes.text();
-                        const html = new DOMParser().parseFromString(sectionHtmlText, 'text/html');
-                        const newDrawer = html.querySelector('cart-drawer-component');
-                        const existingDrawer = document.querySelector('cart-drawer-component');
-                        if (newDrawer && existingDrawer) {
-                            existingDrawer.replaceWith(newDrawer);
-                        }
-                    } catch (e) {
-                        console.error('Error forcefully updating cart drawer:', e);
-                    }
-
-                    setTimeout(() => {
-                        const drawer = document.querySelector('theme-drawer#cart-drawer') || document.querySelector('theme-drawer');
-                        if (drawer && !drawer.hasAttribute('open')) {
-                            if (typeof drawer.open === 'function') drawer.open();
-                            else if (typeof drawer.show === 'function') drawer.show();
-                        }
-                    }, 100);
-
                     document.documentElement.dispatchEvent(new CustomEvent('cart:build', {bubbles: true}));
                 })
                 .catch(err => {

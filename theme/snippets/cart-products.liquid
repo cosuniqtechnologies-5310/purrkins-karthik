@@ -376,41 +376,6 @@
                           Remove
                         </button>
                       </div>
-                      {% if item.selling_plan_allocation %}
-                        <div class="cart-drawer-subscription-info">
-                          {% assign sub_saving = item.variant.price | minus: item.final_price | times: item.quantity %}
-                          {% if sub_saving > 0 %}
-                            <div class="cart-drawer-subscription-savings">
-                              You're saving {{ sub_saving | money }} on this order
-                            </div>
-                          {% endif %}
-                          <div class="cart-drawer-subscription-plan">
-                            <span class="plan-label">Delivers every</span>
-                            <select class="plan-select" onchange="
-                              var line = {{ item.index | plus: 1 }};
-                              var planId = this.value;
-                              var comp = this.closest('cart-items-component');
-                              var qty = {{ item.quantity }};
-                              if (comp && comp.updateMultiple) {
-                                var updates = {};
-                                updates['{{ item.key }}'] = { quantity: qty, selling_plan: planId };
-                                comp.updateMultiple(updates);
-                              }
-                            ">
-                              {% for group in item.product.selling_plan_groups %}
-                                {% for plan in group.selling_plans %}
-                                  <option value="{{ plan.id }}" {% if plan.id == item.selling_plan_allocation.selling_plan.id %}selected{% endif %}>
-                                    {{ plan.options[0].value | default: plan.name }}
-                                  </option>
-                                {% endfor %}
-                              {% endfor %}
-                            </select>
-                          </div>
-                          <div class="cart-drawer-subscription-note">
-                            Pause, skip or cancel anytime · Free delivery on every order
-                          </div>
-                        </div>
-                      {% endif %}
                     {%- else -%}
                       {% render 'volume-pricing-info',
                         variant: item.variant,
@@ -479,6 +444,43 @@
                     </div>
                   {%- endif -%}
                 </td>
+                {% if item.selling_plan_allocation and context == 'drawer' %}
+                  <td class="cart-drawer-subscription-cell" role="cell" headers="productInformation">
+                    <div class="cart-drawer-subscription-info">
+                      {% assign sub_saving = item.variant.price | minus: item.final_price | times: item.quantity %}
+                      {% if sub_saving > 0 %}
+                        <div class="cart-drawer-subscription-savings">
+                          You're saving {{ sub_saving | money }} on this order
+                        </div>
+                      {% endif %}
+                      <div class="cart-drawer-subscription-plan">
+                        <span class="plan-label">Delivers every</span>
+                        <select class="plan-select" onchange="
+                          var line = {{ item.index | plus: 1 }};
+                          var planId = this.value;
+                          var comp = this.closest('cart-items-component');
+                          var qty = {{ item.quantity }};
+                          if (comp && comp.updateMultiple) {
+                            var updates = {};
+                            updates['{{ item.key }}'] = { quantity: qty, selling_plan: planId };
+                            comp.updateMultiple(updates);
+                          }
+                        ">
+                          {% for group in item.product.selling_plan_groups %}
+                            {% for plan in group.selling_plans %}
+                              <option value="{{ plan.id }}" {% if plan.id == item.selling_plan_allocation.selling_plan.id %}selected{% endif %}>
+                                {{ plan.options[0].value | default: plan.name }}
+                              </option>
+                            {% endfor %}
+                          {% endfor %}
+                        </select>
+                      </div>
+                      <div class="cart-drawer-subscription-note">
+                        Pause, skip or cancel anytime · Free delivery on every order
+                      </div>
+                    </div>
+                  </td>
+                {% endif %}
               </tr>
             {% endfor %}
           </tbody>
@@ -640,11 +642,17 @@
     grid-template-areas:
       'media details price'
       'media quantity price'
-      'media error error';
+      'media error error'
+      'subscription subscription subscription';
     column-gap: var(--gap-md);
     align-items: start;
     padding-bottom: var(--cart-items-gap);
     margin-bottom: var(--margin-lg);
+  }
+
+  .cart-drawer-subscription-cell {
+    grid-area: subscription;
+    width: 100%;
   }
 
   .cart-items__details {
