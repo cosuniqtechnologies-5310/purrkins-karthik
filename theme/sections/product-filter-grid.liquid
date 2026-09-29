@@ -225,6 +225,8 @@
         const form = e.target;
         if (form && form.action && form.action.includes('/cart/add')) {
           e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
 
           const btn = form.querySelector('.btn-add-to-cart');
           const formData = new FormData(form);

@@ -431,14 +431,36 @@ export class CartItemsComponent extends createViewEventElement(Component) {
   #handleCartUpdate = (event) => {
     if (event.target === this) return;
 
+    console.log('[DEBUG cart-items] CartLinesUpdateEvent RECEIVED', {
+      target: event.target,
+      action: event.action,
+      hasPromise: !!event.promise,
+    });
+
     event.promise
       ?.then(async ({ detail }) => {
+        console.log('[DEBUG cart-items] Event promise RESOLVED', {
+          detail,
+          sections: detail?.sections,
+          sectionKeys: detail?.sections ? Object.keys(detail.sections) : [],
+        });
+
         const sections = detail?.sections;
         const cartItemsHtml = sections?.[this.sectionId];
-        // Animate empty → non-empty in the drawer (possible in squeeze mode
-        // where the page is interactive alongside the open drawer). This also
-        // needs the response stylesheet because it adds the cart summary markup.
+        
+        console.log('[DEBUG cart-items] SECTION ID', {
+          sectionId: this.sectionId,
+          datasetSectionId: this.dataset.sectionId,
+        });
+
+        console.log('[DEBUG cart-items] SECTION HTML PREVIEW', cartItemsHtml?.slice(0, 1000));
+
         const wasEmptyCartDrawer = this.isDrawer && this.querySelector('[data-cart-drawer-empty]') !== null;
+        
+        console.log('[DEBUG cart-items] EMPTY STATE', {
+          wasEmptyCartDrawer,
+          isDrawer: this.isDrawer
+        });
         /** @type {'hydration' | 'full'} */
         const mode = this.isDrawer ? 'hydration' : 'full';
         const morphOptions = {
@@ -449,6 +471,12 @@ export class CartItemsComponent extends createViewEventElement(Component) {
         if (cartItemsHtml) {
           const existingKeys = new Set(this.refs.cartItemRows?.map((row) => row.dataset.key) ?? []);
 
+          console.log('[DEBUG cart-items] ABOUT TO MORPH', {
+            sectionId: this.sectionId,
+            sectionHtmlExists: !!cartItemsHtml,
+            sectionHtmlLength: cartItemsHtml?.length,
+          });
+
           if (wasEmptyCartDrawer) {
             startViewTransition(() => {
               morphSection(this.sectionId, cartItemsHtml, morphOptions);
@@ -456,6 +484,15 @@ export class CartItemsComponent extends createViewEventElement(Component) {
           } else {
             await morphSection(this.sectionId, cartItemsHtml, morphOptions);
           }
+
+          console.log('[DEBUG cart-items] MORPH COMPLETED');
+
+          console.log('[DEBUG DOM AFTER MORPH]', {
+            cartItemsComponents: document.querySelectorAll('cart-items-component').length,
+            cartDrawerComponents: document.querySelectorAll('cart-drawer-component').length,
+            emptyDrawer: !!document.querySelector('.cart-drawer--empty'),
+            itemsContainer: !!document.querySelector('.cart-drawer__items'),
+          });
 
           // Animate newly added rows (reverse of the remove animation).
           if (!wasEmptyCartDrawer && !prefersReducedMotion()) {

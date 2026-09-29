@@ -56,6 +56,8 @@
     document.addEventListener('submit', function(e) {
       if (e.target && e.target.matches('.pf-add-to-cart-form')) {
         e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         const form = e.target;
         const btn = form.querySelector('.pf-add-to-cart-btn');
 

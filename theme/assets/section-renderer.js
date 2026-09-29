@@ -225,6 +225,11 @@ function containsShadowRoot(element) {
  * `style[data-section-stylesheet]` from the response and injects it into the section wrapper.
  */
 export async function morphSection(sectionId, html, options = {}) {
+  console.log('[DEBUG morphSection] START', {
+    sectionId,
+    mode: options?.mode,
+    htmlLength: html?.length,
+  });
   const { mode = 'full', injectStylesheet = false } = options;
   const fragment = new DOMParser().parseFromString(html, 'text/html');
   const existingElement = document.getElementById(buildSectionSelector(sectionId));

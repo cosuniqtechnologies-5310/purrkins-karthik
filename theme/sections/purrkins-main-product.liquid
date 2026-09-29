@@ -689,6 +689,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (productForm) {
         productForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
             
             const btn = productForm.querySelector('.pf-add-to-cart-btn');
 
