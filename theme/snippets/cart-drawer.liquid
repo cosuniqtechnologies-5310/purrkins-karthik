@@ -50,7 +50,7 @@
       class="theme-drawer__dialog color-custom-drawer"
       aria-labelledby="cart-drawer-heading"
       cart-summary-sticky="true"
-      style="border-top-left-radius: 24px; border-bottom-left-radius: 24px; overflow: hidden; z-index: 10000;"
+      style="border-top-left-radius: 24px; border-bottom-left-radius: 24px; overflow: hidden; z-index: 99999; box-shadow: -8px 0 40px rgba(0,0,0,0.18);"
     >
       <cart-drawer-component
         {% if settings.auto_open_cart_drawer and template.name != 'cart' %}
@@ -286,11 +286,14 @@
     padding-inline: 0;
   }
 
-  /* Rounded left corners to match design */
+  /* Cart drawer: fixed position, above header, left box-shadow */
   #cart-drawer .theme-drawer__dialog {
+    position: fixed !important;
+    z-index: 99999 !important;
     border-top-left-radius: 24px;
     border-bottom-left-radius: 24px;
     overflow: hidden;
+    box-shadow: -8px 0 40px rgba(0, 0, 0, 0.18), -2px 0 12px rgba(0, 0, 0, 0.1);
   }
 
   /* Subscription tab toggle */
