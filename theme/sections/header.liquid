@@ -388,3 +388,13 @@
   ]
 }
 {% endschema %}
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (localStorage.getItem('pk_session')) {
+      var links = document.querySelectorAll('a[href="/apps/purrkins/login"], a[href="/account"]');
+      links.forEach(function(l) { l.href = '/apps/purrkins/dashboard'; });
+    }
+  });
+</script>
