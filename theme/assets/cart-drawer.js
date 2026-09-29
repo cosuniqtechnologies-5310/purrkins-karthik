@@ -31,6 +31,16 @@ class CartDrawerComponent extends Component {
   connectedCallback() {
     super.connectedCallback();
     document.addEventListener(StandardEvents.cartLinesUpdate, this.#handleCartLinesUpdate);
+
+    // Reliable fallback for the close button, handles all clicks inside this component
+    this.addEventListener('click', (event) => {
+      const target = /** @type {HTMLElement} */ (event.target);
+      if (target.closest('.theme-drawer__close-button')) {
+        if (this.#themeDrawer && typeof this.#themeDrawer.close === 'function') {
+          this.#themeDrawer.close();
+        }
+      }
+    });
     this.#themeDrawer?.addEventListener(DrawerOpenEvent.eventName, this.#handleDrawerOpen);
     this.addEventListener('click', this.#handleTabClick);
 
@@ -98,6 +108,16 @@ class CartDrawerComponent extends Component {
    */
   #handleDrawerOpen = () => {
     this.#updateStickyState();
+
+    const closeBtn = /** @type {HTMLElement | null} */ (this.querySelector('.theme-drawer__close-button'));
+    if (closeBtn && !closeBtn.dataset.nativeBound) {
+      closeBtn.addEventListener('click', () => {
+        if (this.#themeDrawer && typeof this.#themeDrawer.close === 'function') {
+          this.#themeDrawer.close();
+        }
+      });
+      closeBtn.dataset.nativeBound = 'true';
+    }
 
     // Close cart drawer when installments CTA is clicked to avoid overlapping dialogs.
     // Re-queried on every open so it survives cart content re-renders that
