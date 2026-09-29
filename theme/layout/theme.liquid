@@ -35,10 +35,7 @@
     <!-- Purrkins Custom Global CSS and Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap"
-      rel="stylesheet"
-    >
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet">
     <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ 'purrkins-globals.css' | asset_url }}">
     {% if request.page_type == 'product' %}
@@ -49,129 +46,122 @@
       let isUpdatingCart = false;
       let cartUpdateQueue = [];
 
-      window.purrkinsAddToCart = function (itemsArr, button, formData = null) {
-        cartUpdateQueue.push({ itemsArr, button, formData });
-        if (!isUpdatingCart) {
-          processCartQueue();
-        }
+      window.purrkinsAddToCart = function(itemsArr, button, formData = null) {
+          cartUpdateQueue.push({ itemsArr, button, formData });
+          if (!isUpdatingCart) {
+              processCartQueue();
+          }
       };
 
       async function processCartQueue() {
-        if (cartUpdateQueue.length === 0) {
-          isUpdatingCart = false;
-          return;
-        }
-
-        isUpdatingCart = true;
-        const { itemsArr, button, formData } = cartUpdateQueue.shift();
-
-        if (button) {
-          button.dataset.originalText = button.innerHTML;
-          button.innerHTML = 'Adding...';
-          button.disabled = true;
-          button.style.opacity = '0.7';
-        }
-
-        let items = itemsArr;
-        if (formData) {
-          const id = formData.get('id');
-          const quantity = formData.get('quantity') || 1;
-          const selling_plan = formData.get('selling_plan');
-          const properties = {};
-          for (const [key, value] of formData.entries()) {
-            if (key.startsWith('properties[')) {
-              const propName = key.substring(11, key.length - 1);
-              properties[propName] = value;
-            }
-          }
-          const item = { id, quantity, properties };
-          if (selling_plan) {
-            item.selling_plan = selling_plan;
-          }
-          items = [item];
-        }
-
-        const payload = {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-          },
-          body: JSON.stringify({
-            items: items,
-            sections: 'cart-drawer-section',
-            sections_url: window.location.pathname,
-          }),
-        };
-
-        console.log('[purrkinsAddToCart] Sending request to cart...', payload);
-
-        // Dispatch the update event BEFORE fetch, matching product-form.js behavior
-        const eventName =
-          window.StandardEvents && window.StandardEvents.cartLinesUpdate
-            ? window.StandardEvents.cartLinesUpdate
-            : 'shopify:cart:lines-update';
-        const updateEvent = new CustomEvent(eventName, { bubbles: true });
-        updateEvent.action = 'add';
-        let resolvePromise, rejectPromise;
-        const promise = new Promise((resolve, reject) => {
-          resolvePromise = resolve;
-          rejectPromise = reject;
-        });
-        updateEvent.promise = promise;
-        document.dispatchEvent(updateEvent);
-
-        try {
-          const res = await fetch(
-            window.Shopify && window.Shopify.routes ? window.Shopify.routes.root + 'cart/add.js' : '/cart/add.js',
-            payload
-          );
-          const data = await res.json().catch(() => ({}));
-
-          if (!res.ok) {
-            throw new Error(data.description || data.message || 'Error adding to cart');
+          if (cartUpdateQueue.length === 0) {
+              isUpdatingCart = false;
+              return;
           }
 
-          console.log('[purrkinsAddToCart] Successfully added item to cart:', data);
+          isUpdatingCart = true;
+          const { itemsArr, button, formData } = cartUpdateQueue.shift();
 
-          const cartData = await fetch(window.Shopify.routes ? window.Shopify.routes.root + 'cart.js' : '/cart.js')
-            .then((r) => r.json())
-            .catch(() => null);
-          console.log('[purrkinsAddToCart] Fetched full cart data:', cartData);
+          if (button) {
+              button.dataset.originalText = button.innerHTML;
+              button.innerHTML = 'Adding...';
+              button.disabled = true;
+              button.style.opacity = '0.7';
+          }
 
-          resolvePromise({
-            cart: cartData,
-            detail: {
-              items: data.items || [data],
-              sections: data.sections,
-              itemCount: cartData ? cartData.item_count : 0,
-            },
+          let items = itemsArr;
+          if (formData) {
+              const id = formData.get('id');
+              const quantity = formData.get('quantity') || 1;
+              const selling_plan = formData.get('selling_plan');
+              const properties = {};
+              for (const [key, value] of formData.entries()) {
+                  if (key.startsWith('properties[')) {
+                      const propName = key.substring(11, key.length - 1);
+                      properties[propName] = value;
+                  }
+              }
+              const item = { id, quantity, properties };
+              if (selling_plan) {
+                  item.selling_plan = selling_plan;
+              }
+              items = [item];
+          }
+
+          const payload = {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'X-Requested-With': 'XMLHttpRequest'
+              },
+              body: JSON.stringify({
+                  items: items,
+                  sections: 'cart-drawer-section',
+                  sections_url: window.location.pathname
+              })
+          };
+
+          console.log('[purrkinsAddToCart] Sending request to cart...', payload);
+
+          // Dispatch the update event BEFORE fetch, matching product-form.js behavior
+          const eventName = (window.StandardEvents && window.StandardEvents.cartLinesUpdate) ? window.StandardEvents.cartLinesUpdate : 'shopify:cart:lines-update';
+          const updateEvent = new CustomEvent(eventName, { bubbles: true });
+          updateEvent.action = 'add';
+          let resolvePromise, rejectPromise;
+          const promise = new Promise((resolve, reject) => { 
+              resolvePromise = resolve; 
+              rejectPromise = reject;
           });
+          updateEvent.promise = promise;
+          document.dispatchEvent(updateEvent);
 
-          document.documentElement.dispatchEvent(new CustomEvent('cart:build', { bubbles: true }));
+          try {
+              const res = await fetch((window.Shopify && window.Shopify.routes) ? window.Shopify.routes.root + 'cart/add.js' : '/cart/add.js', payload);
+              const data = await res.json().catch(() => ({}));
+              
+              if (!res.ok) {
+                  throw new Error(data.description || data.message || 'Error adding to cart');
+              }
+              
+              console.log('[purrkinsAddToCart] Successfully added item to cart:', data);
 
-          if (button) {
-            button.innerHTML = button.dataset.originalText;
-            button.disabled = false;
-            button.style.opacity = '1';
+              const cartData = await fetch(window.Shopify.routes ? window.Shopify.routes.root + 'cart.js' : '/cart.js').then(r => r.json()).catch(() => null);
+              console.log('[purrkinsAddToCart] Fetched full cart data:', cartData);
+              
+              resolvePromise({ 
+                  cart: cartData, 
+                  detail: { 
+                      items: data.items || [data], 
+                      sections: data.sections, 
+                      itemCount: cartData ? cartData.item_count : 0 
+                  } 
+              });
+              
+              document.documentElement.dispatchEvent(new CustomEvent('cart:build', {bubbles: true}));
+
+              if (button) {
+                  button.innerHTML = button.dataset.originalText;
+                  button.disabled = false;
+                  button.style.opacity = '1';
+              }
+          } catch (error) {
+              console.error('[purrkinsAddToCart] Error:', error);
+              rejectPromise(error);
+              if (button) {
+                  button.innerHTML = button.dataset.originalText || 'Add to Cart';
+                  button.disabled = false;
+                  button.style.opacity = '1';
+              }
+              alert('Could not add item to cart: ' + error.message);
+          } finally {
+              // Wait briefly for DOM updates to settle before processing next in queue
+              setTimeout(() => {
+                  processCartQueue();
+              }, 400); // 400ms matches the typical View Transition duration
           }
-        } catch (error) {
-          console.error('[purrkinsAddToCart] Error:', error);
-          rejectPromise(error);
-          if (button) {
-            button.innerHTML = button.dataset.originalText || 'Add to Cart';
-            button.disabled = false;
-            button.style.opacity = '1';
-          }
-          alert('Could not add item to cart: ' + error.message);
-        } finally {
-          // Wait briefly for DOM updates to settle before processing next in queue
-          setTimeout(() => {
-            processCartQueue();
-          }, 400); // 400ms matches the typical View Transition duration
-        }
       }
     </script>
+
 
     {{ content_for_header }}
   </head>

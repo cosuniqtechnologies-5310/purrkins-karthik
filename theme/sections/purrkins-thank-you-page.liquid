@@ -9,27 +9,15 @@
       {% for pet in customer.metafields.custom.pets.value %}
         <div class="quiz-results-card" style="{% if forloop.index0 > 0 %}margin-top: 40px;{% endif %}">
           <h2>Recommend for {{ pet.name.value | default: pet.name | default: 'your kitten' }}</h2>
-
+          
           <div class="quiz-pills-container">
-            {% if pet.age.value != blank or pet.age != blank -%}
-              <span class="quiz-pill">{{ pet.age.value | default: pet.age }}</span>
-            {%- endif %}
-            {% if pet.weight.value != blank or pet.weight != blank -%}
-              <span class="quiz-pill">{{ pet.weight.value | default: pet.weight }}</span>
-            {%- endif %}
-            {% if pet.gender.value != blank or pet.gender != blank -%}
-              <span class="quiz-pill">{{ pet.gender.value | default: pet.gender }}</span>
-            {%- endif %}
-            {% if pet.neutered.value != blank or pet.neutered != blank -%}
-              <span class="quiz-pill">{{ pet.neutered.value | default: pet.neutered }}</span>
-            {%- endif %}
-            {% if pet.body.value != blank or pet.body != blank -%}
-              <span class="quiz-pill">{{ pet.body.value | default: pet.body }}</span>
-            {%- endif %}
-            {% if pet.activity.value != blank or pet.activity != blank -%}
-              <span class="quiz-pill">{{ pet.activity.value | default: pet.activity }}</span>
-            {%- endif %}
-
+            {% if pet.age.value != blank or pet.age != blank %}<span class="quiz-pill">{{ pet.age.value | default: pet.age }}</span>{% endif %}
+            {% if pet.weight.value != blank or pet.weight != blank %}<span class="quiz-pill">{{ pet.weight.value | default: pet.weight }}</span>{% endif %}
+            {% if pet.gender.value != blank or pet.gender != blank %}<span class="quiz-pill">{{ pet.gender.value | default: pet.gender }}</span>{% endif %}
+            {% if pet.neutered.value != blank or pet.neutered != blank %}<span class="quiz-pill">{{ pet.neutered.value | default: pet.neutered }}</span>{% endif %}
+            {% if pet.body.value != blank or pet.body != blank %}<span class="quiz-pill">{{ pet.body.value | default: pet.body }}</span>{% endif %}
+            {% if pet.activity.value != blank or pet.activity != blank %}<span class="quiz-pill">{{ pet.activity.value | default: pet.activity }}</span>{% endif %}
+            
             {% assign pet_focus = pet.focus.value | default: pet.focus %}
             {% if pet_focus != blank %}
               {% assign focuses = pet_focus | split: ',' %}
@@ -40,15 +28,15 @@
           </div>
 
           <div class="quiz-recommendations-grid">
-            {% assign bg_colors = '#E8F4FE,#FFF2E8,#EAF6F0' | split: ',' %}
-            {% assign found_handles = '' %}
+            {% assign bg_colors = "#E8F4FE,#FFF2E8,#EAF6F0" | split: "," %}
+            {% assign found_handles = "" %}
             {% assign found_count = 0 %}
-
+            
             {% assign pet_focus = pet.focus.value | default: pet.focus %}
             {% if pet_focus != blank %}
               {% assign areas = pet_focus | split: ',' %}
               {% assign search_pool = collections.all.products %}
-
+              
               {% for prod in search_pool %}
                 {% assign matched = false %}
                 {% for area in areas %}
@@ -58,12 +46,12 @@
                     {% assign matched = true %}
                   {% endif %}
                 {% endfor %}
-
+                
                 {% if matched %}
-                  {% if found_handles == '' %}
+                  {% if found_handles == "" %}
                     {% assign found_handles = prod.handle %}
                   {% else %}
-                    {% assign found_handles = found_handles | append: ',' | append: prod.handle %}
+                    {% assign found_handles = found_handles | append: "," | append: prod.handle %}
                   {% endif %}
                   {% assign found_count = found_count | plus: 1 %}
                   {% if found_count >= 3 %}{% break %}{% endif %}
@@ -73,26 +61,18 @@
 
             <!-- RENDER CARDS -->
             {% if found_count > 0 %}
-              {% assign handle_array = found_handles | split: ',' %}
+              {% assign handle_array = found_handles | split: "," %}
               {% for handle in handle_array limit: 3 %}
                 {% assign prod = all_products[handle] %}
-                {% assign bg_color = bg_colors[forloop.index0] | default: '#E8F4FE' %}
+                {% assign bg_color = bg_colors[forloop.index0] | default: "#E8F4FE" %}
                 <div class="quiz-rec-card" style="background-color: {{ bg_color }};">
                   <div class="quiz-rec-image">
-                    <img
-                      src="{{ prod.featured_image | image_url: width: 200 }}"
-                      alt="{{ prod.title }}"
-                      width="100"
-                      height="100"
-                      loading="lazy"
-                    >
+                    <img src="{{ prod.featured_image | image_url: width: 200 }}" alt="{{ prod.title }}" width="100" height="100" loading="lazy">
                   </div>
                   <div class="quiz-rec-content">
                     <h3>{{ prod.title }}</h3>
-                    <p>
-                      {{ prod.metafields.custom.short_description | default: 'Nourishing fuel for growing kittens.' }}
-                    </p>
-
+                    <p>{{ prod.metafields.custom.short_description | default: 'Nourishing fuel for growing kittens.' }}</p>
+                    
                     <form method="post" action="{{ routes.cart_add_url }}" class="quiz-rec-form">
                       <input type="hidden" name="id" value="{{ prod.variants.first.id }}">
                       <button type="submit" class="quiz-rec-btn">Add to Cart</button>
@@ -102,22 +82,13 @@
               {% endfor %}
             {% else %}
               <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: #f9f9f9; border-radius: 16px; border: 1px dashed #d1d1d1; color: #595961;">
-                <h3 style="margin-top: 0; font-family: var(--purrkins-heading-font); color: #121217; margin-bottom: 8px;">
-                  No exact matches found
-                </h3>
-                <p style="margin-bottom: 0;">
-                  We couldn't find products that exactly match
-                  <strong>{{ pet.name.value | default: pet.name | default: 'your cat' }}'s</strong> specific focus
-                  areas. Please browse our collections below!
-                </p>
+                <h3 style="margin-top: 0; font-family: var(--purrkins-heading-font); color: #121217; margin-bottom: 8px;">No exact matches found</h3>
+                <p style="margin-bottom: 0;">We couldn't find products that exactly match <strong>{{ pet.name.value | default: pet.name | default: 'your cat' }}'s</strong> specific focus areas. Please browse our collections below!</p>
               </div>
             {% endif %}
           </div>
-
-          <p class="quiz-results-footer-note">
-            Based on {{ pet.name.value | default: pet.name | default: 'your cat' }}'s profile. Fresh water alongside
-            every meal.
-          </p>
+          
+          <p class="quiz-results-footer-note">Based on {{ pet.name.value | default: pet.name | default: "your cat" }}'s profile. Fresh water alongside every meal.</p>
         </div>
       {% endfor %}
     {% elsif customer and customer.note %}
@@ -256,15 +227,10 @@
         >
       </div>
     {% endif %}
-
+    
     {% if customer %}
       <div style="text-align: center; margin-top: 30px;">
-        <a
-          href="/pages/quiz"
-          class="quiz-rec-btn"
-          style="background: #121217; padding: 14px 32px; font-size: 16px; border-radius: 30px; text-decoration: none; display: inline-block;"
-          >+ Add Another Cat's Profile</a
-        >
+        <a href="/pages/quiz" class="quiz-rec-btn" style="background: #121217; padding: 14px 32px; font-size: 16px; border-radius: 30px; text-decoration: none; display: inline-block;">+ Add Another Cat's Profile</a>
       </div>
     {% endif %}
   </div>
@@ -327,6 +293,8 @@
     font-family: var(--purrkins-body-font, sans-serif);
     padding: 40px 20px;
   }
+
+
   .quiz-results-hero {
     background: linear-gradient(135deg, #fff9e6 0%, #f6ebff 50%, #e8f2ff 100%);
     border-radius: 24px;

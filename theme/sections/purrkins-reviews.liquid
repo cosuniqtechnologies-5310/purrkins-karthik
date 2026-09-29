@@ -1,375 +1,92 @@
-<div class="purrkins-reviews-section {{ section.settings.custom_class }}">
-    <div class="purrkins-container purrkins-section-block">
-        <h2 class="purrkins-reviews-heading purrkins-h2-text">{{ section.settings.heading }}</h2>
-        
-        <div class="purrkins-reviews-top-bar">
-            <!-- Overall Rating -->
-            <div class="purrkins-reviews-overall">
-                <div class="pr-overall-score">{{ section.settings.overall_rating }}</div>
-                <div class="pr-overall-stars">
-                    {% for i in (1..5) %}
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 20 20" fill="none">
-                            <path d="M9.38457 1.86886C9.42023 1.79681 9.47532 1.73617 9.54361 1.69377C9.6119 1.65137 9.69069 1.62891 9.77107 1.62891C9.85145 1.62891 9.93024 1.65137 9.99853 1.69377C10.0668 1.73617 10.1219 1.79681 10.1576 1.86886L12.0372 5.67606C12.161 5.92665 12.3438 6.14344 12.5698 6.30784C12.7959 6.47224 13.0584 6.57934 13.335 6.61993L17.5385 7.23507C17.6181 7.24661 17.6929 7.28021 17.7545 7.33206C17.816 7.38391 17.8618 7.45195 17.8867 7.52849C17.9116 7.60502 17.9146 7.68699 17.8953 7.76513C17.8761 7.84327 17.8353 7.91445 17.7777 7.97064L14.7378 10.9308C14.5373 11.1262 14.3873 11.3673 14.3007 11.6335C14.2141 11.8997 14.1935 12.183 14.2406 12.4589L14.9583 16.6412C14.9723 16.7208 14.9637 16.8028 14.9335 16.8777C14.9032 16.9527 14.8524 17.0176 14.787 17.0651C14.7216 17.1126 14.6442 17.1408 14.5635 17.1464C14.4829 17.152 14.4023 17.1349 14.3309 17.0969L10.5734 15.1213C10.3258 14.9912 10.0503 14.9233 9.77066 14.9233C9.49102 14.9233 9.21556 14.9912 8.96797 15.1213L5.21121 17.0969C5.13988 17.1346 5.05938 17.1516 4.97887 17.1459C4.89836 17.1402 4.82107 17.112 4.75579 17.0645C4.69052 17.017 4.63987 16.9522 4.60962 16.8774C4.57937 16.8025 4.57073 16.7207 4.58468 16.6412L5.30153 12.4597C5.34888 12.1836 5.32837 11.9002 5.24176 11.6339C5.15514 11.3675 5.00503 11.1262 4.80437 10.9308L1.76447 7.97145C1.70636 7.91533 1.66519 7.84402 1.64564 7.76565C1.62608 7.68727 1.62894 7.60498 1.65387 7.52815C1.6788 7.45132 1.72481 7.38303 1.78666 7.33107C1.84851 7.27911 1.92371 7.24556 2.00369 7.23426L6.20634 6.61993C6.4832 6.57965 6.74613 6.4727 6.97249 6.30828C7.19885 6.14386 7.38187 5.92689 7.50579 5.67606L9.38457 1.86886Z" fill="#FFE330" stroke="#FFE330" stroke-width="1.46389" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    {% endfor %}
-                </div>
-            </div>
-            
-            <!-- Distribution Bars -->
-            <div class="purrkins-reviews-distribution">
-                <div class="pr-dist-row">
-                    <span class="pr-dist-label">5 <span style="color:#FFE330;">&#9733;</span></span>
-                    <div class="pr-dist-bar-bg"><div class="pr-dist-bar-fill" style="width: 85%;"></div></div>
-                </div>
-                <div class="pr-dist-row">
-                    <span class="pr-dist-label">4 <span style="color:#FFE330;">&#9733;</span></span>
-                    <div class="pr-dist-bar-bg"><div class="pr-dist-bar-fill" style="width: 65%;"></div></div>
-                </div>
-                <div class="pr-dist-row">
-                    <span class="pr-dist-label">3 <span style="color:#FFE330;">&#9733;</span></span>
-                    <div class="pr-dist-bar-bg"><div class="pr-dist-bar-fill" style="width: 15%;"></div></div>
-                </div>
-                <div class="pr-dist-row">
-                    <span class="pr-dist-label">2 <span style="color:#FFE330;">&#9733;</span></span>
-                    <div class="pr-dist-bar-bg"><div class="pr-dist-bar-fill" style="width: 5%;"></div></div>
-                </div>
-                <div class="pr-dist-row">
-                    <span class="pr-dist-label">1 <span style="color:#FFE330;">&#9733;</span></span>
-                    <div class="pr-dist-bar-bg"><div class="pr-dist-bar-fill" style="width: 0%;"></div></div>
-                </div>
-            </div>
-
-            <!-- Photos -->
-            <div class="purrkins-reviews-photos">
-                <div class="pr-photo-item" style="background-image: url('https://cdn.shopify.com/s/files/1/0888/9652/0488/files/pet1.webp?v=1727341852');"></div>
-                <div class="pr-photo-item" style="background-image: url('https://cdn.shopify.com/s/files/1/0888/9652/0488/files/pet2.webp?v=1727341852');"></div>
-                <div class="pr-photo-item pr-photo-more" style="background-image: url('https://cdn.shopify.com/s/files/1/0888/9652/0488/files/pet3.webp?v=1727341852');">
-                    <span>More</span>
-                </div>
-            </div>
-
-            <!-- Write Review Button -->
-            <div class="purrkins-reviews-action">
-                <button class="pr-write-btn purrkins-btn-primary">Write a Review</button>
-            </div>
-        </div>
-
-        <hr class="pr-divider">
-
-        <div class="purrkins-reviews-list">
-            {% for block in section.blocks %}
-                <div class="pr-review-item" {{ block.shopify_attributes }}>
-                    <div class="pr-review-meta">
-                        <div class="pr-review-author">
-                            <strong>{{ block.settings.author_name }}</strong>
-                            {% if block.settings.verified %}
-                                <span class="pr-verified-badge">| Verified Buyer <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M12 6C12 9.31371 9.31371 12 6 12C2.68629 12 0 9.31371 0 6C0 2.68629 2.68629 0 6 0C9.31371 0 12 2.68629 12 6Z" fill="#21252A"/><path d="M3.5 6L5 7.5L8.5 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-                            {% endif %}
-                        </div>
-                        <div class="pr-review-date">{{ block.settings.date }}</div>
-                    </div>
-                    <div class="pr-review-content">
-                        <div class="pr-review-stars">
-                            {% for i in (1..5) %}
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 20 20" fill="none">
-                                    <path d="M9.38457 1.86886C9.42023 1.79681 9.47532 1.73617 9.54361 1.69377C9.6119 1.65137 9.69069 1.62891 9.77107 1.62891C9.85145 1.62891 9.93024 1.65137 9.99853 1.69377C10.0668 1.73617 10.1219 1.79681 10.1576 1.86886L12.0372 5.67606C12.161 5.92665 12.3438 6.14344 12.5698 6.30784C12.7959 6.47224 13.0584 6.57934 13.335 6.61993L17.5385 7.23507C17.6181 7.24661 17.6929 7.28021 17.7545 7.33206C17.816 7.38391 17.8618 7.45195 17.8867 7.52849C17.9116 7.60502 17.9146 7.68699 17.8953 7.76513C17.8761 7.84327 17.8353 7.91445 17.7777 7.97064L14.7378 10.9308C14.5373 11.1262 14.3873 11.3673 14.3007 11.6335C14.2141 11.8997 14.1935 12.183 14.2406 12.4589L14.9583 16.6412C14.9723 16.7208 14.9637 16.8028 14.9335 16.8777C14.9032 16.9527 14.8524 17.0176 14.787 17.0651C14.7216 17.1126 14.6442 17.1408 14.5635 17.1464C14.4829 17.152 14.4023 17.1349 14.3309 17.0969L10.5734 15.1213C10.3258 14.9912 10.0503 14.9233 9.77066 14.9233C9.49102 14.9233 9.21556 14.9912 8.96797 15.1213L5.21121 17.0969C5.13988 17.1346 5.05938 17.1516 4.97887 17.1459C4.89836 17.1402 4.82107 17.112 4.75579 17.0645C4.69052 17.017 4.63987 16.9522 4.60962 16.8774C4.57937 16.8025 4.57073 16.7207 4.58468 16.6412L5.30153 12.4597C5.34888 12.1836 5.32837 11.9002 5.24176 11.6339C5.15514 11.3675 5.00503 11.1262 4.80437 10.9308L1.76447 7.97145C1.70636 7.91533 1.66519 7.84402 1.64564 7.76565C1.62608 7.68727 1.62894 7.60498 1.65387 7.52815C1.6788 7.45132 1.72481 7.38303 1.78666 7.33107C1.84851 7.27911 1.92371 7.24556 2.00369 7.23426L6.20634 6.61993C6.4832 6.57965 6.74613 6.4727 6.97249 6.30828C7.19885 6.14386 7.38187 5.92689 7.50579 5.67606L9.38457 1.86886Z" fill="#FFE330" stroke="#FFE330" stroke-width="1.46389" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            {% endfor %}
-                        </div>
-                        <h4 class="pr-review-title">{{ block.settings.title }}</h4>
-                        <div class="pr-review-text">{{ block.settings.text }}</div>
-                        {% if block.settings.image %}
-                            <div class="pr-review-image">
-                                <img src="{{ block.settings.image | image_url: width: 300 }}" alt="Review Photo" loading="lazy" width="160" height="auto">
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-                <hr class="pr-divider-light">
-            {% endfor %}
-        </div>
-
-        <div class="purrkins-reviews-bottom-action">
-            <button class="pr-read-more-btn purrkins-btn-primary">Read More Review</button>
-        </div>
-    </div>
+<div class="purrkins-judgeme-section purrkins-container purrkins-section-block">
+    <div style='clear:both'></div> 
+    <div id='judgeme_product_reviews' class='jdgm-widget jdgm-review-widget' data-id='{{ product.id }}'> 
+      {{ product.metafields.judgeme.widget }} 
+    </div> 
 </div>
 
 <style>
-.purrkins-reviews-section {
+/* CSS overrides to make Judge.me match the Purrkins design */
+.purrkins-judgeme-section {
     padding: 60px 0;
-    background-color: var(--color-background, #FFF);
 }
-.purrkins-reviews-heading {
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--semantic-text-primary, #21252A);
-    margin-bottom: 40px;
+/* Change star color to custom yellow */
+.purrkins-judgeme-section .jdgm-star {
+    color: #FFE330 !important;
 }
-.purrkins-reviews-top-bar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 40px;
-    margin-bottom: 40px;
+/* Style the review button */
+.purrkins-judgeme-section .jdgm-write-rev-link {
+    background-color: #FFE330 !important;
+    color: #21252A !important;
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+    padding: 12px 24px !important;
+    text-transform: none !important;
+    border: none !important;
+    transition: transform 0.2s;
 }
-.purrkins-reviews-overall {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
+.purrkins-judgeme-section .jdgm-write-rev-link:hover {
+    transform: translateY(-2px);
 }
-.pr-overall-score {
-    font-size: 48px;
-    font-weight: 800;
-    line-height: 1;
-    font-family: var(--purrkins-heading-font);
-    color: #21252A;
+/* Style the histogram bars to be teal */
+.purrkins-judgeme-section .jdgm-histogram__bar-content {
+    background-color: #87C6C6 !important;
 }
-.pr-overall-stars {
-    display: flex;
-    gap: 2px;
+.purrkins-judgeme-section .jdgm-histogram__bar {
+    background-color: #F0F0F1 !important;
+    border-radius: 999px !important;
 }
-.purrkins-reviews-distribution {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    width: 200px;
+/* Make the overall rating text huge */
+.purrkins-judgeme-section .jdgm-rev-widg__summary-average {
+    font-size: 48px !important;
+    font-weight: 800 !important;
+    font-family: var(--purrkins-heading-font) !important;
+    color: #21252A !important;
 }
-.pr-dist-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    font-weight: 700;
-    color: #21252A;
+/* Review headers and bodies */
+.purrkins-judgeme-section .jdgm-rev__title {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    font-family: var(--purrkins-heading-font) !important;
+    color: #21252A !important;
+    margin-bottom: 8px !important;
 }
-.pr-dist-label {
-    width: 20px;
-    text-align: right;
+.purrkins-judgeme-section .jdgm-rev__body {
+    font-size: 16px !important;
+    color: #595961 !important;
+    line-height: 1.5 !important;
 }
-.pr-dist-bar-bg {
-    flex-grow: 1;
-    height: 6px;
-    background-color: #F0F0F1;
-    border-radius: 999px;
-    overflow: hidden;
+.purrkins-judgeme-section .jdgm-rev__author {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #21252A !important;
 }
-.pr-dist-bar-fill {
-    height: 100%;
-    background-color: #87C6C6;
-    border-radius: 999px;
+/* Verified buyer badge */
+.purrkins-judgeme-section .jdgm-rev__buyer-badge {
+    color: #595961 !important;
+    background: none !important;
+    border: none !important;
+    font-size: 12px !important;
+    padding: 0 !important;
 }
-.purrkins-reviews-photos {
-    display: flex;
-    gap: 12px;
+.purrkins-judgeme-section .jdgm-rev__timestamp {
+    color: #595961 !important;
+    font-size: 14px !important;
 }
-.pr-photo-item {
-    width: 80px;
-    height: 80px;
-    border-radius: 12px;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-    overflow: hidden;
-}
-.pr-photo-more {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.pr-photo-more::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.4);
-}
-.pr-photo-more span {
-    position: relative;
-    z-index: 1;
-    color: #FFF;
-    font-weight: 700;
-    font-size: 14px;
-}
-.purrkins-reviews-action {
-    margin-left: auto;
-}
-.pr-write-btn {
-    padding: 12px 24px;
-    font-size: 14px;
-}
-.pr-divider {
-    border: none;
-    border-top: 1px solid #E0E0E3;
-    margin: 40px 0;
-}
-.pr-divider-light {
-    border: none;
-    border-top: 1px solid #F0F0F1;
-    margin: 32px 0;
-}
-.pr-review-item {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 40px;
-}
-.pr-review-author {
-    font-size: 14px;
-    font-weight: 700;
-    color: #21252A;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.pr-verified-badge {
-    color: #595961;
-    font-weight: 400;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-.pr-review-date {
-    font-size: 14px;
-    color: #595961;
-}
-.pr-review-stars {
-    display: flex;
-    gap: 2px;
-    margin-bottom: 12px;
-}
-.pr-review-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #21252A;
-    margin: 0 0 12px 0;
-    font-family: var(--purrkins-heading-font);
-}
-.pr-review-text {
-    font-size: 16px;
-    line-height: 1.5;
-    color: #595961;
-    margin-bottom: 16px;
-}
-.pr-review-image img {
-    border-radius: 12px;
-    object-fit: cover;
-}
-.purrkins-reviews-bottom-action {
-    display: flex;
-    justify-content: center;
-    margin-top: 40px;
-}
-
-@media(max-width: 991px) {
-    .purrkins-reviews-top-bar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 24px;
-    }
-    .purrkins-reviews-action {
-        margin-left: 0;
-        width: 100%;
-    }
-    .pr-write-btn {
-        width: 100%;
-    }
-    .pr-review-item {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
+/* Divider lines */
+.purrkins-judgeme-section .jdgm-rev {
+    border-top: 1px solid #E0E0E3 !important;
+    padding: 30px 0 !important;
 }
 </style>
 
 {% schema %}
 {
-  "name": "Purrkins Reviews",
-  "settings": [
-    {
-      "type": "text",
-      "id": "heading",
-      "label": "Heading",
-      "default": "Customer reviews"
-    },
-    {
-      "type": "text",
-      "id": "overall_rating",
-      "label": "Overall Rating",
-      "default": "4.5"
-    },
-    {
-      "type": "text",
-      "id": "custom_class",
-      "label": "Custom Class"
-    }
-  ],
-  "blocks": [
-    {
-      "type": "review",
-      "name": "Review",
-      "settings": [
-        {
-          "type": "text",
-          "id": "author_name",
-          "label": "Author Name",
-          "default": "Aarav M"
-        },
-        {
-          "type": "checkbox",
-          "id": "verified",
-          "label": "Verified Buyer",
-          "default": true
-        },
-        {
-          "type": "text",
-          "id": "date",
-          "label": "Date String",
-          "default": "2 months ago"
-        },
-        {
-          "type": "text",
-          "id": "title",
-          "label": "Review Title",
-          "default": "Best decision for our kitten!"
-        },
-        {
-          "type": "textarea",
-          "id": "text",
-          "label": "Review Text",
-          "default": "We switched to Purrkins when our 3-month-old kitten became really picky with food..."
-        },
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Optional Photo"
-        }
-      ]
-    }
-  ],
+  "name": "Judge.me Reviews Widget",
+  "settings": [],
   "presets": [
     {
-      "name": "Purrkins Reviews",
-      "blocks": [
-        {
-          "type": "review"
-        },
-        {
-          "type": "review",
-          "settings": {
-            "author_name": "Priya S",
-            "title": "Highly recommend",
-            "text": "Excellent quality, and our kitten gets excited for every meal."
-          }
-        },
-        {
-          "type": "review",
-          "settings": {
-            "author_name": "Rohan Mehra",
-            "title": "Finally found food he actually finishes.",
-            "text": "Our kitten used to sniff every brand and walk away after a few bites. We tried Purrkins on a friend's recommendation, and now he finishes every meal without fuss. The ingredients feel premium, the portions are perfect, and the monthly delivery means we never run out. Couldn't be happier."
-          }
-        }
-      ]
+      "name": "Judge.me Reviews Widget"
     }
   ]
 }

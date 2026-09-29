@@ -60,7 +60,6 @@ html[scroll-lock] .page-wrapper {
 }
 
 .page-wrapper--drawer-open {
-  margin-right: var(--theme-drawer-width, var(--sidebar-width));
   transition-timing-function: var(--animation-timing-fade-in);
 }
 

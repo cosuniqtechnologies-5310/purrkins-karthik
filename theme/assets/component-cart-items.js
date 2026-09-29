@@ -477,6 +477,13 @@ export class CartItemsComponent extends createViewEventElement(Component) {
             sectionHtmlLength: cartItemsHtml?.length,
           });
 
+          console.log('[DEBUG DOM BEFORE MORPH]', {
+            cartItemsComponents: document.querySelectorAll('cart-items-component').length,
+            cartDrawerComponents: document.querySelectorAll('cart-drawer-component').length,
+            emptyDrawer: !!document.querySelector('.cart-drawer--empty'),
+            itemsContainer: !!document.querySelector('.cart-drawer__items'),
+          });
+
           if (wasEmptyCartDrawer) {
             startViewTransition(() => {
               morphSection(this.sectionId, cartItemsHtml, morphOptions);
