@@ -35,8 +35,10 @@
             id="fs-raw-form-{{ section.id }}"
             class="fs-raw-form fs-ajax-form"
             data-endpoint="{{ section.settings.api_endpoint | default: '/apps/purrkins/customer' }}"
+            novalidate
           >
             <div class="fs-form-success" style="display: none;">Claimed! We will reach out soon.</div>
+            <div class="fs-error-msg" style="display: none;"></div>
             <div class="fs-fields">
               <div class="fs-form-group">
                 <input type="text" name="fs_name" placeholder="Full Name" required />
@@ -47,7 +49,8 @@
                   name="fs_phone"
                   placeholder="Mobile Number"
                   required
-                  oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                  maxlength="10"
+                  oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
                 />
               </div>
               <div class="fs-form-group fs-form-submit">
@@ -416,14 +419,35 @@
           btn.innerHTML = 'Submitting...';
           btn.disabled = true;
 
+          var errorMsgNode = form.querySelector('.fs-error-msg');
+          if (errorMsgNode) errorMsgNode.style.display = 'none';
+
           try {
+            function showError(msg) {
+              if (errorMsgNode) {
+                errorMsgNode.innerText = msg;
+                errorMsgNode.style.display = 'block';
+              }
+              btn.innerHTML = 'Claim Free Sample';
+              btn.disabled = false;
+            }
+
             // Read form inputs
             var name = form.querySelector('[name="fs_name"]').value.trim();
             var rawPhone = form.querySelector('[name="fs_phone"]').value.trim();
 
-            if (!name || !rawPhone) {
-              btn.innerHTML = 'Claim Free Sample';
-              btn.disabled = false;
+            if (!name) {
+              showError('Please enter your full name.');
+              return false;
+            }
+
+            if (!rawPhone) {
+              showError('Please enter your mobile number.');
+              return false;
+            }
+
+            if (rawPhone.length < 10) {
+              showError('Please enter a valid 10-digit mobile number.');
               return false;
             }
 
@@ -441,6 +465,7 @@
               tag: 'free-sample-claim',
               email: email,
               accepts_marketing: true,
+              note: 'Try Purrkins with a free sample',
             };
 
             console.log('[FreeSample] Sending:', JSON.stringify(payload), '→', endpointUrl);
@@ -451,11 +476,22 @@
               body: JSON.stringify(payload),
             })
               .then(function (response) {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok');
+                }
                 return response.json().catch(function () {
                   return {};
                 });
               })
               .then(function (data) {
+                if (data && data.error) {
+                  throw new Error(data.error);
+                }
+                if (data && data.errors) {
+                  var errorText = Object.values(data.errors).join(', ');
+                  throw new Error(errorText || 'Something went wrong');
+                }
+
                 console.log('[FreeSample] Response:', data);
                 // Show success
                 var fields = form.querySelector('.fs-fields');
@@ -484,6 +520,11 @@
               })
               .catch(function (err) {
                 console.error('[FreeSample] Error:', err);
+                var errorMsg = form.querySelector('.fs-error-msg');
+                if (errorMsg) {
+                  errorMsg.innerText = err.message && err.message !== 'Network response was not ok' ? err.message : 'Something went wrong. Please try again.';
+                  errorMsg.style.display = 'block';
+                }
                 btn.innerHTML = 'Claim Free Sample';
                 btn.disabled = false;
               });
