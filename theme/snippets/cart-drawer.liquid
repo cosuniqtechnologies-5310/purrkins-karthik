@@ -72,13 +72,11 @@
           {% capture cart_badge_html %}
             {%- unless cart.empty? -%}
               <span
-                class="theme-drawer__badge"
+                class="cart-drawer__item-count"
                 aria-hidden="true"
-                {% if cart.item_count <= 99 %}
-                  data-maintain-ratio
-                {% endif %}
+                style="font-size: 0.9em; font-weight: normal; margin-left: 4px; color: rgb(var(--color-foreground-rgb) / 0.7);"
               >
-                ( {{- cart.item_count -}} &nbsp;items)
+                ({{ cart.item_count }} item{% if cart.item_count != 1 %}s{% endif %})
               </span>
               <span class="visually-hidden">
                 {{ 'accessibility.cart_count' | t }}: {{ cart.item_count }}
