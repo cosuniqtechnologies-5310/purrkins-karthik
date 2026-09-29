@@ -102,6 +102,29 @@
             %}
           {%- endif -%}
 
+          {%- unless cart.empty? -%}
+            <div class="cart-drawer-tabs">
+              <button class="cart-drawer-tab active" data-tab="one-time">One-time</button>
+              <button class="cart-drawer-tab" data-tab="subscribe">Subscribe · save 15%</button>
+            </div>
+            <script>
+              (function() {
+                if (window._cartTabsReady) return;
+                window._cartTabsReady = true;
+                document.addEventListener('click', function(e) {
+                  var btn = e.target.closest('.cart-drawer-tab');
+                  if (!btn) return;
+                  var tab = btn.dataset.tab;
+                  document.querySelectorAll('.cart-drawer-tab').forEach(function(b) {
+                    b.classList.toggle('active', b.dataset.tab === tab);
+                  });
+                  document.body.dataset.cartTab = tab;
+                });
+                document.body.dataset.cartTab = 'one-time';
+              })();
+            </script>
+          {%- endunless -%}
+
           {% capture cart_items_children %}
             {%- if cart.empty? -%}
               {{ empty_cart_drawer_content }}
@@ -259,6 +282,54 @@
 
   cart-drawer-component:not(:has(.cart-form)) .cart-drawer__items {
     padding-inline: 0;
+  }
+
+  /* Rounded left corners to match design */
+  #cart-drawer .theme-drawer__dialog {
+    border-top-left-radius: 24px;
+    border-bottom-left-radius: 24px;
+    overflow: hidden;
+  }
+
+  /* Subscription tab toggle */
+  .cart-drawer-tabs {
+    display: flex;
+    background: #f0f0f0;
+    border-radius: 999px;
+    margin: 0 var(--cart-drawer-padding, 24px) 12px;
+    padding: 3px;
+    gap: 2px;
+  }
+
+  .cart-drawer-tab {
+    flex: 1;
+    border-radius: 999px;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    color: #555;
+    font-weight: 400;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  .cart-drawer-tab.active {
+    background: #fff;
+    color: #000;
+    font-weight: 700;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Filter items based on active tab */
+  body[data-cart-tab='one-time'] .cart-items__table-row[data-subscription-type='subscribe'] {
+    display: none !important;
+  }
+
+  body[data-cart-tab='subscribe'] .cart-items__table-row[data-subscription-type='one-time'] {
+    display: none !important;
   }
 
   @media screen and (prefers-reduced-motion: no-preference) {
