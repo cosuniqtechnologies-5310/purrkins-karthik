@@ -78,13 +78,47 @@
             class="cart-drawer-subscription-toggle"
             style="display: flex; background: #f0f0f0; border-radius: 999px; margin: 0 24px 16px; padding: 4px; font-size: 13px;"
           >
-            <button style="flex: 1; border-radius: 999px; padding: 8px; border: none; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 700;">
+            <button
+              class="cart-toggle-btn active"
+              style="flex: 1; border-radius: 999px; padding: 8px; border: none; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 700; cursor: pointer; transition: all 0.2s ease;"
+            >
               One-time
             </button>
-            <button style="flex: 1; border-radius: 999px; padding: 8px; border: none; background: transparent; color: #555; font-weight: 400;">
+            <button
+              class="cart-toggle-btn"
+              style="flex: 1; border-radius: 999px; padding: 8px; border: none; background: transparent; color: #555; font-weight: 400; cursor: pointer; transition: all 0.2s ease;"
+            >
               Subscribe · save 15%
             </button>
           </div>
+
+          <script>
+            if (!window.cartSubscriptionToggleInitialized) {
+              window.cartSubscriptionToggleInitialized = true;
+              document.addEventListener('click', (e) => {
+                const target = e.target.closest('.cart-toggle-btn');
+                if (!target) return;
+
+                const container = target.closest('.cart-drawer-subscription-toggle');
+                if (!container) return;
+
+                const buttons = container.querySelectorAll('.cart-toggle-btn');
+                buttons.forEach((b) => {
+                  b.classList.remove('active');
+                  b.style.background = 'transparent';
+                  b.style.boxShadow = 'none';
+                  b.style.fontWeight = '400';
+                  b.style.color = '#555';
+                });
+
+                target.classList.add('active');
+                target.style.background = '#fff';
+                target.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                target.style.fontWeight = '700';
+                target.style.color = '#000';
+              });
+            }
+          </script>
 
           {% capture cart_items_children %}
             {%- if cart.empty? -%}
@@ -266,7 +300,7 @@
     border-bottom-left-radius: 24px;
     z-index: 999999;
   }
-  
+
   .cart-drawer__inner {
     border-top-left-radius: 24px;
     border-bottom-left-radius: 24px;
