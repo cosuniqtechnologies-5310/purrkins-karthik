@@ -337,34 +337,61 @@
                     | default: true, allow_false: true
                   %}
                   <div class="cart-items__quantity-controls">
-                    {% render 'volume-pricing-info',
-                      variant: item.variant,
-                      unique_id: item.index,
-                      quantity: item.quantity
-                    %}
-
-                    {% render 'quantity-selector',
-                      product: item.product,
-                      variant: item.variant,
-                      in_cart_quantity: item.quantity,
-                      line_index: item.index,
-                      class: 'cart-primary-typography',
-                      can_update_quantity: can_update_quantity
-                    %}
-
-                    <button
-                      class="button cart-items__remove"
-                      type="button"
-                      aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
-                      on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
-                      {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
-                      {% if can_remove == false %}
-                        hidden
-                      {% endif %}
-                    >
-                      {{- 'icon-delete.svg' | inline_asset_content -}}
-                      <span class="visually-hidden">{{ 'accessibility.remove' | t }}</span>
-                    </button>
+                    {%- if context == 'drawer' -%}
+                      <div class="cart-drawer-pack-row">
+                        <select
+                          class="cart-drawer-pack-select"
+                          aria-label="{{ 'accessibility.quantity' | t }}"
+                          onchange="
+                            var line = {{ item.index | plus: 1 }};
+                            var qty = parseInt(this.value);
+                            var comp = this.closest('cart-items-component');
+                            if (comp && comp.updateQuantity) { comp.updateQuantity({line: line, quantity: qty, action: 'change'}); }
+                          "
+                        >
+                          {% for i in (1..10) %}
+                            <option value="{{ i }}" {% if item.quantity == i %}selected{% endif %}>
+                              {{ i }} {% if i == 1 %}Pack{% else %}Packs{% endif %}
+                            </option>
+                          {% endfor %}
+                        </select>
+                        <button
+                          class="cart-drawer-remove-btn"
+                          type="button"
+                          aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
+                          on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
+                          {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
+                          {% if can_remove == false %}hidden{% endif %}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    {%- else -%}
+                      {% render 'volume-pricing-info',
+                        variant: item.variant,
+                        unique_id: item.index,
+                        quantity: item.quantity
+                      %}
+                      {% render 'quantity-selector',
+                        product: item.product,
+                        variant: item.variant,
+                        in_cart_quantity: item.quantity,
+                        line_index: item.index,
+                        class: 'cart-primary-typography',
+                        can_update_quantity: can_update_quantity
+                      %}
+                      <button
+                        class="button cart-items__remove"
+                        type="button"
+                        aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
+                        on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
+                        {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
+                        {% if can_remove == false %}hidden{% endif %}
+                      >
+                        {{- 'icon-delete.svg' | inline_asset_content -}}
+                        <span class="visually-hidden">{{ 'accessibility.remove' | t }}</span>
+                      </button>
+                    {%- endif -%}
                   </div>
                 </td>
                 <td
@@ -437,6 +464,47 @@
     container-name: cart-items;
     container-type: inline-size;
     width: 100%;
+  }
+
+  /* Drawer pack row: select + remove side by side */
+  .cart-drawer-pack-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .cart-drawer-pack-select {
+    appearance: none;
+    padding: 5px 28px 5px 12px;
+    border-radius: 999px;
+    border: 1.5px solid #121217;
+    background-color: transparent;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23121217' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    color: #121217;
+    cursor: pointer;
+    outline: none;
+    min-width: 90px;
+  }
+
+  .cart-drawer-remove-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 13px;
+    color: #888;
+    text-decoration: underline;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .cart-drawer-remove-btn:hover {
+    color: #333;
   }
 
   .cart-items-disabled {

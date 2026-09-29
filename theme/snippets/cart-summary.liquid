@@ -565,9 +565,13 @@
     line-height: 1.2;
   }
 
-  .cart-drawer__summary .cart-totals:not(:has(.cart-totals__original-container:empty)) {
-    border-block-start: var(--style-border-width) solid rgb(var(--color-foreground-rgb) / var(--opacity-10-25));
-    padding-block-start: var(--padding-2xl);
+  /* In drawer: hide discount input, estimated total section — only show checkout button */
+  .cart-drawer__summary .cart-totals {
+    display: none;
+  }
+
+  .cart-drawer__summary .cart-actions {
+    display: none;
   }
 
   .cart-drawer__summary .cart-note {
