@@ -10,6 +10,12 @@
 
 {%- if settings.cart_type == 'drawer' and template.name != 'cart' -%}
   {% if render_wrapper %}
+    <style>
+      #shopify-section-cart-drawer-section {
+        position: relative;
+        z-index: 999999;
+      }
+    </style>
     <div
       id="shopify-section-cart-drawer-section"
       class="shopify-section"
@@ -254,30 +260,16 @@
     }
   }
 
-  /* Custom Floating Drawer Layout */
-  @media screen and (min-width: 750px) {
-    #cart-drawer .theme-drawer__dialog {
-      height: calc(100dvh - 32px) !important;
-      max-height: calc(100dvh - 32px) !important;
-      top: 16px !important;
-      bottom: 16px !important;
-      right: -450px !important;
-      margin-right: 16px !important;
-      border-radius: 24px !important;
-      overflow: hidden !important;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.15) !important;
-      border: none !important;
-      width: 400px !important;
-    }
-    
-    #cart-drawer .theme-drawer__dialog[open] {
-      right: 0 !important;
-      transform: translateX(0) !important;
-    }
-    
-    .cart-drawer__inner {
-      border-radius: 24px !important;
-      background: #fff;
-    }
+  /* Curve the drawer on the left side to match the design */
+  #cart-drawer .theme-drawer__dialog {
+    border-top-left-radius: 24px;
+    border-bottom-left-radius: 24px;
+    z-index: 999999;
+  }
+  
+  .cart-drawer__inner {
+    border-top-left-radius: 24px;
+    border-bottom-left-radius: 24px;
+    background-color: var(--color-background);
   }
 {% endstylesheet %}
