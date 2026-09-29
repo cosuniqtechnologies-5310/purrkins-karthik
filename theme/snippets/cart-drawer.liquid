@@ -13,6 +13,7 @@
     <div
       id="shopify-section-cart-drawer-section"
       class="shopify-section"
+      style="position: relative; z-index: 10000;"
     >
   {% endif %}
 
@@ -49,7 +50,7 @@
       class="theme-drawer__dialog color-custom-drawer"
       aria-labelledby="cart-drawer-heading"
       cart-summary-sticky="true"
-      style="border-top-left-radius: 24px; border-bottom-left-radius: 24px; overflow: hidden;"
+      style="border-top-left-radius: 24px; border-bottom-left-radius: 24px; overflow: hidden; z-index: 10000;"
     >
       <cart-drawer-component
         {% if settings.auto_open_cart_drawer and template.name != 'cart' %}
