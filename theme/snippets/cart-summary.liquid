@@ -2,7 +2,6 @@
   Renders the cart summary totals.
 
   @param {string} [accelerated_checkout_buttons_layout] - { 'vertical' } Forced layout of the additional checkout buttons, instead of relying on platform's layout.
-  @param {string} [section_id] - The section ID for cart discount component.
 {%- enddoc -%}
 
 {% render 'text-component-shimmer-styles' %}
@@ -259,9 +258,8 @@
     </div>
   </div>
   {% endcomment %}
-</div>
 
-<div class="cart__ctas">
+  <div class="cart__ctas">
   <div class="cart-security-icons" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 16px;">
     <div style="display: flex; align-items: center; gap: 8px;">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
@@ -311,6 +309,7 @@
       {{ content_for_additional_checkout_buttons }}
     </div>
   {% endif %}
+  </div>
 </div>
 
 {% stylesheet %}

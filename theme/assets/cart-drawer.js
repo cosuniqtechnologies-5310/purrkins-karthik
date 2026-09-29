@@ -47,11 +47,34 @@ class CartDrawerComponent extends Component {
     this.#themeDrawer?.removeEventListener(DrawerOpenEvent.eventName, this.#handleDrawerOpen);
   }
 
+  #autoSwitchTabs = () => {
+    const hasOneTime = this.querySelector('.cart-items__table-row[data-subscription-type="one-time"]');
+    const hasSubscribe = this.querySelector('.cart-items__table-row[data-subscription-type="subscribe"]');
+    const currentTab = document.body.dataset.cartTab;
+    
+    if (currentTab === 'one-time' && !hasOneTime && hasSubscribe) {
+       const btns = this.querySelectorAll('.cart-toggle-btn');
+       btns.forEach(b => {
+         if (b instanceof HTMLElement && b.textContent?.toLowerCase().includes('subscribe')) {
+           b.click();
+         }
+       });
+    } else if (currentTab === 'subscribe' && !hasSubscribe && hasOneTime) {
+       const btns = this.querySelectorAll('.cart-toggle-btn');
+       btns.forEach(b => {
+         if (b instanceof HTMLElement && b.textContent?.toLowerCase().includes('one-time')) {
+           b.click();
+         }
+       });
+    }
+  };
+
   /**
    * Handles the theme-drawer opening — updates sticky state and wires up the installments CTA.
    */
   #handleDrawerOpen = () => {
     this.#updateStickyState();
+    this.#autoSwitchTabs();
 
     // Close cart drawer when installments CTA is clicked to avoid overlapping dialogs.
     // Re-queried on every open so it survives cart content re-renders that
@@ -90,28 +113,6 @@ class CartDrawerComponent extends Component {
           return;
         }
 
-        const autoSwitchTabs = () => {
-          const hasOneTime = this.querySelector('.cart-items__table-row[data-subscription-type="one-time"]');
-          const hasSubscribe = this.querySelector('.cart-items__table-row[data-subscription-type="subscribe"]');
-          const currentTab = document.body.dataset.cartTab;
-          
-          if (currentTab === 'one-time' && !hasOneTime && hasSubscribe) {
-             const btns = this.querySelectorAll('.cart-toggle-btn');
-             btns.forEach(b => {
-               if (b instanceof HTMLElement && b.textContent?.toLowerCase().includes('subscribe')) {
-                 b.click();
-               }
-             });
-          } else if (currentTab === 'subscribe' && !hasSubscribe && hasOneTime) {
-             const btns = this.querySelectorAll('.cart-toggle-btn');
-             btns.forEach(b => {
-               if (b instanceof HTMLElement && b.textContent?.toLowerCase().includes('one-time')) {
-                 b.click();
-               }
-             });
-          }
-        };
-
         const openAndSettle = () => {
           if (!this.#themeDrawer?.isOpen) {
             if (this.#isCartEmpty()) {
@@ -119,18 +120,18 @@ class CartDrawerComponent extends Component {
               const observer = new MutationObserver(() => {
                 if (!this.#isCartEmpty()) {
                   this.#themeDrawer?.open();
-                  autoSwitchTabs();
+                  this.#autoSwitchTabs();
                   observer.disconnect();
                 }
               });
               observer.observe(this, { childList: true, subtree: true, attributes: true });
-              setTimeout(() => { observer.disconnect(); this.#themeDrawer?.open(); autoSwitchTabs(); }, 2000);
+              setTimeout(() => { observer.disconnect(); this.#themeDrawer?.open(); this.#autoSwitchTabs(); }, 2000);
             } else {
               this.#themeDrawer?.open();
-              setTimeout(autoSwitchTabs, 100);
+              setTimeout(() => this.#autoSwitchTabs(), 100);
             }
           } else {
-             setTimeout(autoSwitchTabs, 100);
+             setTimeout(() => this.#autoSwitchTabs(), 100);
           }
           settle();
         };

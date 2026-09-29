@@ -15,6 +15,13 @@
         position: relative;
         z-index: 999999;
       }
+      /* Filter cart items based on active tab */
+      body[data-cart-tab="one-time"] .cart-items__table-row[data-subscription-type="subscribe"] {
+        display: none !important;
+      }
+      body[data-cart-tab="subscribe"] .cart-items__table-row[data-subscription-type="one-time"] {
+        display: none !important;
+      }
     </style>
     <div
       id="shopify-section-cart-drawer-section"
@@ -102,7 +109,7 @@
                 const container = target.closest('.cart-drawer-subscription-toggle');
                 if (!container) return;
 
-                const isSubscribe = target.innerText.toLowerCase().includes('subscribe');
+                const isSubscribe = target.textContent.toLowerCase().includes('subscribe');
                 const rows = document.querySelectorAll('.cart-items__table-row');
                 const promises = [];
 
@@ -134,8 +141,8 @@
 
                 if (promises.length > 0) {
                   // Show loading state
-                  const originalText = target.innerText;
-                  target.innerText = 'Updating...';
+                  const originalText = target.textContent;
+                  target.textContent = 'Updating...';
                   target.style.opacity = '0.7';
                   target.style.pointerEvents = 'none';
 
@@ -182,7 +189,7 @@
                 </scroll-hint>
 
                 <div class="cart-drawer__summary">
-                  {% render 'cart-summary', section_id: 'cart-drawer-section' %}
+                  {% render 'cart-summary' %}
                 </div>
               </scroll-hint>
             {%- endif -%}
