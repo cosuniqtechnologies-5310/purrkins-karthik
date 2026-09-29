@@ -143,6 +143,14 @@
 
           <tbody role="rowgroup">
             {% for item in cart.items %}
+              {% assign first_selling_plan_id = '' %}
+              {% for group in item.product.selling_plan_groups %}
+                {% for plan in group.selling_plans %}
+                  {% assign first_selling_plan_id = plan.id %}
+                  {% break %}
+                {% endfor %}
+                {% if first_selling_plan_id != '' %}{% break %}{% endif %}
+              {% endfor %}
               <tr
                 id="CartItem-{{ item.key }}"
                 role="row"
@@ -151,6 +159,8 @@
                 data-parent-key="{{ item.parent_relationship.parent.key }}"
                 data-key="{{ item.key }}"
                 data-subscription-type="{% if item.selling_plan_allocation %}subscribe{% else %}one-time{% endif %}"
+                data-first-selling-plan-id="{{ first_selling_plan_id }}"
+                data-current-quantity="{{ item.quantity }}"
               >
                 <td
                   class="cart-items__media"
@@ -366,6 +376,41 @@
                           Remove
                         </button>
                       </div>
+                      {% if item.selling_plan_allocation %}
+                        <div class="cart-drawer-subscription-info">
+                          {% assign sub_saving = item.variant.price | minus: item.final_price | times: item.quantity %}
+                          {% if sub_saving > 0 %}
+                            <div class="cart-drawer-subscription-savings">
+                              You're saving {{ sub_saving | money }} on this order
+                            </div>
+                          {% endif %}
+                          <div class="cart-drawer-subscription-plan">
+                            <span class="plan-label">Delivers every</span>
+                            <select class="plan-select" onchange="
+                              var line = {{ item.index | plus: 1 }};
+                              var planId = this.value;
+                              var comp = this.closest('cart-items-component');
+                              var qty = {{ item.quantity }};
+                              if (comp && comp.updateMultiple) {
+                                var updates = {};
+                                updates['{{ item.key }}'] = { quantity: qty, selling_plan: planId };
+                                comp.updateMultiple(updates);
+                              }
+                            ">
+                              {% for group in item.product.selling_plan_groups %}
+                                {% for plan in group.selling_plans %}
+                                  <option value="{{ plan.id }}" {% if plan.id == item.selling_plan_allocation.selling_plan.id %}selected{% endif %}>
+                                    {{ plan.options[0].value | default: plan.name }}
+                                  </option>
+                                {% endfor %}
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="cart-drawer-subscription-note">
+                            Pause, skip or cancel anytime · Free delivery on every order
+                          </div>
+                        </div>
+                      {% endif %}
                     {%- else -%}
                       {% render 'volume-pricing-info',
                         variant: item.variant,
@@ -505,6 +550,54 @@
 
   .cart-drawer-remove-btn:hover {
     color: #333;
+  }
+
+  .cart-drawer-subscription-info {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .cart-drawer-subscription-savings {
+    background-color: #d1f5e2;
+    color: #2b7a54;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .cart-drawer-subscription-plan {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
+  .cart-drawer-subscription-plan .plan-label {
+    color: #666;
+  }
+
+  .cart-drawer-subscription-plan .plan-select {
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    color: #000;
+    cursor: pointer;
+    outline: none;
+    text-align: right;
+  }
+
+  .cart-drawer-subscription-note {
+    font-size: 12px;
+    color: #888;
+    text-align: center;
   }
 
   .cart-items-disabled {

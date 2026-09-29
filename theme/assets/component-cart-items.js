@@ -199,6 +199,96 @@ export class CartItemsComponent extends createViewEventElement(Component) {
   }
 
   /**
+   * Updates multiple items.
+   * @param {Record<string, { quantity?: number, selling_plan?: string }>} updates - The updates.
+   */
+  updateMultiple(updates) {
+    this.#disableCartItems();
+
+    const { cartTotal } = this.refs;
+
+    const cartItemsComponents = document.querySelectorAll('cart-items-component');
+    const sectionsToUpdate = new Set([this.sectionId]);
+    cartItemsComponents.forEach((item) => {
+      if (item instanceof HTMLElement && item.dataset.sectionId) {
+        sectionsToUpdate.add(item.dataset.sectionId);
+      }
+    });
+
+    const body = JSON.stringify({
+      updates: updates,
+      sections: Array.from(sectionsToUpdate).join(','),
+      sections_url: window.location.pathname,
+    });
+
+    cartTotal?.shimmer();
+
+    const deferredUpdatePromise = CartLinesUpdateEvent.createPromise();
+    this.dispatchEvent(
+      new CartLinesUpdateEvent({
+        action: 'update',
+        context: 'cart',
+        lines: [],
+        promise: deferredUpdatePromise.promise,
+      })
+    );
+
+    fetch(`${Theme.routes.cart_update_url}`, fetchConfig('json', { body }))
+      .then((response) => response.text())
+      .then((responseText) => {
+        const parsedResponseText = JSON.parse(responseText);
+
+        resetShimmer(this);
+
+        if (parsedResponseText.errors) {
+          deferredUpdatePromise.reject(new Error(parsedResponseText.errors));
+          return;
+        }
+
+        const newSectionHTML = new DOMParser().parseFromString(
+          parsedResponseText.sections[this.sectionId],
+          'text/html'
+        );
+
+        const newCartHiddenItemCount = newSectionHTML.querySelector('[ref="cartItemCount"]')?.textContent;
+        const newCartItemCount = newCartHiddenItemCount ? parseInt(newCartHiddenItemCount, 10) : 0;
+
+        this.#updateQuantitySelectors(parsedResponseText);
+
+        deferredUpdatePromise.resolve({
+          cart: CartLinesUpdateEvent.createCartFromAjaxResponse(parsedResponseText),
+          detail: {
+            sections: parsedResponseText.sections,
+            items: parsedResponseText.items,
+            itemCount: newCartItemCount,
+            source: 'cart-items-component',
+            didError: false,
+          },
+        });
+
+        morphSection(this.sectionId, parsedResponseText.sections[this.sectionId], {
+          mode: this.isDrawer ? 'hydration' : 'full',
+        });
+
+        this.#updateCartQuantitySelectorButtonStates();
+      })
+      .catch((error) => {
+        console.error(error);
+        deferredUpdatePromise.reject(error);
+
+        this.dispatchEvent(
+          new CartErrorEvent({
+            error: error?.message || 'Failed to update cart',
+            code: 'SERVICE_UNAVAILABLE',
+          })
+        );
+      })
+      .finally(() => {
+        this.#enableCartItems();
+      });
+  }
+
+  /**
    * Updates the quantity.
    * @param {Object} config - The config.
    * @param {number} config.line - The line.

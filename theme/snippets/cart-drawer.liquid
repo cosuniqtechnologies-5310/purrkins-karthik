@@ -84,11 +84,18 @@
           %}
 
           {%- comment -%} Always show the tab toggle, even when cart is empty {%- endcomment -%}
+          {% assign has_subscription = false %}
+          {% for item in cart.items %}
+            {% if item.selling_plan_allocation %}
+              {% assign has_subscription = true %}
+            {% endif %}
+          {% endfor %}
           <div class="cart-drawer-tabs">
-            <button class="cart-drawer-tab active" data-tab="one-time">One-time</button>
-            <button class="cart-drawer-tab" data-tab="subscribe">Subscribe · save 15%</button>
+            <button class="cart-drawer-tab {% if has_subscription == false %}active{% endif %}" data-tab="one-time">One-time</button>
+            <button class="cart-drawer-tab {% if has_subscription %}active{% endif %}" data-tab="subscribe">Subscribe · save 15%</button>
           </div>
           <script>
+            document.body.dataset.cartTab = '{% if has_subscription %}subscribe{% else %}one-time{% endif %}';
             (function () {
               if (window._cartTabsReady) return;
               window._cartTabsReady = true;
@@ -96,12 +103,41 @@
                 var btn = e.target.closest('.cart-drawer-tab');
                 if (!btn) return;
                 var tab = btn.dataset.tab;
+                if (document.body.dataset.cartTab === tab) return;
+
                 document.querySelectorAll('.cart-drawer-tab').forEach(function (b) {
                   b.classList.toggle('active', b.dataset.tab === tab);
                 });
                 document.body.dataset.cartTab = tab;
+
+                var comp = document.querySelector('cart-items-component');
+                if (comp && comp.updateMultiple) {
+                  var rows = document.querySelectorAll('.cart-items__table-row[data-key]');
+                  var updates = {};
+                  var hasChanges = false;
+                  rows.forEach(function(row) {
+                    var key = row.dataset.key;
+                    var qty = parseInt(row.dataset.currentQuantity) || 1;
+                    var planId = row.dataset.firstSellingPlanId;
+                    var currentType = row.dataset.subscriptionType;
+
+                    if (planId) {
+                      if (tab === 'subscribe' && currentType !== 'subscribe') {
+                        updates[key] = { quantity: qty, selling_plan: planId };
+                        hasChanges = true;
+                      } else if (tab === 'one-time' && currentType === 'subscribe') {
+                        // To remove a selling plan, Shopify requires updating with an empty or null selling_plan, but passing just quantity with no selling_plan might work, 
+                        // or we can pass selling_plan: null. Actually `selling_plan: ""` works.
+                        updates[key] = { quantity: qty, selling_plan: "" };
+                        hasChanges = true;
+                      }
+                    }
+                  });
+                  if (hasChanges) {
+                    comp.updateMultiple(updates);
+                  }
+                }
               });
-              document.body.dataset.cartTab = 'one-time';
             })();
           </script>
 
