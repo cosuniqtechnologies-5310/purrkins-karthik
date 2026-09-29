@@ -116,9 +116,26 @@
                 target.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
                 target.style.fontWeight = '700';
                 target.style.color = '#000';
+
+                // Set active tab state on body to filter cart items
+                const isSubscribe = target.innerText.toLowerCase().includes('subscribe');
+                document.body.dataset.cartTab = isSubscribe ? 'subscribe' : 'one-time';
               });
+              
+              // Set initial tab state
+              document.body.dataset.cartTab = 'one-time';
             }
           </script>
+
+          <style>
+            /* Filter cart items based on active tab */
+            body[data-cart-tab="one-time"] .cart-items__table-row[data-subscription-type="subscribe"] {
+              display: none !important;
+            }
+            body[data-cart-tab="subscribe"] .cart-items__table-row[data-subscription-type="one-time"] {
+              display: none !important;
+            }
+          </style>
 
           {% capture cart_items_children %}
             {%- if cart.empty? -%}
