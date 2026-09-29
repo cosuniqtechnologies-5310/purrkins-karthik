@@ -25,7 +25,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Call the app proxy endpoint
-    fetch('/apps/purrkins/wishlist', {
+        let url = '/apps/purrkins/wishlist';
+    const pk_token = localStorage.getItem('pk_session');
+    if (pk_token) {
+      url += '?session=' + pk_token;
+    }
+
+    // Call the app proxy endpoint
+    fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
