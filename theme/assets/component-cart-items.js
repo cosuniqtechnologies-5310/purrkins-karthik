@@ -177,10 +177,29 @@ export class CartItemsComponent extends createViewEventElement(Component) {
       console.log('[PURRKINS CART] CART EMPTY');
       const clone = document.importNode(template.content, true);
 
+      console.log('[PURRKINS CART] DRAWER MORPH START', {
+        mode: 'replaceChildren (empty state)',
+        drawerCount: document.querySelectorAll('cart-drawer-component').length,
+        cartItemsCount: document.querySelectorAll('cart-items-component').length
+      });
+
       startViewTransition(() => {
         document.getElementById('cart-drawer-heading')?.remove();
         this.replaceChildren(clone);
       }, [this.isDrawer ? 'empty-cart-drawer' : 'empty-cart-page']);
+
+      console.log('[PURRKINS CART] DRAWER MORPH SUCCESS', {
+        drawerCount: document.querySelectorAll('cart-drawer-component').length,
+        cartItemsCount: document.querySelectorAll('cart-items-component').length,
+        emptyState: true
+      });
+
+      console.log('[PURRKINS CART] DRAWER DOM UPDATED', {
+        products: [],
+        productCount: 0,
+        drawerCount: document.querySelectorAll('cart-drawer-component').length,
+        cartItemsCount: document.querySelectorAll('cart-items-component').length
+      });
 
       return;
     }
@@ -451,21 +470,38 @@ export class CartItemsComponent extends createViewEventElement(Component) {
   #handleCartUpdate = (event) => {
     if (event.target === this) return;
 
-    if (event.action === 'add') {
-      console.log('[PURRKINS CART] DRAWER UPDATE START');
-    }
+    console.log('[PURRKINS CART] DRAWER UPDATE RECEIVED', {
+      action: event.action,
+      hasPromise: !!event.promise,
+      sectionId: this.sectionId,
+      currentItemCount: this.querySelectorAll('.cart-items tbody tr').length
+    });
 
     event.promise
       ?.then(async ({ detail }) => {
+        console.log('[PURRKINS CART] DRAWER UPDATE DATA RECEIVED', {
+          action: event.action,
+          hasDetail: !!detail,
+          hasSections: !!detail?.sections,
+          sectionKeys: Object.keys(detail?.sections || {}),
+          sectionId: this.sectionId
+        });
+
         const sections = detail?.sections;
         const cartItemsHtml = sections?.[this.sectionId];
 
+        console.log('[PURRKINS CART] DRAWER SECTION RECEIVED', {
+          sectionId: this.sectionId,
+          htmlExists: !!cartItemsHtml,
+          htmlLength: cartItemsHtml?.length || 0
+        });
+
         if (!cartItemsHtml) {
-          console.error('[PURRKINS CART] SECTION ERROR', {
+          console.error('[PURRKINS CART] DRAWER SECTION ERROR', {
             sectionId: this.sectionId,
-            availableSections: sections ? Object.keys(sections) : [],
-            detail
+            availableSections: Object.keys(detail?.sections || {})
           });
+          return; // Do not call morphSection() when the HTML is missing
         }
         
         const wasEmptyCartDrawer = this.isDrawer && this.querySelector('[data-cart-drawer-empty]') !== null;
@@ -480,10 +516,13 @@ export class CartItemsComponent extends createViewEventElement(Component) {
         if (cartItemsHtml) {
           const existingKeys = new Set(this.refs.cartItemRows?.map((row) => row.dataset.key) ?? []);
 
-          console.log('[PURRKINS CART] MORPH START', {
+          console.log('[PURRKINS CART] DRAWER MORPH START', {
             sectionId: this.sectionId,
-            htmlLength: cartItemsHtml.length,
-            cartItemCount: detail?.itemCount
+            mode: mode,
+            htmlLength: cartItemsHtml?.length || 0,
+            drawerCount: document.querySelectorAll('cart-drawer-component').length,
+            cartItemsCount: document.querySelectorAll('cart-items-component').length,
+            currentRows: this.querySelectorAll('.cart-items tbody tr').length
           });
 
           try {
@@ -494,27 +533,33 @@ export class CartItemsComponent extends createViewEventElement(Component) {
             } else {
               await morphSection(this.sectionId, cartItemsHtml, morphOptions);
             }
-          } catch (error) {
-            console.error('[PURRKINS CART] MORPH ERROR', { error, message: error?.message });
-            if (error?.name === 'InvalidStateError' || error?.message?.includes('Transition was')) {
-              console.error('[PURRKINS CART] VIEW TRANSITION ERROR', { error, name: error?.name, message: error?.message });
-            }
-          }
-
-          const cartDrawerComponents = document.querySelectorAll('cart-drawer-component').length;
-          const cartItemsComponents = document.querySelectorAll('cart-items-component').length;
-
-          console.log('[PURRKINS CART] MORPH SUCCESS', {
-            cartDrawerComponents,
-            cartItemsComponents,
-            itemCount: detail?.itemCount
-          });
-          
-          if (cartDrawerComponents !== 1 || cartItemsComponents !== 1) {
-            console.error('[PURRKINS CART] DOM INTEGRITY ERROR', {
-              drawerCount: cartDrawerComponents,
-              cartItemsCount: cartItemsComponents
+            
+            console.log('[PURRKINS CART] DRAWER MORPH SUCCESS', {
+              sectionId: this.sectionId,
+              drawerCount: document.querySelectorAll('cart-drawer-component').length,
+              cartItemsCount: document.querySelectorAll('cart-items-component').length,
+              rows: this.querySelectorAll('.cart-items tbody tr').length,
+              emptyState: !!this.querySelector('.cart-drawer--empty')
             });
+
+            const products = [...document.querySelectorAll(
+              'cart-items-component .cart-items__title'
+            )].map((el) => el.textContent.trim());
+
+            console.log('[PURRKINS CART] DRAWER DOM UPDATED', {
+              products,
+              productCount: products.length,
+              drawerCount: document.querySelectorAll('cart-drawer-component').length,
+              cartItemsCount: document.querySelectorAll('cart-items-component').length
+            });
+            
+          } catch (error) {
+            console.error('[PURRKINS CART] DRAWER MORPH ERROR', {
+              name: error?.name,
+              message: error?.message,
+              error
+            });
+            throw error;
           }
 
           // Animate newly added rows (reverse of the remove animation).

@@ -133,6 +133,11 @@ class CartDrawerComponent extends Component {
    * @param {import('@shopify/events').CartLinesUpdateEvent} event
    */
   #handleCartLinesUpdate = (event) => {
+    console.log('[PURRKINS CART] DRAWER EVENT HANDLER', {
+      action: event.action,
+      hasPromise: !!event.promise
+    });
+
     const shouldAutoOpen = this.hasAttribute('auto-open') && event.action === 'add' && !this.#themeDrawer?.isOpen;
 
     const sourceModal = /** @type {HTMLDialogElement | null} */ (
@@ -152,7 +157,11 @@ class CartDrawerComponent extends Component {
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               this.#themeDrawer?.open();
-              console.log('[PURRKINS CART] DRAWER OPEN');
+              console.log('[PURRKINS CART] DRAWER OPEN SUCCESS', {
+                isOpen: !!this.#themeDrawer?.isOpen,
+                drawerCount: document.querySelectorAll('cart-drawer-component').length,
+                cartItemsCount: document.querySelectorAll('cart-items-component').length
+              });
               settle();
             });
           });
