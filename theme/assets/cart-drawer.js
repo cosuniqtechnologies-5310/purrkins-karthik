@@ -72,8 +72,8 @@ class CartDrawerComponent extends Component {
     if (!comp || typeof comp.updateMultiple !== 'function') return;
 
     const rows = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-items__table-row[data-key]'));
-    /** @type {Record<string, any>} */
-    const updates = {};
+    /** @type {Array<any>} */
+    const updates = [];
     let hasChanges = false;
     
     rows.forEach(row => {
@@ -85,10 +85,10 @@ class CartDrawerComponent extends Component {
 
       if (planId) {
         if (tab === 'subscribe' && currentType !== 'subscribe') {
-          updates[key] = { quantity: qty, selling_plan: planId };
+          updates.push({ id: key, quantity: qty, selling_plan: planId });
           hasChanges = true;
         } else if (tab === 'one-time' && currentType === 'subscribe') {
-          updates[key] = { quantity: qty, selling_plan: "" };
+          updates.push({ id: key, quantity: qty, selling_plan: null });
           hasChanges = true;
         }
       }

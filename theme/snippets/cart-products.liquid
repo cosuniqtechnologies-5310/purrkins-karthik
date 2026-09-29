@@ -60,7 +60,7 @@
   {% if cart.empty? or force_empty %}
     {%- if shop.customer_accounts_enabled and customer == null -%}
       <p>
-        {{ 'actions.log_in_html' | t: link: routes.account_login_url }}
+        {{ 'actions.log_in_html' | t: link: '/apps/purrkins/login' }}
       </p>
     {%- endif -%}
 

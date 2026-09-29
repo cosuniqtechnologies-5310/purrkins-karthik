@@ -266,7 +266,7 @@
           </a>
           {% if shop.customer_accounts_enabled %}
             <a
-              href="{% if customer %}/apps/purrkins/dashboard{% else %}{{ routes.account_login_url }}?return_to=/apps/purrkins/dashboard{% endif %}"
+              href="{% if customer %}/apps/purrkins/dashboard{% else %}/apps/purrkins/login{% endif %}"
               aria-label="User Account"
             >
               <svg
