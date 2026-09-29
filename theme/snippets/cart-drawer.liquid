@@ -25,19 +25,10 @@
 
   {% capture empty_cart_drawer_content %}
     <div
-      class="cart-drawer__content"
+      class="cart-drawer__content cart-drawer__content--empty"
       aria-label="{{ 'accessibility.cart' | t }}"
     >
-      <h2
-        class="theme-drawer__title h4"
-        id="cart-drawer-heading"
-      >
-        {{ 'content.your_cart_is_empty' | t }}
-      </h2>
-
-      <div class="cart-drawer__items">
-        {% render 'cart-products', force_empty: true, context: 'drawer' %}
-      </div>
+      <p class="cart-drawer__empty-text">Your cart is currently empty.</p>
     </div>
   {% endcapture %}
 
@@ -65,67 +56,52 @@
           class="cart-drawer__inner{% if cart.empty? %} cart-drawer--empty{% endif %}"
           data-hydration-key="cart-drawer-inner"
         >
-          {%- if cart.empty? -%}
-            <div class="theme-drawer__header">
-              <button
-                on:click="#cart-drawer/close"
-                class="theme-drawer__close-button cart-drawer__close-button--empty"
-                type="button"
-                aria-label="{{ 'actions.close' | t }}"
-              >
-                <span class="svg-wrapper">
-                  {{- 'icon-close.svg' | inline_asset_content -}}
-                </span>
-              </button>
-            </div>
-          {%- else -%}
-            {% capture cart_badge_html %}
-              <span
-                class="theme-drawer__badge{% if cart.item_count == 0 %} visually-hidden{% endif %}"
-                aria-hidden="true"
-                {% if cart.item_count <= 99 %}
-                  data-maintain-ratio
-                {% endif %}
-              >
-                {{- cart.item_count -}}
-              </span>
-              {% if cart.item_count > 0 %}
-                <span class="visually-hidden">
-                  {{ 'accessibility.cart_count' | t }}: {{ cart.item_count }}
-                </span>
+          {%- comment -%} Always show the full cart header with title and item count {%- endcomment -%}
+          {% capture cart_badge_html %}
+            <span
+              class="theme-drawer__badge{% if cart.item_count == 0 %} visually-hidden{% endif %}"
+              aria-hidden="true"
+              {% if cart.item_count <= 99 %}
+                data-maintain-ratio
               {% endif %}
-            {% endcapture %}
-            {% assign cart_drawer_title = 'content.cart_title' | t %}
-            {% render 'theme-drawer-header',
-              title: cart_drawer_title,
-              drawer_id: 'cart-drawer',
-              heading_id: 'cart-drawer-heading',
-              title_append: cart_badge_html
-            %}
-          {%- endif -%}
+            >
+              {{- cart.item_count -}}
+            </span>
+            {% if cart.item_count > 0 %}
+              <span class="visually-hidden">
+                {{ 'accessibility.cart_count' | t }}: {{ cart.item_count }}
+              </span>
+            {% endif %}
+          {% endcapture %}
+          {% assign cart_drawer_title = 'content.cart_title' | t %}
+          {% render 'theme-drawer-header',
+            title: cart_drawer_title,
+            drawer_id: 'cart-drawer',
+            heading_id: 'cart-drawer-heading',
+            title_append: cart_badge_html
+          %}
 
-          {%- unless cart.empty? -%}
-            <div class="cart-drawer-tabs">
-              <button class="cart-drawer-tab active" data-tab="one-time">One-time</button>
-              <button class="cart-drawer-tab" data-tab="subscribe">Subscribe · save 15%</button>
-            </div>
-            <script>
-              (function () {
-                if (window._cartTabsReady) return;
-                window._cartTabsReady = true;
-                document.addEventListener('click', function (e) {
-                  var btn = e.target.closest('.cart-drawer-tab');
-                  if (!btn) return;
-                  var tab = btn.dataset.tab;
-                  document.querySelectorAll('.cart-drawer-tab').forEach(function (b) {
-                    b.classList.toggle('active', b.dataset.tab === tab);
-                  });
-                  document.body.dataset.cartTab = tab;
+          {%- comment -%} Always show the tab toggle, even when cart is empty {%- endcomment -%}
+          <div class="cart-drawer-tabs">
+            <button class="cart-drawer-tab active" data-tab="one-time">One-time</button>
+            <button class="cart-drawer-tab" data-tab="subscribe">Subscribe · save 15%</button>
+          </div>
+          <script>
+            (function () {
+              if (window._cartTabsReady) return;
+              window._cartTabsReady = true;
+              document.addEventListener('click', function (e) {
+                var btn = e.target.closest('.cart-drawer-tab');
+                if (!btn) return;
+                var tab = btn.dataset.tab;
+                document.querySelectorAll('.cart-drawer-tab').forEach(function (b) {
+                  b.classList.toggle('active', b.dataset.tab === tab);
                 });
-                document.body.dataset.cartTab = 'one-time';
-              })();
-            </script>
-          {%- endunless -%}
+                document.body.dataset.cartTab = tab;
+              });
+              document.body.dataset.cartTab = 'one-time';
+            })();
+          </script>
 
           {% capture cart_items_children %}
             {%- if cart.empty? -%}
@@ -274,6 +250,19 @@
 
   .cart-drawer--empty .cart-drawer__items {
     padding-inline: 0;
+  }
+
+  .cart-drawer__content--empty {
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cart-drawer__empty-text {
+    font-size: 14px;
+    color: rgb(var(--color-foreground-rgb) / 0.6);
+    margin: 0;
+    padding: var(--padding-lg);
   }
 
   cart-drawer-component:not(:has(.cart-form)) .cart-drawer__content {
