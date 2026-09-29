@@ -150,7 +150,10 @@
                 ref="cartItemRows[]"
                 data-parent-key="{{ item.parent_relationship.parent.key }}"
                 data-key="{{ item.key }}"
+                data-quantity="{{ item.quantity }}"
                 data-subscription-type="{% if item.selling_plan_allocation %}subscribe{% else %}one-time{% endif %}"
+                data-has-selling-plan="{% if item.product.selling_plan_groups.size > 0 %}true{% else %}false{% endif %}"
+                data-selling-plan-id="{{ item.product.selling_plan_groups.first.selling_plans.first.id }}"
               >
                 <td
                   class="cart-items__media"
@@ -340,10 +343,10 @@
                     <select
                       class="cart-dropdown-quantity"
                       onchange="this.closest('cart-items-component').updateQuantity({line: {{ item.index | plus: 1 }}, quantity: parseInt(this.value), action: 'change'})"
-                      style="padding: 6px 12px; border-radius: 999px; border: 1px solid #121217; background: transparent; font-size: 13px; font-weight: 700; width: fit-content; min-width: 100px; color: #121217; font-family: inherit; cursor: pointer; outline: none; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg width=\"10\" height=\"6\" viewBox=\"0 0 10 6\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M1 1L5 5L9 1\" stroke=\"%23121217\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>'); background-repeat: no-repeat; background-position: right 12px center;"
+                      style="padding: 6px 12px; border-radius: 999px; border: 1px solid #121217; background: transparent; font-size: 13px; font-weight: 700; width: fit-content; min-width: 80px; color: #121217; font-family: inherit; cursor: pointer; outline: none; appearance: none; background-image: url(&quot;data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23121217' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px;"
                     >
                       {% for i in (1..10) %}
-                        <option value="{{ i }}" {% if item.quantity == i %}selected{% endif %}>{{ i }} Packs</option>
+                        <option value="{{ i }}" {% if item.quantity == i %}selected{% endif %}>Qty: {{ i }}</option>
                       {% endfor %}
                     </select>
 

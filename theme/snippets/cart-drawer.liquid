@@ -95,12 +95,56 @@
           <script>
             if (!window.cartSubscriptionToggleInitialized) {
               window.cartSubscriptionToggleInitialized = true;
-              document.addEventListener('click', (e) => {
+              document.addEventListener('click', async (e) => {
                 const target = e.target.closest('.cart-toggle-btn');
                 if (!target) return;
 
                 const container = target.closest('.cart-drawer-subscription-toggle');
                 if (!container) return;
+
+                const isSubscribe = target.innerText.toLowerCase().includes('subscribe');
+                const rows = document.querySelectorAll('.cart-items__table-row');
+                const promises = [];
+
+                rows.forEach(row => {
+                  const isSubItem = row.dataset.subscriptionType === 'subscribe';
+                  const hasPlan = row.dataset.hasSellingPlan === 'true';
+                  const planId = row.dataset.sellingPlanId;
+                  const key = row.dataset.key;
+                  const qty = row.dataset.quantity;
+
+                  if (isSubscribe && !isSubItem && hasPlan) {
+                    promises.push(
+                      fetch('/cart/change.js', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: key, quantity: qty, selling_plan: planId })
+                      })
+                    );
+                  } else if (!isSubscribe && isSubItem) {
+                    promises.push(
+                      fetch('/cart/change.js', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: key, quantity: qty, selling_plan: "" })
+                      })
+                    );
+                  }
+                });
+
+                if (promises.length > 0) {
+                  // Show loading state
+                  const originalText = target.innerText;
+                  target.innerText = "Updating...";
+                  target.style.opacity = "0.7";
+                  target.style.pointerEvents = "none";
+                  
+                  await Promise.all(promises);
+                  
+                  // Reload the page to fully refresh the cart state with the new subscription items
+                  window.location.reload();
+                  return;
+                }
 
                 const buttons = container.querySelectorAll('.cart-toggle-btn');
                 buttons.forEach((b) => {
@@ -117,25 +161,13 @@
                 target.style.fontWeight = '700';
                 target.style.color = '#000';
 
-                // Set active tab state on body to filter cart items
-                const isSubscribe = target.innerText.toLowerCase().includes('subscribe');
                 document.body.dataset.cartTab = isSubscribe ? 'subscribe' : 'one-time';
               });
               
-              // Set initial tab state
+              // Set initial tab state based on URL or defaults
               document.body.dataset.cartTab = 'one-time';
             }
           </script>
-
-          <style>
-            /* Filter cart items based on active tab */
-            body[data-cart-tab="one-time"] .cart-items__table-row[data-subscription-type="subscribe"] {
-              display: none !important;
-            }
-            body[data-cart-tab="subscribe"] .cart-items__table-row[data-subscription-type="one-time"] {
-              display: none !important;
-            }
-          </style>
 
           {% capture cart_items_children %}
             {%- if cart.empty? -%}
