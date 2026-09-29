@@ -50,7 +50,8 @@ class CartDrawerComponent extends Component {
   #autoSwitchTabs = () => {
     const hasOneTime = this.querySelector('.cart-items__table-row[data-subscription-type="one-time"]');
     const hasSubscribe = this.querySelector('.cart-items__table-row[data-subscription-type="subscribe"]');
-    const currentTab = document.body.dataset.cartTab;
+    let currentTab = document.body.dataset.cartTab;
+    if (!currentTab) currentTab = 'one-time';
     
     if (currentTab === 'one-time' && !hasOneTime && hasSubscribe) {
        const btns = this.querySelectorAll('.cart-toggle-btn');
