@@ -700,6 +700,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const formData = new FormData(productForm);
+            formData.append('sections', 'cart-drawer-section');
+            formData.append('sections_url', window.location.pathname);
             
             let resolvePromise, rejectPromise;
             const promise = new Promise((resolve, reject) => { 
@@ -722,21 +724,12 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(res => res.json())
             .then(data => {
-                resolvePromise({ detail: { items: data.items || [data] } });
+                resolvePromise({ detail: { items: data.items || [data], sections: data.sections } });
                 
                 if (btn) {
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                 }
-                
-                setTimeout(() => {
-                    const drawer = document.querySelector('theme-drawer#cart-drawer') || document.querySelector('theme-drawer');
-                    if (drawer && typeof drawer.open === 'function') {
-                        drawer.open();
-                    } else if (drawer && typeof drawer.show === 'function') {
-                        drawer.show();
-                    }
-                }, 100);
             })
             .catch(err => {
                 console.error(err);

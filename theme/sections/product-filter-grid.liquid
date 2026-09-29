@@ -235,6 +235,8 @@
           }
           
           const formData = new FormData(form);
+          formData.append('sections', 'cart-drawer-section');
+          formData.append('sections_url', window.location.pathname);
           
           let resolvePromise, rejectPromise;
           const promise = new Promise((resolve, reject) => {
@@ -258,15 +260,7 @@
           })
           .then(res => res.json())
           .then(data => {
-            resolvePromise({ detail: { items: [data] } });
-            
-            // Try to explicitly open the cart drawer if theme logic didn't catch it
-            setTimeout(() => {
-              const drawer = document.querySelector('theme-drawer#cart-drawer') || document.querySelector('theme-drawer');
-              if (drawer && typeof drawer.open === 'function') {
-                drawer.open();
-              }
-            }, 100);
+            resolvePromise({ detail: { items: data.items || [data], sections: data.sections } });
           })
           .catch(err => {
             console.error(err);

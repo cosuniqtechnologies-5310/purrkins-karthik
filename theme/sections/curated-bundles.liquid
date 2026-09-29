@@ -206,7 +206,9 @@ function initCBAddToCart_{{ section.id | replace: '-', '_' }}() {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        items: [{ id: variantId, quantity: qty }]
+                        items: [{ id: variantId, quantity: qty }],
+                        sections: 'cart-drawer-section',
+                        sections_url: window.location.pathname
                     })
                 })
                 .then(async res => {
@@ -229,16 +231,9 @@ function initCBAddToCart_{{ section.id | replace: '-', '_' }}() {
                     const promise = new Promise((resolve) => { resolvePromise = resolve; });
                     updateEvent.promise = promise;
                     document.dispatchEvent(updateEvent);
-                    resolvePromise({ detail: { items: data.items || [data] } });
+                    resolvePromise({ detail: { items: data.items || [data], sections: data.sections } });
 
                     document.documentElement.dispatchEvent(new CustomEvent('cart:build', {bubbles: true}));
-                    
-                    setTimeout(() => {
-                        const drawer = document.querySelector('theme-drawer#cart-drawer') || document.querySelector('theme-drawer');
-                        if (drawer && typeof drawer.open === 'function') {
-                            drawer.open();
-                        }
-                    }, 100);
                 })
                 .catch(err => {
                     console.error(err);

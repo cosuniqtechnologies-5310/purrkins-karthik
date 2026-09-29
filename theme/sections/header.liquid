@@ -332,12 +332,10 @@
       });
       // Handle the CartLinesUpdateEvent standard event
       document.addEventListener('cart:lines-update', function(event) {
-        event.promise?.then(function({ cart }) {
-          if (cart) {
-            var count = cart.totalQuantity || 0;
-            cartBadge.textContent = count;
-            cartBadge.style.display = count > 0 ? '' : 'none';
-          }
+        event.promise?.then(function(payload) {
+          var count = payload?.cart?.totalQuantity ?? payload?.detail?.itemCount ?? 0;
+          cartBadge.textContent = count;
+          cartBadge.style.display = count > 0 ? '' : 'none';
         });
       });
     }

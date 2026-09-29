@@ -103,7 +103,11 @@
                 var btn = e.target.closest('.cart-drawer-tab');
                 if (!btn) return;
                 var tab = btn.dataset.tab;
-                if (document.body.dataset.cartTab === tab) return;
+                console.log('Cart tab clicked:', tab);
+                if (document.body.dataset.cartTab === tab) {
+                  console.log('Tab is already active, ignoring click.');
+                  return;
+                }
 
                 document.querySelectorAll('.cart-drawer-tab').forEach(function (b) {
                   b.classList.toggle('active', b.dataset.tab === tab);
@@ -111,31 +115,59 @@
                 document.body.dataset.cartTab = tab;
 
                 var comp = document.querySelector('cart-items-component');
+                console.log('Found cart-items-component:', comp);
+                
                 if (comp && comp.updateMultiple) {
                   var rows = document.querySelectorAll('.cart-items__table-row[data-key]');
+                  console.log('Found cart item rows:', rows.length);
+                  
                   var updates = {};
                   var hasChanges = false;
+                  
                   rows.forEach(function(row) {
                     var key = row.dataset.key;
                     var qty = parseInt(row.dataset.currentQuantity) || 1;
                     var planId = row.dataset.firstSellingPlanId;
                     var currentType = row.dataset.subscriptionType;
 
+                    console.log('Processing item row:', key);
+                    console.log('  - Quantity:', qty);
+                    console.log('  - First Selling Plan ID:', planId);
+                    console.log('  - Current Subscription Type:', currentType);
+
                     if (planId) {
                       if (tab === 'subscribe' && currentType !== 'subscribe') {
+                        console.log('  -> Adding selling plan to item updates');
                         updates[key] = { quantity: qty, selling_plan: planId };
                         hasChanges = true;
                       } else if (tab === 'one-time' && currentType === 'subscribe') {
+                        console.log('  -> Removing selling plan from item updates');
                         // To remove a selling plan, Shopify requires updating with an empty or null selling_plan, but passing just quantity with no selling_plan might work, 
                         // or we can pass selling_plan: null. Actually `selling_plan: ""` works.
                         updates[key] = { quantity: qty, selling_plan: "" };
                         hasChanges = true;
+                      } else {
+                        console.log('  -> No change needed for this item');
                       }
+                    } else {
+                      console.log('  -> No selling plan ID available for this item');
                     }
                   });
+                  
+                  console.log('Has changes to send:', hasChanges);
+                  console.log('Updates payload:', updates);
+                  
                   if (hasChanges) {
-                    comp.updateMultiple(updates);
+                    console.log('Calling comp.updateMultiple(updates)...');
+                    try {
+                      comp.updateMultiple(updates);
+                    } catch (err) {
+                      console.error('Error calling updateMultiple:', err);
+                    }
                   }
+                } else {
+                  console.error('Cart items component or updateMultiple method not found!');
+                  if (comp) console.log('comp.updateMultiple is:', comp.updateMultiple);
                 }
               });
             })();
