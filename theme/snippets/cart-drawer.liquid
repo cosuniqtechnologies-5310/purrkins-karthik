@@ -28,7 +28,9 @@
       class="cart-drawer__content cart-drawer__content--empty"
       aria-label="{{ 'accessibility.cart' | t }}"
     >
-      <p class="cart-drawer__empty-text">Your cart is currently empty.</p>
+      <div class="cart-items__wrapper cart-items__wrapper--drawer-empty" data-cart-drawer-empty>
+        <p class="cart-drawer__empty-text">Your cart is currently empty.</p>
+      </div>
     </div>
   {% endcapture %}
 
@@ -141,6 +143,21 @@
     --cart-drawer-padding: var(--theme-drawer-padding);
     --font-paragraph--line-height: 1;
     display: contents;
+    font-family: var(--font-paragraph--family);
+  }
+
+  .theme-drawer__dialog {
+    font-family: var(--font-paragraph--family);
+  }
+
+  .theme-drawer__title {
+    font-family: var(--purrkins-heading-font);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .cart-drawer-tab {
+    font-family: var(--font-paragraph--family) !important;
   }
 
   .cart-drawer__inner {
@@ -242,9 +259,9 @@
   }
 
   .cart-drawer--empty .cart-drawer__content {
-    text-align: center;
-    align-items: center;
-    justify-content: center;
+    text-align: left;
+    align-items: flex-start;
+    justify-content: flex-start;
     min-height: auto;
   }
 
@@ -253,16 +270,20 @@
   }
 
   .cart-drawer__content--empty {
-    text-align: center;
-    align-items: center;
-    justify-content: center;
+    text-align: left;
+    align-items: flex-start;
+    justify-content: flex-start;
   }
 
   .cart-drawer__empty-text {
-    font-size: 14px;
-    color: rgb(var(--color-foreground-rgb) / 0.6);
+    font-family: var(--font-paragraph--family);
+    font-size: 13px;
+    font-weight: 400;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
     margin: 0;
-    padding: var(--padding-lg);
+    padding: 16px var(--cart-drawer-padding, 24px);
+    letter-spacing: 0;
+    line-height: 1.5;
   }
 
   cart-drawer-component:not(:has(.cart-form)) .cart-drawer__content {

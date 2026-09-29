@@ -349,7 +349,7 @@
                             if (comp && comp.updateQuantity) { comp.updateQuantity({line: line, quantity: qty, action: 'change'}); }
                           "
                         >
-                          {% for i in (1..10) %}
+                          {% for i in (1..5) %}
                             <option value="{{ i }}" {% if item.quantity == i %}selected{% endif %}>
                               {{ i }} {% if i == 1 %}Pack{% else %}Packs{% endif %}
                             </option>

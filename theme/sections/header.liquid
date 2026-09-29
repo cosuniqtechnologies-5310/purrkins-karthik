@@ -301,9 +301,7 @@
               <path d="M8.74844 19.6004C9.42499 19.6004 9.97344 19.0519 9.97344 18.3754C9.97344 17.6988 9.42499 17.1504 8.74844 17.1504C8.07189 17.1504 7.52344 17.6988 7.52344 18.3754C7.52344 19.0519 8.07189 19.6004 8.74844 19.6004Z" fill="#21252A"/>
               <path d="M15.3109 19.6004C15.9875 19.6004 16.5359 19.0519 16.5359 18.3754C16.5359 17.6988 15.9875 17.1504 15.3109 17.1504C14.6344 17.1504 14.0859 17.6988 14.0859 18.3754C14.0859 19.0519 14.6344 19.6004 15.3109 19.6004Z" fill="#21252A"/>
             </svg>
-            {% if cart.item_count > 0 %}
-              <span class="header-cart-count">{{ cart.item_count }}</span>
-            {% endif %}
+            <span class="header-cart-count" {% if cart.item_count == 0 %}style="display: none;"{% endif %}>{{ cart.item_count }}</span>
           </button>
         </div>
       </div>
@@ -320,6 +318,27 @@
         e.preventDefault();
         toggle.classList.toggle('is-active');
         nav.classList.toggle('is-active');
+      });
+    }
+
+    var cartBadge = document.querySelector('.header-cart-count');
+    if (cartBadge) {
+      document.addEventListener('cart:view', function(event) {
+        if (event.detail && event.detail.cart) {
+          var count = event.detail.cart.item_count || 0;
+          cartBadge.textContent = count;
+          cartBadge.style.display = count > 0 ? '' : 'none';
+        }
+      });
+      // Handle the CartLinesUpdateEvent standard event
+      document.addEventListener('cart:lines-update', function(event) {
+        event.promise?.then(function({ cart }) {
+          if (cart) {
+            var count = cart.totalQuantity || 0;
+            cartBadge.textContent = count;
+            cartBadge.style.display = count > 0 ? '' : 'none';
+          }
+        });
       });
     }
   });

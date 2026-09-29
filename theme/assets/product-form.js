@@ -427,7 +427,7 @@ class ProductFormComponent extends Component {
     }
 
     const cartItemsComponents = document.querySelectorAll('cart-items-component');
-    let cartItemComponentsSectionIds = ['cart-drawer-section', 'cart-icon-bubble'];
+    let cartItemComponentsSectionIds = ['cart-drawer-section'];
     cartItemsComponents.forEach((item) => {
       if (item instanceof HTMLElement && item.dataset.sectionId && !cartItemComponentsSectionIds.includes(item.dataset.sectionId)) {
         cartItemComponentsSectionIds.push(item.dataset.sectionId);
@@ -435,6 +435,7 @@ class ProductFormComponent extends Component {
     });
     if (cartItemComponentsSectionIds.length > 0) {
       formData.append('sections', cartItemComponentsSectionIds.join(','));
+      formData.append('sections_url', window.location.pathname);
     }
 
     const itemCount = Number(formData.get('quantity')) || Number(this.dataset.quantityDefault);
@@ -594,7 +595,7 @@ class ProductFormComponent extends Component {
     if (this.#timeout) clearTimeout(this.#timeout);
 
     const cartItemsComponents = document.querySelectorAll('cart-items-component');
-    const cartItemComponentsSectionIds = ['cart-drawer-section', 'cart-icon-bubble'];
+    const cartItemComponentsSectionIds = ['cart-drawer-section'];
     for (const item of cartItemsComponents) {
       if (item instanceof HTMLElement && item.dataset.sectionId && !cartItemComponentsSectionIds.includes(item.dataset.sectionId)) {
         cartItemComponentsSectionIds.push(item.dataset.sectionId);
@@ -622,6 +623,7 @@ class ProductFormComponent extends Component {
         quantity: item.quantity,
       })),
       sections: cartItemComponentsSectionIds.join(','),
+      sections_url: window.location.pathname,
     };
 
     fetch(Theme.routes.cart_add_url, {
