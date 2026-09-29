@@ -114,18 +114,9 @@ class CartDrawerComponent extends Component {
   #handleCartLinesUpdate = (event) => {
     const shouldAutoOpen = this.hasAttribute('auto-open') && event.action === 'add' && !this.#themeDrawer?.isOpen;
 
-    // When the event originates inside an open MODAL <dialog> (e.g. quick-add),
-    // defer the auto-open until that dialog's native `close` fires so its focus
-    // restoration runs first — otherwise we'd capture the wrong
-    // `#previouslyFocused`. Non-modal dialogs (e.g. the hotspot preview) don't
-    // close on add and don't move focus, so `:modal` excludes them.
     const sourceModal = /** @type {HTMLDialogElement | null} */ (
       event.target instanceof Element ? event.target.closest('dialog:modal') : null
     );
-
-    if (shouldAutoOpen && !sourceModal && !this.#isCartEmpty()) {
-      this.#themeDrawer?.open();
-    }
 
     event.promise
       ?.then(({ detail }) => {
@@ -137,7 +128,7 @@ class CartDrawerComponent extends Component {
         }
 
         const openAndSettle = () => {
-          if (!this.#themeDrawer?.isOpen) this.#themeDrawer?.open();
+          this.#themeDrawer?.open();
           settle();
         };
 

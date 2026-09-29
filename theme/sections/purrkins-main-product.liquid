@@ -717,8 +717,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const eventName = (window.StandardEvents && window.StandardEvents.cartLinesUpdate) ? window.StandardEvents.cartLinesUpdate : 'shopify:cart:lines-update';
                 const updateEvent = new CustomEvent(eventName, { bubbles: true });
                 updateEvent.action = 'add';
-                let resolvePromise;
-                const promise = new Promise((resolve) => { resolvePromise = resolve; });
+                let resolvePromise, rejectPromise;
+                const promise = new Promise((resolve, reject) => { 
+                    resolvePromise = resolve; 
+                    rejectPromise = reject;
+                });
                 updateEvent.promise = promise;
                 document.dispatchEvent(updateEvent);
 
