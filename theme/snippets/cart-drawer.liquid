@@ -106,7 +106,7 @@
                 const rows = document.querySelectorAll('.cart-items__table-row');
                 const promises = [];
 
-                rows.forEach(row => {
+                rows.forEach((row) => {
                   const isSubItem = row.dataset.subscriptionType === 'subscribe';
                   const hasPlan = row.dataset.hasSellingPlan === 'true';
                   const planId = row.dataset.sellingPlanId;
@@ -118,7 +118,7 @@
                       fetch('/cart/change.js', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id: key, quantity: qty, selling_plan: planId })
+                        body: JSON.stringify({ id: key, quantity: qty, selling_plan: planId }),
                       })
                     );
                   } else if (!isSubscribe && isSubItem) {
@@ -126,7 +126,7 @@
                       fetch('/cart/change.js', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id: key, quantity: qty, selling_plan: "" })
+                        body: JSON.stringify({ id: key, quantity: qty, selling_plan: '' }),
                       })
                     );
                   }
@@ -135,12 +135,12 @@
                 if (promises.length > 0) {
                   // Show loading state
                   const originalText = target.innerText;
-                  target.innerText = "Updating...";
-                  target.style.opacity = "0.7";
-                  target.style.pointerEvents = "none";
-                  
+                  target.innerText = 'Updating...';
+                  target.style.opacity = '0.7';
+                  target.style.pointerEvents = 'none';
+
                   await Promise.all(promises);
-                  
+
                   // Reload the page to fully refresh the cart state with the new subscription items
                   window.location.reload();
                   return;
@@ -163,7 +163,7 @@
 
                 document.body.dataset.cartTab = isSubscribe ? 'subscribe' : 'one-time';
               });
-              
+
               // Set initial tab state based on URL or defaults
               document.body.dataset.cartTab = 'one-time';
             }
