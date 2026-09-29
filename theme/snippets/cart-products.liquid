@@ -335,24 +335,19 @@
                   {% assign can_update_quantity = item.instructions.can_update_quantity
                     | default: true, allow_false: true
                   %}
-                  <div class="cart-items__quantity-controls">
-                    {% render 'volume-pricing-info',
-                      variant: item.variant,
-                      unique_id: item.index,
-                      quantity: item.quantity
-                    %}
-
-                    {% render 'quantity-selector',
-                      product: item.product,
-                      variant: item.variant,
-                      in_cart_quantity: item.quantity,
-                      line_index: item.index,
-                      class: 'cart-primary-typography',
-                      can_update_quantity: can_update_quantity
-                    %}
+                  <div class="cart-items__quantity-controls" style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
+                    <select
+                      class="cart-dropdown-quantity"
+                      onchange="this.closest('cart-items-component').updateQuantity({line: {{ item.index | plus: 1 }}, quantity: parseInt(this.value), action: 'change'})"
+                      style="padding: 6px 12px; border-radius: 999px; border: 1px solid #121217; background: transparent; font-size: 13px; font-weight: 700; width: fit-content; min-width: 100px; color: #121217; font-family: inherit; cursor: pointer; outline: none; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg width=\"10\" height=\"6\" viewBox=\"0 0 10 6\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M1 1L5 5L9 1\" stroke=\"%23121217\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>'); background-repeat: no-repeat; background-position: right 12px center;"
+                    >
+                      {% for i in (1..10) %}
+                        <option value="{{ i }}" {% if item.quantity == i %}selected{% endif %}>{{ i }} Packs</option>
+                      {% endfor %}
+                    </select>
 
                     <button
-                      class="button cart-items__remove"
+                      class="cart-items__remove"
                       type="button"
                       aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
                       on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
@@ -360,9 +355,9 @@
                       {% if can_remove == false %}
                         hidden
                       {% endif %}
+                      style="text-decoration: underline; background: transparent; border: none; padding: 0; color: #8a8d90; font-size: 13px; margin-left: 2px; cursor: pointer; font-family: inherit;"
                     >
-                      {{- 'icon-delete.svg' | inline_asset_content -}}
-                      <span class="visually-hidden">{{ 'accessibility.remove' | t }}</span>
+                      Remove
                     </button>
                   </div>
                 </td>

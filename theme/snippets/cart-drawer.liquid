@@ -26,17 +26,9 @@
     <div
       class="cart-drawer__content"
       aria-label="{{ 'accessibility.cart' | t }}"
+      style="padding: 20px 24px; justify-content: flex-start;"
     >
-      <h2
-        class="theme-drawer__title h4"
-        id="cart-drawer-heading"
-      >
-        {{ 'content.your_cart_is_empty' | t }}
-      </h2>
-
-      <div class="cart-drawer__items">
-        {% render 'cart-products', force_empty: true, context: 'drawer' %}
-      </div>
+      <p style="color: #555; font-size: 14px; margin: 0; text-align: left; width: 100%;">Your cart is currently empty.</p>
     </div>
   {% endcapture %}
 
@@ -47,7 +39,7 @@
     <dialog
       ref="panel"
       class="theme-drawer__dialog color-custom-drawer"
-      aria-labelledby="cart-drawer-heading"
+      aria-labelledby="custom-cart-drawer-heading"
       cart-summary-sticky="true"
     >
       <cart-drawer-component
@@ -63,44 +55,30 @@
           class="cart-drawer__inner{% if cart.empty? %} cart-drawer--empty{% endif %}"
           data-hydration-key="cart-drawer-inner"
         >
-          {%- if cart.empty? -%}
-            <div class="theme-drawer__header">
-              <button
-                on:click="#cart-drawer/close"
-                class="theme-drawer__close-button cart-drawer__close-button--empty"
-                type="button"
-                aria-label="{{ 'actions.close' | t }}"
-              >
-                <span class="svg-wrapper">
-                  {{- 'icon-close.svg' | inline_asset_content -}}
-                </span>
-              </button>
-            </div>
-          {%- else -%}
-            {% capture cart_badge_html %}
-              <span
-                class="theme-drawer__badge{% if cart.item_count == 0 %} visually-hidden{% endif %}"
-                aria-hidden="true"
-                {% if cart.item_count <= 99 %}
-                  data-maintain-ratio
-                {% endif %}
-              >
-                {{- cart.item_count -}}
-              </span>
-              {% if cart.item_count > 0 %}
-                <span class="visually-hidden">
-                  {{ 'accessibility.cart_count' | t }}: {{ cart.item_count }}
-                </span>
-              {% endif %}
-            {% endcapture %}
-            {% assign cart_drawer_title = 'content.cart_title' | t %}
-            {% render 'theme-drawer-header',
-              title: cart_drawer_title,
-              drawer_id: 'cart-drawer',
-              heading_id: 'cart-drawer-heading',
-              title_append: cart_badge_html
-            %}
-          {%- endif -%}
+          {% capture cart_badge_html %}
+            <span class="cart-drawer__item-count" style="font-size: 14px; font-weight: normal; color: #555; margin-left: 8px;">
+              (<span data-cart-count>{{ cart.item_count }}</span> item<span data-cart-count-plural {% if cart.item_count == 1 %}style="display:none;"{% endif %}>s</span>)
+            </span>
+          {% endcapture %}
+          {% assign cart_drawer_title = 'content.cart_title' | t %}
+          {% render 'theme-drawer-header',
+            title: cart_drawer_title,
+            drawer_id: 'cart-drawer',
+            heading_id: 'custom-cart-drawer-heading',
+            title_append: cart_badge_html
+          %}
+
+          <div
+            class="cart-drawer-subscription-toggle"
+            style="display: flex; background: #f0f0f0; border-radius: 999px; margin: 0 24px 16px; padding: 4px; font-size: 13px;"
+          >
+            <button style="flex: 1; border-radius: 999px; padding: 8px; border: none; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 700;">
+              One-time
+            </button>
+            <button style="flex: 1; border-radius: 999px; padding: 8px; border: none; background: transparent; color: #555; font-weight: 400;">
+              Subscribe · save 15%
+            </button>
+          </div>
 
           {% capture cart_items_children %}
             {%- if cart.empty? -%}
@@ -273,6 +251,33 @@
     .cart-drawer__header,
     .cart-drawer__content {
       background: transparent;
+    }
+  }
+
+  /* Custom Floating Drawer Layout */
+  @media screen and (min-width: 750px) {
+    #cart-drawer .theme-drawer__dialog {
+      height: calc(100dvh - 32px) !important;
+      max-height: calc(100dvh - 32px) !important;
+      top: 16px !important;
+      bottom: 16px !important;
+      right: -450px !important;
+      margin-right: 16px !important;
+      border-radius: 24px !important;
+      overflow: hidden !important;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15) !important;
+      border: none !important;
+      width: 400px !important;
+    }
+    
+    #cart-drawer .theme-drawer__dialog[open] {
+      right: 0 !important;
+      transform: translateX(0) !important;
+    }
+    
+    .cart-drawer__inner {
+      border-radius: 24px !important;
+      background: #fff;
     }
   }
 {% endstylesheet %}
