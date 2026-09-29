@@ -269,6 +269,8 @@
                   itemCount: cartData ? cartData.item_count : 0,
                 },
               });
+              
+              document.documentElement.dispatchEvent(new CustomEvent('cart:build', {bubbles: true}));
             })
             .catch((err) => {
               console.error(err);
