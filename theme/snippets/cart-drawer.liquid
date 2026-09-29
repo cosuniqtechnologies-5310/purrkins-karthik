@@ -22,7 +22,16 @@
     src="{{ 'cart-drawer.js' | asset_url }}"
     fetchpriority="low"
   ></script>
-
+  <script
+    src="{{ 'component-cart-items.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+  <script
+    src="{{ 'component-cart-quantity-selector.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
   {% capture empty_cart_drawer_content %}
     <div
       class="cart-drawer__content cart-drawer__content--empty"

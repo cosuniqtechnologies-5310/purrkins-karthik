@@ -152,7 +152,7 @@ class CartDrawerComponent extends Component {
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               this.#themeDrawer?.open();
-              console.log('[cart-drawer] Cart drawer successfully opened and updated!');
+              console.log('[PURRKINS CART] DRAWER OPEN');
               settle();
             });
           });
@@ -166,7 +166,7 @@ class CartDrawerComponent extends Component {
       })
       .catch((error) => {
         if (error?.name !== 'AbortError') {
-            console.error('[cart-drawer] ERROR: Failed to update or open cart drawer!', error);
+            console.error('[PURRKINS CART] DRAWER ERROR', { error, message: error?.message });
         }
       });
   };

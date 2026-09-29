@@ -174,6 +174,7 @@ export class CartItemsComponent extends createViewEventElement(Component) {
 
     const template = document.getElementById('empty-cart-template');
     if (isEmptyCart && template instanceof HTMLTemplateElement) {
+      console.log('[PURRKINS CART] CART EMPTY');
       const clone = document.importNode(template.content, true);
 
       startViewTransition(() => {
@@ -296,6 +297,9 @@ export class CartItemsComponent extends createViewEventElement(Component) {
    * @param {string} config.action - The action.
    */
   updateQuantity(config) {
+    const isRemove = config.quantity === 0 || config.action === 'clear';
+    console.log(isRemove ? '[PURRKINS CART] REMOVE START' : '[PURRKINS CART] QUANTITY UPDATE START', config);
+
     const cartPerformaceUpdateMarker = cartPerformance.createStartingMarker(`${config.action}:user-action`);
 
     this.#disableCartItems();
@@ -317,6 +321,8 @@ export class CartItemsComponent extends createViewEventElement(Component) {
       sections: Array.from(sectionsToUpdate).join(','),
       sections_url: window.location.pathname,
     });
+    
+    console.log(isRemove ? '[PURRKINS CART] REMOVE REQUEST' : '[PURRKINS CART] QUANTITY REQUEST');
 
     cartTotal?.shimmer();
 
@@ -337,14 +343,24 @@ export class CartItemsComponent extends createViewEventElement(Component) {
       })
       .then((responseText) => {
         const parsedResponseText = JSON.parse(responseText);
+        const isRemove = config.quantity === 0 || config.action === 'clear';
+        console.log(isRemove ? '[PURRKINS CART] REMOVE SUCCESS' : '[PURRKINS CART] QUANTITY SUCCESS', { itemCount: parsedResponseText.item_count });
 
         resetShimmer(this);
 
         if (parsedResponseText.errors) {
+          console.error(isRemove ? '[PURRKINS CART] REMOVE ERROR' : '[PURRKINS CART] QUANTITY ERROR', parsedResponseText.errors);
           this.#handleCartError(line, parsedResponseText);
           deferredUpdatePromise.reject(new Error(parsedResponseText.errors));
           return;
         }
+
+        console.log('[PURRKINS CART] CART STATE', {
+           itemCount: parsedResponseText.item_count,
+           totalPrice: parsedResponseText.original_total_price,
+           currency: window.Shopify?.currency?.active || 'USD',
+           lineCount: parsedResponseText.items ? parsedResponseText.items.length : 0
+        });
 
         const newSectionHTML = new DOMParser().parseFromString(
           parsedResponseText.sections[this.sectionId],
@@ -376,7 +392,11 @@ export class CartItemsComponent extends createViewEventElement(Component) {
         this.#updateCartQuantitySelectorButtonStates();
       })
       .catch((error) => {
-        console.error(error);
+        const isRemove = config.quantity === 0 || config.action === 'clear';
+        console.error(isRemove ? '[PURRKINS CART] REMOVE ERROR' : '[PURRKINS CART] QUANTITY ERROR', {
+          error,
+          message: error?.message
+        });
         deferredUpdatePromise.reject(error);
 
         this.dispatchEvent(
@@ -431,36 +451,25 @@ export class CartItemsComponent extends createViewEventElement(Component) {
   #handleCartUpdate = (event) => {
     if (event.target === this) return;
 
-    console.log('[DEBUG cart-items] CartLinesUpdateEvent RECEIVED', {
-      target: event.target,
-      action: event.action,
-      hasPromise: !!event.promise,
-    });
+    if (event.action === 'add') {
+      console.log('[PURRKINS CART] DRAWER UPDATE START');
+    }
 
     event.promise
       ?.then(async ({ detail }) => {
-        console.log('[DEBUG cart-items] Event promise RESOLVED', {
-          detail,
-          sections: detail?.sections,
-          sectionKeys: detail?.sections ? Object.keys(detail.sections) : [],
-        });
-
         const sections = detail?.sections;
         const cartItemsHtml = sections?.[this.sectionId];
+
+        if (!cartItemsHtml) {
+          console.error('[PURRKINS CART] SECTION ERROR', {
+            sectionId: this.sectionId,
+            availableSections: sections ? Object.keys(sections) : [],
+            detail
+          });
+        }
         
-        console.log('[DEBUG cart-items] SECTION ID', {
-          sectionId: this.sectionId,
-          datasetSectionId: this.dataset.sectionId,
-        });
-
-        console.log('[DEBUG cart-items] SECTION HTML PREVIEW', cartItemsHtml?.slice(0, 1000));
-
         const wasEmptyCartDrawer = this.isDrawer && this.querySelector('[data-cart-drawer-empty]') !== null;
         
-        console.log('[DEBUG cart-items] EMPTY STATE', {
-          wasEmptyCartDrawer,
-          isDrawer: this.isDrawer
-        });
         /** @type {'hydration' | 'full'} */
         const mode = this.isDrawer ? 'hydration' : 'full';
         const morphOptions = {
@@ -471,35 +480,42 @@ export class CartItemsComponent extends createViewEventElement(Component) {
         if (cartItemsHtml) {
           const existingKeys = new Set(this.refs.cartItemRows?.map((row) => row.dataset.key) ?? []);
 
-          console.log('[DEBUG cart-items] ABOUT TO MORPH', {
+          console.log('[PURRKINS CART] MORPH START', {
             sectionId: this.sectionId,
-            sectionHtmlExists: !!cartItemsHtml,
-            sectionHtmlLength: cartItemsHtml?.length,
+            htmlLength: cartItemsHtml.length,
+            cartItemCount: detail?.itemCount
           });
 
-          console.log('[DEBUG DOM BEFORE MORPH]', {
-            cartItemsComponents: document.querySelectorAll('cart-items-component').length,
-            cartDrawerComponents: document.querySelectorAll('cart-drawer-component').length,
-            emptyDrawer: !!document.querySelector('.cart-drawer--empty'),
-            itemsContainer: !!document.querySelector('.cart-drawer__items'),
-          });
-
-          if (wasEmptyCartDrawer) {
-            startViewTransition(() => {
-              morphSection(this.sectionId, cartItemsHtml, morphOptions);
-            }, ['fill-cart-drawer']);
-          } else {
-            await morphSection(this.sectionId, cartItemsHtml, morphOptions);
+          try {
+            if (wasEmptyCartDrawer) {
+              startViewTransition(() => {
+                morphSection(this.sectionId, cartItemsHtml, morphOptions);
+              }, ['fill-cart-drawer']);
+            } else {
+              await morphSection(this.sectionId, cartItemsHtml, morphOptions);
+            }
+          } catch (error) {
+            console.error('[PURRKINS CART] MORPH ERROR', { error, message: error?.message });
+            if (error?.name === 'InvalidStateError' || error?.message?.includes('Transition was')) {
+              console.error('[PURRKINS CART] VIEW TRANSITION ERROR', { error, name: error?.name, message: error?.message });
+            }
           }
 
-          console.log('[DEBUG cart-items] MORPH COMPLETED');
+          const cartDrawerComponents = document.querySelectorAll('cart-drawer-component').length;
+          const cartItemsComponents = document.querySelectorAll('cart-items-component').length;
 
-          console.log('[DEBUG DOM AFTER MORPH]', {
-            cartItemsComponents: document.querySelectorAll('cart-items-component').length,
-            cartDrawerComponents: document.querySelectorAll('cart-drawer-component').length,
-            emptyDrawer: !!document.querySelector('.cart-drawer--empty'),
-            itemsContainer: !!document.querySelector('.cart-drawer__items'),
+          console.log('[PURRKINS CART] MORPH SUCCESS', {
+            cartDrawerComponents,
+            cartItemsComponents,
+            itemCount: detail?.itemCount
           });
+          
+          if (cartDrawerComponents !== 1 || cartItemsComponents !== 1) {
+            console.error('[PURRKINS CART] DOM INTEGRITY ERROR', {
+              drawerCount: cartDrawerComponents,
+              cartItemsCount: cartItemsComponents
+            });
+          }
 
           // Animate newly added rows (reverse of the remove animation).
           if (!wasEmptyCartDrawer && !prefersReducedMotion()) {

@@ -88,6 +88,8 @@
               items = [item];
           }
 
+          console.log('[PURRKINS CART] ADD START', { items });
+
           const payload = {
               method: 'POST',
               headers: {
@@ -101,7 +103,7 @@
               })
           };
 
-          console.log('[purrkinsAddToCart] Sending request to cart...', payload);
+          console.log('[PURRKINS CART] ADD REQUEST');
 
           // Dispatch the update event BEFORE fetch, matching product-form.js behavior
           const eventName = (window.StandardEvents && window.StandardEvents.cartLinesUpdate) ? window.StandardEvents.cartLinesUpdate : 'shopify:cart:lines-update';
@@ -114,19 +116,32 @@
           });
           updateEvent.promise = promise;
           document.dispatchEvent(updateEvent);
+          console.log('[PURRKINS CART] UPDATE EVENT DISPATCHED');
 
           try {
               const res = await fetch((window.Shopify && window.Shopify.routes) ? window.Shopify.routes.root + 'cart/add.js' : '/cart/add.js', payload);
-              const data = await res.json().catch(() => ({}));
+              const data = await res.json().catch(() => null);
               
               if (!res.ok) {
-                  throw new Error(data.description || data.message || 'Error adding to cart');
+                  throw new Error(data?.description || data?.message || 'Error adding to cart');
               }
               
-              console.log('[purrkinsAddToCart] Successfully added item to cart:', data);
-
+              if (!data) {
+                  throw new Error('Invalid JSON response from Shopify');
+              }
+              
               const cartData = await fetch(window.Shopify.routes ? window.Shopify.routes.root + 'cart.js' : '/cart.js').then(r => r.json()).catch(() => null);
-              console.log('[purrkinsAddToCart] Fetched full cart data:', cartData);
+              if (cartData) {
+                  console.log('[PURRKINS CART] CART FETCH SUCCESS');
+              } else {
+                  console.error('[PURRKINS CART] CART FETCH ERROR', { message: 'Failed to fetch cart.js' });
+              }
+              
+              console.log('[PURRKINS CART] ADD SUCCESS', { 
+                  itemCount: cartData ? cartData.item_count : (data.items ? data.items.length : 1), 
+                  totalPrice: cartData ? cartData.total_price : 0, 
+                  sections: data.sections 
+              });
               
               resolvePromise({ 
                   cart: cartData, 
@@ -145,19 +160,39 @@
                   button.style.opacity = '1';
               }
           } catch (error) {
-              console.error('[purrkinsAddToCart] Error:', error);
+              console.error('[PURRKINS CART] ADD ERROR', {
+                  error,
+                  message: error?.message,
+                  status: error?.status
+              });
               rejectPromise(error);
               if (button) {
                   button.innerHTML = button.dataset.originalText || 'Add to Cart';
                   button.disabled = false;
                   button.style.opacity = '1';
               }
-              alert('Could not add item to cart: ' + error.message);
+              
+              // Use a theme error notification if available, otherwise safely fallback without breaking layout
+              if (window.showThemeError) {
+                  window.showThemeError('Unable to add this product. Please try again.');
+              } else {
+                  // Find or create an error message element near the button, avoiding raw alerts
+                  if (button && button.parentElement) {
+                      const errEl = document.createElement('div');
+                      errEl.style.color = '#d82c0d';
+                      errEl.style.fontSize = '12px';
+                      errEl.style.marginTop = '4px';
+                      errEl.textContent = 'Unable to add this product. Please try again.';
+                      button.parentElement.appendChild(errEl);
+                      setTimeout(() => errEl.remove(), 4000);
+                  }
+              }
           } finally {
               // Wait briefly for DOM updates to settle before processing next in queue
               setTimeout(() => {
                   processCartQueue();
               }, 400); // 400ms matches the typical View Transition duration
+
           }
       }
     </script>
