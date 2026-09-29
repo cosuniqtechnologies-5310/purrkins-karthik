@@ -61,7 +61,7 @@ export class CartItemsComponent extends createViewEventElement(Component) {
       ?.then(({ detail }) => {
         const sectionsHtml = detail?.sections?.[this.sectionId];
         if (sectionsHtml) {
-          morphSection(this.sectionId, sectionsHtml, { mode: 'full' });
+          morphSection(this.sectionId, sectionsHtml, { mode: this.isDrawer ? 'hydration' : 'full' });
           this.#updateCartQuantitySelectorButtonStates();
         } else if (external) {
           // External caller (Shopify.actions.updateCart or SFAPI default handler) didn't
@@ -69,7 +69,7 @@ export class CartItemsComponent extends createViewEventElement(Component) {
           // Internal cart-discount-component morphs the section itself — no fallback needed.
           sectionRenderer.renderSection(this.sectionId, {
             cache: false,
-            mode: 'full',
+            mode: this.isDrawer ? 'hydration' : 'full',
           });
         }
       })
@@ -88,11 +88,11 @@ export class CartItemsComponent extends createViewEventElement(Component) {
         const sections = /** @type {Record<string, string> | undefined} */ (detail?.sections);
         const sectionsHtml = sections?.[this.sectionId];
         if (sectionsHtml) {
-          morphSection(this.sectionId, sectionsHtml, { mode: 'full' });
+          morphSection(this.sectionId, sectionsHtml, { mode: this.isDrawer ? 'hydration' : 'full' });
         } else {
           sectionRenderer.renderSection(this.sectionId, {
             cache: false,
-            mode: 'full',
+            mode: this.isDrawer ? 'hydration' : 'full',
           });
         }
       })
@@ -350,7 +350,7 @@ export class CartItemsComponent extends createViewEventElement(Component) {
         // needs the response stylesheet because it adds the cart summary markup.
         const wasEmptyCartDrawer = this.isDrawer && this.querySelector('[data-cart-drawer-empty]') !== null;
         /** @type {'hydration' | 'full'} */
-        const mode = 'full';
+        const mode = this.isDrawer ? 'hydration' : 'full';
         const morphOptions = {
           mode,
           injectStylesheet: wasEmptyCartDrawer,

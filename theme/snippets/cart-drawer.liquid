@@ -10,19 +10,6 @@
 
 {%- if settings.cart_type == 'drawer' and template.name != 'cart' -%}
   {% if render_wrapper %}
-    <style>
-      #shopify-section-cart-drawer-section {
-        position: relative;
-        z-index: 999999;
-      }
-      /* Filter cart items based on active tab */
-      body[data-cart-tab="one-time"] .cart-items__table-row[data-subscription-type="subscribe"] {
-        display: none !important;
-      }
-      body[data-cart-tab="subscribe"] .cart-items__table-row[data-subscription-type="one-time"] {
-        display: none !important;
-      }
-    </style>
     <div
       id="shopify-section-cart-drawer-section"
       class="shopify-section"
@@ -39,9 +26,17 @@
     <div
       class="cart-drawer__content"
       aria-label="{{ 'accessibility.cart' | t }}"
-      style="padding: 20px 24px; justify-content: flex-start;"
     >
-      <p style="color: #555; font-size: 14px; margin: 0; text-align: left; width: 100%;">Your cart is currently empty.</p>
+      <h2
+        class="theme-drawer__title h4"
+        id="cart-drawer-heading"
+      >
+        {{ 'content.your_cart_is_empty' | t }}
+      </h2>
+
+      <div class="cart-drawer__items">
+        {% render 'cart-products', force_empty: true, context: 'drawer' %}
+      </div>
     </div>
   {% endcapture %}
 
@@ -52,7 +47,7 @@
     <dialog
       ref="panel"
       class="theme-drawer__dialog color-custom-drawer"
-      aria-labelledby="custom-cart-drawer-heading"
+      aria-labelledby="cart-drawer-heading"
       cart-summary-sticky="true"
     >
       <cart-drawer-component
@@ -68,124 +63,60 @@
           class="cart-drawer__inner{% if cart.empty? %} cart-drawer--empty{% endif %}"
           data-hydration-key="cart-drawer-inner"
         >
-          {% capture cart_badge_html %}
-            <span class="cart-drawer__item-count" style="font-size: 14px; font-weight: normal; color: #555; margin-left: 8px;">
-              (<span data-cart-count>{{ cart.item_count }}</span> item<span data-cart-count-plural {% if cart.item_count == 1 %}style="display:none;"{% endif %}>s</span>)
-            </span>
-          {% endcapture %}
-          {% assign cart_drawer_title = 'content.cart_title' | t %}
-          {% render 'theme-drawer-header',
-            title: cart_drawer_title,
-            drawer_id: 'cart-drawer',
-            heading_id: 'custom-cart-drawer-heading',
-            title_append: cart_badge_html
-          %}
-
-          <div
-            class="cart-drawer-subscription-toggle"
-            style="display: flex; background: #f0f0f0; border-radius: 999px; margin: 0 24px 16px; padding: 4px; font-size: 13px;"
-          >
-            <button
-              class="cart-toggle-btn active"
-              style="flex: 1; border-radius: 999px; padding: 8px; border: none; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 700; cursor: pointer; transition: all 0.2s ease;"
-            >
-              One-time
-            </button>
-            <button
-              class="cart-toggle-btn"
-              style="flex: 1; border-radius: 999px; padding: 8px; border: none; background: transparent; color: #555; font-weight: 400; cursor: pointer; transition: all 0.2s ease;"
-            >
-              Subscribe · save 15%
-            </button>
-          </div>
-
-          <script>
-            if (!window.cartSubscriptionToggleInitialized) {
-              window.cartSubscriptionToggleInitialized = true;
-              document.addEventListener('click', async (e) => {
-                const target = e.target.closest('.cart-toggle-btn');
-                if (!target) return;
-
-                const container = target.closest('.cart-drawer-subscription-toggle');
-                if (!container) return;
-
-                const isSubscribe = target.textContent.toLowerCase().includes('subscribe');
-                const rows = document.querySelectorAll('.cart-items__table-row');
-                const promises = [];
-
-                rows.forEach((row) => {
-                  const isSubItem = row.dataset.subscriptionType === 'subscribe';
-                  const hasPlan = row.dataset.hasSellingPlan === 'true';
-                  const planId = row.dataset.sellingPlanId;
-                  const key = row.dataset.key;
-                  const qty = row.dataset.quantity;
-
-                  if (isSubscribe && !isSubItem && hasPlan) {
-                    promises.push(
-                      fetch('/cart/change.js', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id: key, quantity: qty, selling_plan: planId }),
-                      })
-                    );
-                  } else if (!isSubscribe && isSubItem) {
-                    promises.push(
-                      fetch('/cart/change.js', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id: key, quantity: qty, selling_plan: '' }),
-                      })
-                    );
-                  }
-                });
-
-                if (promises.length > 0) {
-                  // Show loading state
-                  const originalText = target.textContent;
-                  target.textContent = 'Updating...';
-                  target.style.opacity = '0.7';
-                  target.style.pointerEvents = 'none';
-
-                  await Promise.all(promises);
-
-                  // Reload the page to fully refresh the cart state with the new subscription items
-                  window.location.reload();
-                  return;
-                }
-
-                const buttons = container.querySelectorAll('.cart-toggle-btn');
-                buttons.forEach((b) => {
-                  b.classList.remove('active');
-                  b.style.background = 'transparent';
-                  b.style.boxShadow = 'none';
-                  b.style.fontWeight = '400';
-                  b.style.color = '#555';
-                });
-
-                target.classList.add('active');
-                target.style.background = '#fff';
-                target.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-                target.style.fontWeight = '700';
-                target.style.color = '#000';
-
-                document.body.dataset.cartTab = isSubscribe ? 'subscribe' : 'one-time';
-              });
-
-              // Set initial tab state based on URL or defaults
-              document.body.dataset.cartTab = 'one-time';
-            }
-          </script>
+          {%- if cart.empty? -%}
+            <div class="theme-drawer__header">
+              <button
+                on:click="#cart-drawer/close"
+                class="theme-drawer__close-button cart-drawer__close-button--empty"
+                type="button"
+                aria-label="{{ 'actions.close' | t }}"
+              >
+                <span class="svg-wrapper">
+                  {{- 'icon-close.svg' | inline_asset_content -}}
+                </span>
+              </button>
+            </div>
+          {%- else -%}
+            {% capture cart_badge_html %}
+              <span
+                class="theme-drawer__badge{% if cart.item_count == 0 %} visually-hidden{% endif %}"
+                aria-hidden="true"
+                {% if cart.item_count <= 99 %}
+                  data-maintain-ratio
+                {% endif %}
+              >
+                {{- cart.item_count -}}
+              </span>
+              {% if cart.item_count > 0 %}
+                <span class="visually-hidden">
+                  {{ 'accessibility.cart_count' | t }}: {{ cart.item_count }}
+                </span>
+              {% endif %}
+            {% endcapture %}
+            {% assign cart_drawer_title = 'content.cart_title' | t %}
+            {% render 'theme-drawer-header',
+              title: cart_drawer_title,
+              drawer_id: 'cart-drawer',
+              heading_id: 'cart-drawer-heading',
+              title_append: cart_badge_html
+            %}
+          {%- endif -%}
 
           {% capture cart_items_children %}
             {%- if cart.empty? -%}
               {{ empty_cart_drawer_content }}
             {%- else -%}
               <scroll-hint
-                class="cart-drawer__content cart-drawer__items"
+                class="cart-drawer__content"
                 aria-label="{{ 'accessibility.cart' | t }}"
-                data-hydration-key="cart-drawer-items"
               >
-                {% render 'cart-products', context: 'drawer' %}
+                <scroll-hint class="cart-drawer__items">
+                  {% render 'cart-products', context: 'drawer' %}
+                </scroll-hint>
+
+                <div class="cart-drawer__summary">
+                  {% render 'cart-summary', section_id: 'cart-drawer-section' %}
+                </div>
               </scroll-hint>
             {%- endif -%}
           {% endcapture %}
@@ -194,9 +125,6 @@
             is_drawer: true,
             section_id: 'cart-drawer-section'
           %}
-          <div class="cart-drawer__summary" data-hydration-key="cart-drawer-summary">
-            {% render 'cart-summary' %}
-          </div>
         </div>
       </cart-drawer-component>
     </dialog>
@@ -346,18 +274,5 @@
     .cart-drawer__content {
       background: transparent;
     }
-  }
-
-  /* Curve the drawer on the left side to match the design */
-  #cart-drawer .theme-drawer__dialog {
-    border-top-left-radius: 24px;
-    border-bottom-left-radius: 24px;
-    z-index: 999999;
-  }
-
-  .cart-drawer__inner {
-    border-top-left-radius: 24px;
-    border-bottom-left-radius: 24px;
-    background-color: var(--color-background);
   }
 {% endstylesheet %}

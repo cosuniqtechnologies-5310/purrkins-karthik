@@ -41,185 +41,183 @@
     {%- endif -%}
   </div>
 
-  {% comment %}
-    {% if settings.show_cart_note or settings.show_add_discount_code %}
-      <div class="cart-actions">
-        {% if settings.show_cart_note %}
-          <script
-            type="module"
-            src="{{ 'cart-note.js' | asset_url }}"
-          ></script>
+  {% if settings.show_cart_note or settings.show_add_discount_code %}
+    <div class="cart-actions">
+      {% if settings.show_cart_note %}
+        <script
+          type="module"
+          src="{{ 'cart-note.js' | asset_url }}"
+        ></script>
 
-          <cart-note style="display: flex;">
-            {% capture cart_note_accordion_children %}
-              <details
-                {% if settings.cart_note_open_by_default %}
-                  open
-                {% endif %}
-              >
-                <summary class="cart-note__summary">
-                  <span class="cart-note__label cart-primary-typography">
-                    {{ 'content.seller_note' | t }}
-                  </span>
-
-                  <span class="cart-totals__icon">
-                    {{- 'icon-plus.svg' | inline_asset_content -}}
-                  </span>
-                </summary>
-
-                <div class="details-content cart-note__inner">
-                  <label
-                    for="cart-note"
-                    class="visually-hidden"
-                  >
-                    {{- 'content.seller_note' | t -}}
-                  </label>
-                  <textarea
-                    form="cart-form"
-                    on:input="/updateCartNote"
-                    id="cart-note"
-                    class="cart-note__instructions"
-                    name="note"
-                    data-skip-node-update
-                  >{{ cart.note }}</textarea>
-                </div>
-              </details>
-            {% endcapture %}
-            {% render 'accordion-custom-component',
-              children: cart_note_accordion_children,
-              class: 'cart-note',
-              open_by_default_on_desktop: settings.cart_note_open_by_default,
-              open_by_default_on_mobile: settings.cart_note_open_by_default
-            %}
-          </cart-note>
-        {% endif %}
-        {% if settings.show_cart_note and settings.show_add_discount_code %}
-          <div class="cart-actions__divider"></div>
-        {% endif %}
-        {% if settings.show_add_discount_code %}
-          {% liquid
-            assign discount_codes = cart.cart_level_discount_applications | where: 'type', 'discount_code' | map: 'title'
-            for item in cart.items
-              for allocation in item.line_level_discount_allocations
-                if allocation.discount_application.type == 'discount_code'
-                  assign discount_codes = item.line_level_discount_allocations | slice: forloop.index0 | map: 'discount_application' | map: 'title' | concat: discount_codes
-                endif
-              endfor
-            endfor
-
-            assign discount_codes = discount_codes | uniq
-
-            # Evaluate the boolean expression for the disclosure state
-            if discount_codes.size == 0
-              assign disclosure_expanded = false
-            else
-              assign disclosure_expanded = true
-            endif
-          %}
-
-          {% capture cart_discount_accordion_children %}
+        <cart-note style="display: flex;">
+          {% capture cart_note_accordion_children %}
             <details
-              {% if disclosure_expanded %}
+              {% if settings.cart_note_open_by_default %}
                 open
               {% endif %}
             >
-              <summary class="cart-discount__summary">
-                <span class="cart-discount__label cart-primary-typography">{{ 'content.discount' | t }}</span>
+              <summary class="cart-note__summary">
+                <span class="cart-note__label cart-primary-typography">
+                  {{ 'content.seller_note' | t }}
+                </span>
 
                 <span class="cart-totals__icon">
                   {{- 'icon-plus.svg' | inline_asset_content -}}
                 </span>
               </summary>
 
-              <div class="details-content">
-                <div id="cart-discount-disclosure">
-                  <cart-discount-component
-                    {% if section_id != blank %}
-                      data-section-id="{{ section_id }}"
-                    {% endif %}
-                  >
-                    <div class="cart-discount__content">
-                      <form
-                        on:submit="/applyDiscount"
-                        onsubmit="return false;"
-                        class="cart-discount__form"
-                      >
-                        <label
-                          for="cart-discount"
-                          class="visually-hidden"
-                        >
-                          {{- 'accessibility.discount' | t -}}
-                        </label>
-                        <input
-                          id="cart-discount"
-                          class="cart-discount__input"
-                          type="text"
-                          name="discount"
-                          size="8"
-                          placeholder="{{ 'content.discount_code' | t }}"
-                          required
-                          data-skip-node-update
-                        >
-                        <button
-                          type="submit"
-                          class="button cart-discount__button"
-                        >
-                          {{ 'actions.apply' | t }}
-                        </button>
-                      </form>
-                    </div>
-                    <div
-                      class="cart-discount__error hidden"
-                      role="alert"
-                      ref="cartDiscountError"
-                    >
-                      <span class="svg-wrapper">
-                        {{- 'icon-error.svg' | inline_asset_content -}}
-                      </span>
-                      <small
-                        class="cart-discount__error-text cart-primary-typography hidden"
-                        ref="cartDiscountErrorDiscountCode"
-                      >
-                        {{ 'content.discount_code_error' | t: code: 'test' }}
-                      </small>
-                      <small
-                        class="cart-discount__error-text cart-primary-typography hidden"
-                        ref="cartDiscountErrorShipping"
-                      >
-                        {{ 'content.shipping_discount_error' | t }}
-                      </small>
-                    </div>
-                    <ul class="cart-discount__codes">
-                      {% for discount_code in discount_codes %}
-                        <li
-                          class="cart-discount__pill"
-                          data-discount-code="{{ discount_code }}"
-                          aria-label="{{ 'accessibility.discount_applied' | t: code: discount_code }}"
-                        >
-                          <p class="cart-discount__pill-code">
-                            {{ discount_code }}
-                          </p>
-                          <button
-                            type="button"
-                            on:click="/removeDiscount"
-                            class="cart-discount__pill-remove svg-wrapper svg-wrapper--smaller button-unstyled"
-                            aria-label="{{ 'actions.remove_discount' | t: code: discount_code }}"
-                          >
-                            {{- 'icon-filters-close.svg' | inline_asset_content -}}
-                          </button>
-                        </li>
-                      {% endfor %}
-                    </ul>
-                  </cart-discount-component>
-                </div>
+              <div class="details-content cart-note__inner">
+                <label
+                  for="cart-note"
+                  class="visually-hidden"
+                >
+                  {{- 'content.seller_note' | t -}}
+                </label>
+                <textarea
+                  form="cart-form"
+                  on:input="/updateCartNote"
+                  id="cart-note"
+                  class="cart-note__instructions"
+                  name="note"
+                  data-skip-node-update
+                >{{ cart.note }}</textarea>
               </div>
             </details>
           {% endcapture %}
-          {% render 'accordion-custom-component', children: cart_discount_accordion_children, class: 'cart-discount' %}
-        {% endif %}
-      </div>
-    {% endif %}
-  {% endcomment %}
+          {% render 'accordion-custom-component',
+            children: cart_note_accordion_children,
+            class: 'cart-note',
+            open_by_default_on_desktop: settings.cart_note_open_by_default,
+            open_by_default_on_mobile: settings.cart_note_open_by_default
+          %}
+        </cart-note>
+      {% endif %}
+      {% if settings.show_cart_note and settings.show_add_discount_code %}
+        <div class="cart-actions__divider"></div>
+      {% endif %}
+      {% if settings.show_add_discount_code %}
+        {% liquid
+          assign discount_codes = cart.cart_level_discount_applications | where: 'type', 'discount_code' | map: 'title'
+          for item in cart.items
+            for allocation in item.line_level_discount_allocations
+              if allocation.discount_application.type == 'discount_code'
+                assign discount_codes = item.line_level_discount_allocations | slice: forloop.index0 | map: 'discount_application' | map: 'title' | concat: discount_codes
+              endif
+            endfor
+          endfor
+
+          assign discount_codes = discount_codes | uniq
+
+          # Evaluate the boolean expression for the disclosure state
+          if discount_codes.size == 0
+            assign disclosure_expanded = false
+          else
+            assign disclosure_expanded = true
+          endif
+        %}
+
+        {% capture cart_discount_accordion_children %}
+          <details
+            {% if disclosure_expanded %}
+              open
+            {% endif %}
+          >
+            <summary class="cart-discount__summary">
+              <span class="cart-discount__label cart-primary-typography">{{ 'content.discount' | t }}</span>
+
+              <span class="cart-totals__icon">
+                {{- 'icon-plus.svg' | inline_asset_content -}}
+              </span>
+            </summary>
+
+            <div class="details-content">
+              <div id="cart-discount-disclosure">
+                <cart-discount-component
+                  {% if section_id != blank %}
+                    data-section-id="{{ section_id }}"
+                  {% endif %}
+                >
+                  <div class="cart-discount__content">
+                    <form
+                      on:submit="/applyDiscount"
+                      onsubmit="return false;"
+                      class="cart-discount__form"
+                    >
+                      <label
+                        for="cart-discount"
+                        class="visually-hidden"
+                      >
+                        {{- 'accessibility.discount' | t -}}
+                      </label>
+                      <input
+                        id="cart-discount"
+                        class="cart-discount__input"
+                        type="text"
+                        name="discount"
+                        size="8"
+                        placeholder="{{ 'content.discount_code' | t }}"
+                        required
+                        data-skip-node-update
+                      >
+                      <button
+                        type="submit"
+                        class="button cart-discount__button"
+                      >
+                        {{ 'actions.apply' | t }}
+                      </button>
+                    </form>
+                  </div>
+                  <div
+                    class="cart-discount__error hidden"
+                    role="alert"
+                    ref="cartDiscountError"
+                  >
+                    <span class="svg-wrapper">
+                      {{- 'icon-error.svg' | inline_asset_content -}}
+                    </span>
+                    <small
+                      class="cart-discount__error-text cart-primary-typography hidden"
+                      ref="cartDiscountErrorDiscountCode"
+                    >
+                      {{ 'content.discount_code_error' | t: code: 'test' }}
+                    </small>
+                    <small
+                      class="cart-discount__error-text cart-primary-typography hidden"
+                      ref="cartDiscountErrorShipping"
+                    >
+                      {{ 'content.shipping_discount_error' | t }}
+                    </small>
+                  </div>
+                  <ul class="cart-discount__codes">
+                    {% for discount_code in discount_codes %}
+                      <li
+                        class="cart-discount__pill"
+                        data-discount-code="{{ discount_code }}"
+                        aria-label="{{ 'accessibility.discount_applied' | t: code: discount_code }}"
+                      >
+                        <p class="cart-discount__pill-code">
+                          {{ discount_code }}
+                        </p>
+                        <button
+                          type="button"
+                          on:click="/removeDiscount"
+                          class="cart-discount__pill-remove svg-wrapper svg-wrapper--smaller button-unstyled"
+                          aria-label="{{ 'actions.remove_discount' | t: code: discount_code }}"
+                        >
+                          {{- 'icon-filters-close.svg' | inline_asset_content -}}
+                        </button>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </cart-discount-component>
+              </div>
+            </div>
+          </details>
+        {% endcapture %}
+        {% render 'accordion-custom-component', children: cart_discount_accordion_children, class: 'cart-discount' %}
+      {% endif %}
+    </div>
+  {% endif %}
 
   {%- liquid
     if settings.currency_code_enabled_cart_total
@@ -229,110 +227,62 @@
     endif
   -%}
 
-  {% comment %}
-    <div class="cart-totals__container{% if settings.show_installments %} cart-totals__container--has-installments{% endif %}">
-      <span
-        class="cart-totals__item cart-totals__total"
-        role="status"
-      >
-        <span class="cart-totals__total-label cart-primary-typography">{{ 'content.cart_estimated_total' | t }}</span>
-        <text-component
-          ref="cartTotal"
-          value="{{ total_price | strip_html }}"
-          class="cart-totals__total-value cart-secondary-typography"
-          {% comment %} Used by payment_terms web component {% endcomment %}
-          data-testid="cart-total-value"
-          data-cart-subtotal
-        >
-          {{ total_price }}
-        </text-component>
-      </span>
-      {% if settings.show_installments %}
-        <span class="cart-totals__item cart-totals__installments">
-          {% form 'cart', cart %}
-            {{ form | payment_terms }}
-          {% endform %}
-        </span>
-      {% endif %}
-      <div class="cart-totals__item cart-totals__tax-note cart-primary-typography">
-        {% render 'tax-info', has_discounts_enabled: settings.show_add_discount_code %}
-      </div>
-    </div>
-  {% endcomment %}
-
-  <div class="cart__ctas">
-    <div class="cart-security-icons" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 16px;">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline>
-        </svg>
-        <div style="font-size: 10px; font-weight: bold; line-height: 1.2; text-align: left;">
-          <div>SECURE</div>
-          <div style="font-weight: normal; color: #555;">SSL ENCRYPTED</div>
-        </div>
-      </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-        </svg>
-        <div style="font-size: 10px; font-weight: bold; line-height: 1.2; text-align: left;">
-          <div>SECURE</div>
-          <div style="font-weight: normal; color: #555;">Payment</div>
-        </div>
-      </div>
-    </div>
-
-    <button
-      type="submit"
-      id="checkout"
-      class="cart__checkout-button button"
-      name="checkout"
-      {% if cart == empty %}
-        disabled
-      {% endif %}
-      form="cart-form"
-      style="background-color: #ffdd00; color: #000; border-radius: 999px; border: none;"
+  <div class="cart-totals__container{% if settings.show_installments %} cart-totals__container--has-installments{% endif %}">
+    <span
+      class="cart-totals__item cart-totals__total"
+      role="status"
     >
-      <span class="button-text" style="display: flex; justify-content: center; gap: 6px; font-weight: 700;">
-        <span class="checkout-price">{{ cart.total_price | money }}</span>
-        <span>|</span>
-        <span>Checkout</span>
-      </span>
-    </button>
-
-    <div style="text-align: center; font-size: 12px; color: #555; margin-top: 12px;">
-      Shipping & taxes calculated at checkout
-    </div>
-
-    {% if additional_checkout_buttons and settings.show_accelerated_checkout_buttons %}
-      <div
-        class="
-          additional-checkout-buttons
-          {% if accelerated_checkout_buttons_layout == 'vertical' %}additional-checkout-buttons--vertical{% endif %}
-        "
+      <span class="cart-totals__total-label cart-primary-typography">{{ 'content.cart_estimated_total' | t }}</span>
+      <text-component
+        ref="cartTotal"
+        value="{{ total_price | strip_html }}"
+        class="cart-totals__total-value cart-secondary-typography"
+        {% comment %} Used by payment_terms web component {% endcomment %}
+        data-testid="cart-total-value"
+        data-cart-subtotal
       >
-        {{ content_for_additional_checkout_buttons }}
-      </div>
+        {{ total_price }}
+      </text-component>
+    </span>
+    {% if settings.show_installments %}
+      <span class="cart-totals__item cart-totals__installments">
+        {% form 'cart', cart %}
+          {{ form | payment_terms }}
+        {% endform %}
+      </span>
     {% endif %}
+    <div class="cart-totals__item cart-totals__tax-note cart-primary-typography">
+      {% render 'tax-info', has_discounts_enabled: settings.show_add_discount_code %}
+    </div>
   </div>
+</div>
+
+<div class="cart__ctas">
+  <button
+    type="submit"
+    id="checkout"
+    class="cart__checkout-button button"
+    name="checkout"
+    {% if cart == empty %}
+      disabled
+    {% endif %}
+    form="cart-form"
+  >
+    <span class="button-text">
+      {{ 'content.checkout' | t }}
+    </span>
+  </button>
+
+  {% if additional_checkout_buttons and settings.show_accelerated_checkout_buttons %}
+    <div
+      class="
+        additional-checkout-buttons
+        {% if accelerated_checkout_buttons_layout == 'vertical' %}additional-checkout-buttons--vertical{% endif %}
+      "
+    >
+      {{ content_for_additional_checkout_buttons }}
+    </div>
+  {% endif %}
 </div>
 
 {% stylesheet %}
