@@ -110,14 +110,14 @@
               <button class="cart-drawer-tab" data-tab="subscribe">Subscribe · save 15%</button>
             </div>
             <script>
-              (function() {
+              (function () {
                 if (window._cartTabsReady) return;
                 window._cartTabsReady = true;
-                document.addEventListener('click', function(e) {
+                document.addEventListener('click', function (e) {
                   var btn = e.target.closest('.cart-drawer-tab');
                   if (!btn) return;
                   var tab = btn.dataset.tab;
-                  document.querySelectorAll('.cart-drawer-tab').forEach(function(b) {
+                  document.querySelectorAll('.cart-drawer-tab').forEach(function (b) {
                     b.classList.toggle('active', b.dataset.tab === tab);
                   });
                   document.body.dataset.cartTab = tab;
