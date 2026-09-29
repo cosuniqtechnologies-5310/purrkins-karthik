@@ -94,11 +94,12 @@ class CartDrawerComponent extends Component {
       }
     });
     
+    const tabs = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-drawer-tab'));
+    tabs.forEach(b => {
+      b.classList.toggle('active', b.dataset.tab === tab);
+    });
+
     if (hasChanges) {
-      const tabs = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-drawer-tab'));
-      tabs.forEach(b => {
-        b.classList.toggle('active', b.dataset.tab === tab);
-      });
       comp.updateMultiple(updates);
     }
   };
@@ -148,8 +149,13 @@ class CartDrawerComponent extends Component {
         }
 
         const openAndSettle = () => {
-          this.#themeDrawer?.open();
-          settle();
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              this.#themeDrawer?.open();
+              console.log('[cart-drawer] Cart drawer successfully opened and updated!');
+              settle();
+            });
+          });
         };
 
         if (sourceModal?.open) {
@@ -159,7 +165,9 @@ class CartDrawerComponent extends Component {
         }
       })
       .catch((error) => {
-        if (error?.name !== 'AbortError') console.warn('[cart-drawer] Event promise rejected:', error);
+        if (error?.name !== 'AbortError') {
+            console.error('[cart-drawer] ERROR: Failed to update or open cart drawer!', error);
+        }
       });
   };
 

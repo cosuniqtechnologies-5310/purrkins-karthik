@@ -42,6 +42,86 @@
       <link rel="stylesheet" href="{{ 'purrkins-single-product.css' | asset_url }}">
     {% endif %}
 
+    <script>
+      window.purrkinsAddToCart = function(items, button, formData = null) {
+          if (button) {
+              button.dataset.originalText = button.innerHTML;
+              button.innerHTML = 'Adding...';
+              button.disabled = true;
+              button.style.opacity = '0.7';
+          }
+
+          let payload;
+          if (formData) {
+              formData.append('sections', 'cart-drawer-section');
+              formData.append('sections_url', window.location.pathname);
+              payload = {
+                  method: 'POST',
+                  body: formData,
+                  headers: { 'X-Requested-With': 'XMLHttpRequest' }
+              };
+          } else {
+              payload = {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'X-Requested-With': 'XMLHttpRequest'
+                  },
+                  body: JSON.stringify({
+                      items: items,
+                      sections: 'cart-drawer-section',
+                      sections_url: window.location.pathname
+                  })
+              };
+          }
+
+          console.log('[purrkinsAddToCart] Sending request to cart...', payload);
+
+          fetch((window.Shopify && window.Shopify.routes) ? window.Shopify.routes.root + 'cart/add.js' : '/cart/add.js', payload)
+          .then(async res => {
+              const data = await res.json().catch(() => ({}));
+              if (!res.ok) {
+                  throw new Error(data.description || data.message || 'Error adding to cart');
+              }
+              return data;
+          })
+          .then(async data => {
+              console.log('[purrkinsAddToCart] Successfully added item to cart:', data);
+
+              const eventName = (window.StandardEvents && window.StandardEvents.cartLinesUpdate) ? window.StandardEvents.cartLinesUpdate : 'shopify:cart:lines-update';
+              const updateEvent = new CustomEvent(eventName, { bubbles: true });
+              updateEvent.action = 'add';
+              let resolvePromise;
+              const promise = new Promise((resolve) => { resolvePromise = resolve; });
+              updateEvent.promise = promise;
+              document.dispatchEvent(updateEvent);
+
+              const cartData = await fetch(window.Shopify.routes ? window.Shopify.routes.root + 'cart.js' : '/cart.js').then(r => r.json()).catch(() => null);
+              console.log('[purrkinsAddToCart] Fetched full cart data:', cartData);
+              
+              resolvePromise({ cart: cartData, detail: { items: data.items || [data], sections: data.sections, itemCount: cartData ? cartData.item_count : 0 } });
+              
+              document.documentElement.dispatchEvent(new CustomEvent('cart:build', {bubbles: true}));
+
+              if (button) {
+                  button.innerHTML = button.dataset.originalText || 'Add to Cart';
+                  button.disabled = false;
+                  button.style.opacity = '1';
+              }
+          })
+          .catch(err => {
+              console.error('[purrkinsAddToCart] Error:', err);
+              if (button) {
+                  button.innerHTML = button.dataset.originalText || 'Add to Cart';
+                  button.disabled = false;
+                  button.style.opacity = '1';
+              }
+              alert('Could not add item to cart: ' + err.message);
+          });
+      };
+    </script>
+
+
     {{ content_for_header }}
   </head>
 

@@ -227,64 +227,12 @@
           e.preventDefault();
 
           const btn = form.querySelector('.btn-add-to-cart');
-          let originalText = 'Add to Cart';
-          if (btn) {
-            originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = 'Adding...';
-          }
-
           const formData = new FormData(form);
-          formData.append('sections', 'cart-drawer-section');
-          formData.append('sections_url', window.location.pathname);
-
-          fetch(window.Shopify.routes.root + 'cart/add.js', {
-            method: 'POST',
-            body: formData,
-            headers: {
-              'X-Requested-With': 'XMLHttpRequest',
-            },
-          })
-            .then((res) => res.json())
-            .then(async (data) => {
-              const eventName =
-                window.StandardEvents && window.StandardEvents.cartLinesUpdate
-                  ? window.StandardEvents.cartLinesUpdate
-                  : 'shopify:cart:lines-update';
-              const updateEvent = new CustomEvent(eventName, { bubbles: true });
-              updateEvent.action = 'add';
-              let resolvePromise, rejectPromise;
-              const promise = new Promise((resolve, reject) => { 
-                  resolvePromise = resolve; 
-                  rejectPromise = reject;
-              });
-              updateEvent.promise = promise;
-              document.dispatchEvent(updateEvent);
-
-              const cartData = await fetch(window.Shopify.routes ? window.Shopify.routes.root + 'cart.js' : '/cart.js')
-                .then((r) => r.json())
-                .catch(() => null);
-              resolvePromise({
-                cart: cartData,
-                detail: {
-                  items: data.items || [data],
-                  sections: data.sections,
-                  itemCount: cartData ? cartData.item_count : 0,
-                },
-              });
-              
-              document.documentElement.dispatchEvent(new CustomEvent('cart:build', {bubbles: true}));
-            })
-            .catch((err) => {
-              console.error(err);
-              rejectPromise(err);
-            })
-            .finally(() => {
-              if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-              }
-            });
+          if (window.purrkinsAddToCart) {
+            window.purrkinsAddToCart(null, btn, formData);
+          } else {
+            console.error('purrkinsAddToCart is not defined');
+          }
         }
       });
 

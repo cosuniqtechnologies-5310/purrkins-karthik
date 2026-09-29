@@ -195,58 +195,11 @@ function initCBAddToCart_{{ section.id | replace: '-', '_' }}() {
                     return;
                 }
                 
-                const originalText = addBtn.innerHTML;
-                addBtn.innerHTML = 'Adding...';
-                addBtn.disabled = true;
-                addBtn.style.opacity = '0.7';
-
-                fetch(window.Shopify.routes ? window.Shopify.routes.root + 'cart/add.js' : '/cart/add.js', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        items: [{ id: variantId, quantity: qty }],
-                        sections: 'cart-drawer-section',
-                        sections_url: window.location.pathname
-                    })
-                })
-                .then(async res => {
-                    const data = await res.json().catch(() => ({}));
-                    if (!res.ok) {
-                        throw new Error(data.description || data.message || 'Error adding to cart');
-                    }
-                    return data;
-                })
-                .then(async data => {
-                    addBtn.innerHTML = originalText;
-                    addBtn.disabled = false;
-                    addBtn.style.opacity = '1';
-                    
-                    const eventName = (window.StandardEvents && window.StandardEvents.cartLinesUpdate) ? window.StandardEvents.cartLinesUpdate : 'shopify:cart:lines-update';
-                    const updateEvent = new CustomEvent(eventName, { bubbles: true });
-                    updateEvent.action = 'add';
-                    
-                    let resolvePromise, rejectPromise;
-                    const promise = new Promise((resolve, reject) => { 
-                        resolvePromise = resolve; 
-                        rejectPromise = reject;
-                    });
-                    updateEvent.promise = promise;
-                    document.dispatchEvent(updateEvent);
-
-                    const cartData = await fetch(window.Shopify.routes ? window.Shopify.routes.root + 'cart.js' : '/cart.js').then(r => r.json()).catch(() => null);
-                    resolvePromise({ cart: cartData, detail: { items: data.items || [data], sections: data.sections, itemCount: cartData ? cartData.item_count : 0 } });
-
-                    document.documentElement.dispatchEvent(new CustomEvent('cart:build', {bubbles: true}));
-                })
-                .catch(err => {
-                    console.error(err);
-                    addBtn.innerHTML = originalText;
-                    addBtn.disabled = false;
-                    addBtn.style.opacity = '1';
-                    alert('Could not add item to cart: ' + err.message);
-                });
+                if (window.purrkinsAddToCart) {
+                    window.purrkinsAddToCart([{ id: variantId, quantity: qty }], addBtn);
+                } else {
+                    console.error('purrkinsAddToCart is not defined');
+                }
             }
         });
     }
