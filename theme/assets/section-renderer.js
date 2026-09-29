@@ -177,6 +177,7 @@ const SECTION_ID_PREFIX = 'shopify-section-';
  */
 function buildSectionRenderingURL(sectionId, url = new URL(window.location.href)) {
   url.searchParams.set('section_id', normalizeSectionId(sectionId));
+  url.searchParams.set('t', Date.now().toString());
   url.searchParams.sort();
 
   return url.toString();
