@@ -32,6 +32,7 @@ class CartDrawerComponent extends Component {
     super.connectedCallback();
     document.addEventListener(StandardEvents.cartLinesUpdate, this.#handleCartLinesUpdate);
     this.#themeDrawer?.addEventListener(DrawerOpenEvent.eventName, this.#handleDrawerOpen);
+    this.addEventListener('click', this.#handleTabClick);
 
     // The restore path sets [open] before this module loads, so the
     // theme-drawer:open event will have already fired. Use the attribute
@@ -45,7 +46,52 @@ class CartDrawerComponent extends Component {
     super.disconnectedCallback();
     document.removeEventListener(StandardEvents.cartLinesUpdate, this.#handleCartLinesUpdate);
     this.#themeDrawer?.removeEventListener(DrawerOpenEvent.eventName, this.#handleDrawerOpen);
+    this.removeEventListener('click', this.#handleTabClick);
   }
+
+  #handleTabClick = (/** @type {Event} */ event) => {
+    const target = /** @type {HTMLElement} */ (event.target);
+    const btn = /** @type {HTMLElement | null} */ (target.closest('.cart-drawer-tab'));
+    if (!btn) return;
+    
+    if (btn.classList.contains('active')) return;
+
+    const tab = btn.dataset.tab;
+    /** @type {any} */
+    const comp = this.querySelector('cart-items-component');
+    if (!comp || typeof comp.updateMultiple !== 'function') return;
+
+    const rows = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-items__table-row[data-key]'));
+    /** @type {Record<string, any>} */
+    const updates = {};
+    let hasChanges = false;
+    
+    rows.forEach(row => {
+      const key = row.dataset.key;
+      if (!key) return;
+      const qty = parseInt(row.dataset.currentQuantity || '1', 10);
+      const planId = row.dataset.firstSellingPlanId;
+      const currentType = row.dataset.subscriptionType;
+
+      if (planId) {
+        if (tab === 'subscribe' && currentType !== 'subscribe') {
+          updates[key] = { quantity: qty, selling_plan: planId };
+          hasChanges = true;
+        } else if (tab === 'one-time' && currentType === 'subscribe') {
+          updates[key] = { quantity: qty, selling_plan: "" };
+          hasChanges = true;
+        }
+      }
+    });
+    
+    if (hasChanges) {
+      const tabs = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-drawer-tab'));
+      tabs.forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === tab);
+      });
+      comp.updateMultiple(updates);
+    }
+  };
 
   /**
    * Handles the theme-drawer opening — updates sticky state and wires up the installments CTA.
