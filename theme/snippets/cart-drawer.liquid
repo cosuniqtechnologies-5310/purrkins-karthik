@@ -181,16 +181,11 @@
               {{ empty_cart_drawer_content }}
             {%- else -%}
               <scroll-hint
-                class="cart-drawer__content"
+                class="cart-drawer__content cart-drawer__items"
                 aria-label="{{ 'accessibility.cart' | t }}"
+                data-hydration-key="cart-drawer-items"
               >
-                <scroll-hint class="cart-drawer__items">
-                  {% render 'cart-products', context: 'drawer' %}
-                </scroll-hint>
-
-                <div class="cart-drawer__summary">
-                  {% render 'cart-summary' %}
-                </div>
+                {% render 'cart-products', context: 'drawer' %}
               </scroll-hint>
             {%- endif -%}
           {% endcapture %}
@@ -199,6 +194,9 @@
             is_drawer: true,
             section_id: 'cart-drawer-section'
           %}
+          <div class="cart-drawer__summary" data-hydration-key="cart-drawer-summary">
+            {% render 'cart-summary' %}
+          </div>
         </div>
       </cart-drawer-component>
     </dialog>
