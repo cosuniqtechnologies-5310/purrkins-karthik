@@ -90,6 +90,14 @@
 
           console.log('[PURRKINS CART] ADD START', { items });
 
+          const cartItemsComponents = document.querySelectorAll('cart-items-component');
+          let cartItemComponentsSectionIds = ['cart-drawer-section'];
+          cartItemsComponents.forEach((item) => {
+            if (item instanceof HTMLElement && item.dataset.sectionId && !cartItemComponentsSectionIds.includes(item.dataset.sectionId)) {
+              cartItemComponentsSectionIds.push(item.dataset.sectionId);
+            }
+          });
+
           const payload = {
               method: 'POST',
               headers: {
@@ -98,8 +106,8 @@
               },
               body: JSON.stringify({
                   items: items,
-                  sections: 'cart-drawer-section',
-                  sections_url: window.location.pathname
+                  sections: cartItemComponentsSectionIds.join(','),
+                  sections_url: (window.Shopify && window.Shopify.routes) ? window.Shopify.routes.root : '/'
               })
           };
 
@@ -119,7 +127,9 @@
           console.log('[PURRKINS CART] UPDATE EVENT DISPATCHED');
 
           try {
-              const res = await fetch((window.Shopify && window.Shopify.routes) ? window.Shopify.routes.root + 'cart/add.js' : '/cart/add.js', payload);
+              const rootUrl = (window.Shopify && window.Shopify.routes) ? window.Shopify.routes.root : '/';
+              const fetchUrl = rootUrl + 'cart/add.js';
+              const res = await fetch(fetchUrl, payload);
               const data = await res.json().catch(() => null);
               
               if (!res.ok) {
