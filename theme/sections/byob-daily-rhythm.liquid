@@ -47,15 +47,9 @@
 
         {% if section.settings.button_text != blank %}
           <div class="byob-rhythm-btn-wrapper">
-            {% if customer %}
-              <button type="button" class="purrkins-btn-secondary byob-trigger-quiz">
-                {{ section.settings.button_text }}
-              </button>
-            {% else %}
-              <a href="/account/login?checkout_url=/pages/byob" class="purrkins-btn-secondary" style="text-decoration: none;">
-                {{ section.settings.button_text }}
-              </a>
-            {% endif %}
+            <button type="button" class="purrkins-btn-secondary byob-trigger-quiz">
+              {{ section.settings.button_text }}
+            </button>
           </div>
         {% endif %}
       </div>
@@ -80,6 +74,16 @@
     quizBtns.forEach((btn) => {
       btn.addEventListener('click', function (e) {
         e.preventDefault();
+        
+        // Check for either native Shopify login or custom Remix OTP login
+        const hasNativeLogin = {{ customer | default: 'null' | json }} !== null;
+        const hasCustomLogin = !!localStorage.getItem('pk_session');
+        
+        if (!hasNativeLogin && !hasCustomLogin) {
+          window.location.href = '/apps/purrkins/login?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+          return;
+        }
+
         if (quizSection) {
           quizSection.style.display = 'block';
           quizSection.scrollIntoView({ behavior: 'smooth' });
