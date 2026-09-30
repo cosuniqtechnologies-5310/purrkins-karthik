@@ -1,4 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Initialize wishlist state on page load
+  const pk_token = localStorage.getItem('pk_session');
+  if (pk_token) {
+    fetch('/apps/purrkins/wishlist?session=' + pk_token)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && data.success && data.wishlist) {
+          const wishlist = data.wishlist;
+          document.querySelectorAll('.pf-qv-fav').forEach(btn => {
+            const productId = btn.getAttribute('data-product-id');
+            const productGid = productId && productId.includes("gid://shopify/Product/") ? productId : `gid://shopify/Product/${productId}`;
+            if (productId && wishlist.includes(productGid)) {
+              btn.classList.add('is-saved');
+              const path = btn.querySelector('path');
+              if (path) path.setAttribute('fill', '#21252A');
+            }
+          });
+        }
+      })
+      .catch(err => console.error("Error fetching wishlist state:", err));
+  }
+
   // Listen for clicks on the wishlist button globally
   document.body.addEventListener('click', (e) => {
     if (!e.target || !(e.target instanceof Element)) return;
