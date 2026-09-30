@@ -1,448 +1,430 @@
 <div class="byob-quiz-popup-overlay" id="global-byob-quiz-popup" style="display: none;">
   <div class="byob-quiz-section purrkins-section-block">
     <div class="purrkins-container" style="max-width: 1196px; position: relative;">
-      <button type="button" class="byob-quiz-close-btn" onclick="document.getElementById('global-byob-quiz-popup').style.display='none'">
+      <button
+        type="button"
+        class="byob-quiz-close-btn"
+        onclick="document.getElementById('global-byob-quiz-popup').style.display='none'"
+      >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M18 6L6 18M6 6L18 18" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
-    <div class="byob-quiz-card">
-      <iframe name="quiz_hidden_iframe" id="quiz_hidden_iframe" style="display:none;"></iframe>
-      <form id="byob-quiz-form" action="/account" method="post" target="quiz_hidden_iframe">
-        <!-- We use form_type=customer to update customer details natively -->
-        <input type="hidden" name="form_type" value="customer">
-        <input type="hidden" name="utf8" value="âœ“">
-        <input type="hidden" name="return_to" value="/account">
+      <div class="byob-quiz-card">
+        <iframe name="quiz_hidden_iframe" id="quiz_hidden_iframe" style="display:none;"></iframe>
+        <form id="popup-byob-quiz-form" action="/account" method="post" target="quiz_hidden_iframe">
+          <!-- We use form_type=customer to update customer details natively -->
+          <input type="hidden" name="form_type" value="customer">
+          <input type="hidden" name="utf8" value="âœ“">
+          <input type="hidden" name="return_to" value="/account">
 
-        <div class="byob-quiz-slider-container">
-          <div class="byob-quiz-slider" id="byob-quiz-slider">
-            <!-- Slide 1 -->
-            <div class="byob-quiz-slide active" data-step="1">
-              <div class="byob-slider-wrapper">
-                <div class="quiz-flex-wrapper">
-                  <div class="byob-quiz-header">
-                    <div class="quiz-nav">
-                      <button type="button" class="quiz-next">
-                        <img
-                          src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/right-nav.svg?v=1790164808"
-                          alt="Next"
-                          width="50"
-                          height="50"
-                          loading="lazy"
-                        >
-                      </button>
+          <div class="byob-quiz-slider-container">
+            <div class="byob-quiz-slider" id="popup-byob-quiz-slider">
+              <!-- Slide 1 -->
+              <div class="byob-quiz-slide active" data-step="1">
+                <div class="byob-slider-wrapper">
+                  <div class="quiz-flex-wrapper">
+                    <div class="byob-quiz-header">
+                      <div class="quiz-nav">
+                        <button type="button" class="quiz-next">
+                          <img
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/right-nav.svg?v=1790164808"
+                            alt="Next"
+                            width="50"
+                            height="50"
+                            loading="lazy"
+                          >
+                        </button>
+                      </div>
+                    </div>
+                    <h2 class="quiz-title">Discover their daily rhythm</h2>
+                    <div class="quiz-input-group row-group">
+                      <label class="quiz-label-inline quiz-subtitle">Your kitten's name</label>
+                      <input
+                        type="text"
+                        name="quiz_name"
+                        class="quiz-text-input underline-input"
+                        placeholder="Enter name"
+                      >
                     </div>
                   </div>
-                  <h2 class="quiz-title">Discover their daily rhythm</h2>
-                  <div class="quiz-input-group row-group">
-                    <label class="quiz-label-inline quiz-subtitle">Your kitten's name</label>
-                    <input
-                      type="text"
-                      name="quiz_name"
-                      class="quiz-text-input underline-input"
-                      placeholder="Enter name"
-                    >
-                  </div>
-                </div>
-                <div class="quiz-flex-wrapper">
-                  <div class="quiz-box-group">
-                    <h3 class="quiz-subtitle">Select your cat's age</h3>
-                    <div class="quiz-options grid-3">
-                      <label class="quiz-option"
-                        ><input type="radio" name="quiz_age" value="Lactating cat and babies"
-                        ><span>Lactating cat and babies</span></label
-                      >
-                      <label class="quiz-option"
-                        ><input type="radio" name="quiz_age" value="3-8 weeks kitten"
-                        ><span>3â€“8 weeks kitten</span></label
-                      >
-                      <label class="quiz-option"
-                        ><input type="radio" name="quiz_age" value="2-4-month kitten"
-                        ><span>2â€“4-month kitten</span></label
-                      >
-                      <label class="quiz-option"
-                        ><input type="radio" name="quiz_age" value="4+ month kitten"><span>4+ month kitten</span></label
-                      >
-                      <label class="quiz-option"
-                        ><input type="radio" name="quiz_age" value="1+ years (adult)"
-                        ><span>1+ years (adult)</span></label
-                      >
-                      <label class="quiz-option"
-                        ><input type="radio" name="quiz_age" value="7+ years (senior)"
-                        ><span>7+ years (senior)</span></label
-                      >
+                  <div class="quiz-flex-wrapper">
+                    <div class="quiz-box-group">
+                      <h3 class="quiz-subtitle">Select your cat's age</h3>
+                      <div class="quiz-options grid-3">
+                        <label class="quiz-option"
+                          ><input type="radio" name="quiz_age" value="Lactating cat and babies"
+                          ><span>Lactating cat and babies</span></label
+                        >
+                        <label class="quiz-option"
+                          ><input type="radio" name="quiz_age" value="3-8 weeks kitten"
+                          ><span>3-8 weeks kitten</span></label
+                        >
+                        <label class="quiz-option"
+                          ><input type="radio" name="quiz_age" value="2-4-month kitten"
+                          ><span>2-4-month kitten</span></label
+                        >
+                        <label class="quiz-option"
+                          ><input type="radio" name="quiz_age" value="4+ month kitten"
+                          ><span>4+ month kitten</span></label
+                        >
+                        <label class="quiz-option"
+                          ><input type="radio" name="quiz_age" value="1+ years (adult)"
+                          ><span>1+ years (adult)</span></label
+                        >
+                        <label class="quiz-option"
+                          ><input type="radio" name="quiz_age" value="7+ years (senior)"
+                          ><span>7+ years (senior)</span></label
+                        >
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Slide 2 -->
-            <div class="byob-quiz-slide" data-step="2">
-              <div class="byob-slider-wrapper">
-                <div class="quiz-flex-wrapper">
-                  <div class="byob-quiz-header">
-                    <div class="quiz-nav">
-                      <button type="button" class="quiz-prev">
-                        <img
-                          src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/left-nav.svg?v=1790164808"
-                          alt="Previous"
-                          width="50"
-                          height="50"
-                          loading="lazy"
-                        >
-                      </button>
-                      <button type="button" class="quiz-next">
-                        <img
-                          src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/right-nav.svg?v=1790164808"
-                          alt="Next"
-                          width="50"
-                          height="50"
-                          loading="lazy"
-                        >
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="quiz-split-layout">
-                    <div class="quiz-split-content quiz-box-group">
-                      <h2 class="quiz-title">Are they a boy or a girl, and have they been neutered?</h2>
-
-                      <div class="quiz-box-group-custom">
-                        <h3 class="quiz-subtitle">Gender</h3>
-                        <div class="quiz-options grid-2">
-                          <label class="quiz-option"
-                            ><input type="radio" name="quiz_gender" value="Male"><span>Male</span></label
+              <!-- Slide 2 -->
+              <div class="byob-quiz-slide" data-step="2">
+                <div class="byob-slider-wrapper">
+                  <div class="quiz-flex-wrapper">
+                    <div class="byob-quiz-header">
+                      <div class="quiz-nav">
+                        <button type="button" class="quiz-prev">
+                          <img
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/left-nav.svg?v=1790164808"
+                            alt="Previous"
+                            width="50"
+                            height="50"
+                            loading="lazy"
                           >
-                          <label class="quiz-option"
-                            ><input type="radio" name="quiz_gender" value="Female"><span>Female</span></label
+                        </button>
+                        <button type="button" class="quiz-next">
+                          <img
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/right-nav.svg?v=1790164808"
+                            alt="Next"
+                            width="50"
+                            height="50"
+                            loading="lazy"
                           >
-                        </div>
-                      </div>
-
-                      <div class="quiz-box-group-custom">
-                        <h3 class="quiz-subtitle">Neutered</h3>
-                        <div class="quiz-options grid-2">
-                          <label class="quiz-option"
-                            ><input type="radio" name="quiz_neutered" value="Neutered"><span>Yes</span></label
-                          >
-                          <label class="quiz-option"
-                            ><input type="radio" name="quiz_neutered" value="Not Neutered"><span>No</span></label
-                          >
-                        </div>
+                        </button>
                       </div>
                     </div>
-                    <div class="quiz-split-image">
-                      {% if section.settings.q2_image != blank %}
+
+                    <div class="quiz-split-layout">
+                      <div class="quiz-split-content quiz-box-group">
+                        <h2 class="quiz-title">Are they a boy or a girl, and have they been neutered?</h2>
+
+                        <div class="quiz-box-group-custom">
+                          <h3 class="quiz-subtitle">Gender</h3>
+                          <div class="quiz-options grid-2">
+                            <label class="quiz-option"
+                              ><input type="radio" name="quiz_gender" value="Male"><span>Male</span></label
+                            >
+                            <label class="quiz-option"
+                              ><input type="radio" name="quiz_gender" value="Female"><span>Female</span></label
+                            >
+                          </div>
+                        </div>
+
+                        <div class="quiz-box-group-custom">
+                          <h3 class="quiz-subtitle">Neutered</h3>
+                          <div class="quiz-options grid-2">
+                            <label class="quiz-option"
+                              ><input type="radio" name="quiz_neutered" value="Neutered"><span>Yes</span></label
+                            >
+                            <label class="quiz-option"
+                              ><input type="radio" name="quiz_neutered" value="Not Neutered"><span>No</span></label
+                            >
+                          </div>
+                        </div>
+                      </div>
+                      <div class="quiz-split-image">
                         <img
-                          src="{{ section.settings.q2_image | image_url: width: 400 }}"
+                          src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/gender_banner.webp"
                           alt="Gender Image"
                           width="400"
                           height="400"
                           loading="lazy"
                         >
-                      {% else %}
-                        <!-- Placeholder -->
-                        <div style="width: 100%; height: 100%; background: #ccc; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                          Image 2
-                        </div>
-                      {% endif %}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Slide 3 -->
-            <div class="byob-quiz-slide" data-step="3">
-              <div class="byob-slider-wrapper">
-                <div class="quiz-flex-wrapper">
-                  <div class="byob-quiz-header">
-                    <div class="quiz-nav">
-                      <button type="button" class="quiz-prev">
-                        <img
-                          src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/left-nav.svg?v=1790164808"
-                          alt="Previous"
-                          width="50"
-                          height="50"
-                          loading="lazy"
-                        >
-                      </button>
-                      <button type="button" class="quiz-next">
-                        <img
-                          src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/right-nav.svg?v=1790164808"
-                          alt="Next"
-                          width="50"
-                          height="50"
-                          loading="lazy"
-                        >
-                      </button>
+              <!-- Slide 3 -->
+              <div class="byob-quiz-slide" data-step="3">
+                <div class="byob-slider-wrapper">
+                  <div class="quiz-flex-wrapper">
+                    <div class="byob-quiz-header">
+                      <div class="quiz-nav">
+                        <button type="button" class="quiz-prev">
+                          <img
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/left-nav.svg?v=1790164808"
+                            alt="Previous"
+                            width="50"
+                            height="50"
+                            loading="lazy"
+                          >
+                        </button>
+                        <button type="button" class="quiz-next">
+                          <img
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/right-nav.svg?v=1790164808"
+                            alt="Next"
+                            width="50"
+                            height="50"
+                            loading="lazy"
+                          >
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="quiz-input-group row-group">
+                      <label class="quiz-label-inline quiz-subtitle">What is their current weight (in kgs)?</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        name="quiz_weight"
+                        class="quiz-text-input underline-input"
+                        placeholder="e.g. 4.5"
+                      >
                     </div>
                   </div>
 
-                  <div class="quiz-input-group row-group">
-                    <label class="quiz-label-inline quiz-subtitle">What is their current weight (in kgs)?</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      name="quiz_weight"
-                      class="quiz-text-input underline-input"
-                      placeholder="e.g. 4.5"
-                    >
-                  </div>
-                </div>
-
-                <div class="quiz-flex-wrapper">
-                  <div class="quiz-image-options grid-4">
-                    <label class="quiz-image-option">
-                      <input type="radio" name="quiz_body" value="Skinny">
-                      <div class="quiz-image-card">
-                        <h4>Skinny</h4>
-                        {% if section.settings.q3_img_1 != blank -%}
+                  <div class="quiz-flex-wrapper">
+                    <div class="quiz-image-options grid-4">
+                      <label class="quiz-image-option">
+                        <input type="radio" name="quiz_body" value="Skinny">
+                        <div class="quiz-image-card">
+                          <h4>Skinny</h4>
                           <img
-                            src="{{ section.settings.q3_img_1 | image_url: width: 200 }}"
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/skinny.webp"
                             alt="Skinny"
                             width="200"
                             height="200"
                             loading="lazy"
                           >
-                        {%- endif %}
-                      </div>
-                    </label>
-                    <label class="quiz-image-option">
-                      <input type="radio" name="quiz_body" value="Lean">
-                      <div class="quiz-image-card">
-                        <h4>Lean</h4>
-                        {% if section.settings.q3_img_2 != blank -%}
+                        </div>
+                      </label>
+                      <label class="quiz-image-option">
+                        <input type="radio" name="quiz_body" value="Lean">
+                        <div class="quiz-image-card">
+                          <h4>Lean</h4>
                           <img
-                            src="{{ section.settings.q3_img_2 | image_url: width: 200 }}"
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/lean.webp"
                             alt="Lean"
                             width="200"
                             height="200"
                             loading="lazy"
                           >
-                        {%- endif %}
-                      </div>
-                    </label>
-                    <label class="quiz-image-option">
-                      <input type="radio" name="quiz_body" value="Healthy">
-                      <div class="quiz-image-card">
-                        <h4>Healthy</h4>
-                        {% if section.settings.q3_img_3 != blank -%}
+                        </div>
+                      </label>
+                      <label class="quiz-image-option">
+                        <input type="radio" name="quiz_body" value="Healthy">
+                        <div class="quiz-image-card">
+                          <h4>Healthy</h4>
                           <img
-                            src="{{ section.settings.q3_img_3 | image_url: width: 200 }}"
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/healthy.webp"
                             alt="Healthy"
                             width="200"
                             height="200"
                             loading="lazy"
                           >
-                        {%- endif %}
-                      </div>
-                    </label>
-                    <label class="quiz-image-option">
-                      <input type="radio" name="quiz_body" value="Obese">
-                      <div class="quiz-image-card">
-                        <h4>Obese</h4>
-                        {% if section.settings.q3_img_4 != blank -%}
+                        </div>
+                      </label>
+                      <label class="quiz-image-option">
+                        <input type="radio" name="quiz_body" value="Obese">
+                        <div class="quiz-image-card">
+                          <h4>Obese</h4>
                           <img
-                            src="{{ section.settings.q3_img_4 | image_url: width: 200 }}"
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/obese.webp"
                             alt="Obese"
                             width="200"
                             height="200"
                             loading="lazy"
                           >
-                        {%- endif %}
-                      </div>
-                    </label>
+                        </div>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Slide 4 -->
-            <div class="byob-quiz-slide" data-step="4">
-              <div class="byob-slider-wrapper">
-                <div class="quiz-flex-wrapper">
-                  <div class="byob-quiz-header">
-                    <div class="quiz-nav">
-                      <button type="button" class="quiz-prev">
-                        <img
-                          src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/left-nav.svg?v=1790164808"
-                          alt="Previous"
-                          width="50"
-                          height="50"
-                          loading="lazy"
-                        >
-                      </button>
-                      <button type="button" class="quiz-next">
-                        <img
-                          src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/right-nav.svg?v=1790164808"
-                          alt="Next"
-                          width="50"
-                          height="50"
-                          loading="lazy"
-                        >
-                      </button>
+              <!-- Slide 4 -->
+              <div class="byob-quiz-slide" data-step="4">
+                <div class="byob-slider-wrapper">
+                  <div class="quiz-flex-wrapper">
+                    <div class="byob-quiz-header">
+                      <div class="quiz-nav">
+                        <button type="button" class="quiz-prev">
+                          <img
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/left-nav.svg?v=1790164808"
+                            alt="Previous"
+                            width="50"
+                            height="50"
+                            loading="lazy"
+                          >
+                        </button>
+                        <button type="button" class="quiz-next">
+                          <img
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/right-nav.svg?v=1790164808"
+                            alt="Next"
+                            width="50"
+                            height="50"
+                            loading="lazy"
+                          >
+                        </button>
+                      </div>
+                    </div>
+                    <div class="row-group">
+                      <h2 class="quiz-subtitle">What is their activity level? Choose between the 4 images.</h2>
                     </div>
                   </div>
-                  <div class="row-group">
-                    <h2 class="quiz-subtitle">What is their activity level? Choose between the 4 images.</h2>
-                  </div>
-                </div>
-                <div class="quiz-flex-wrapper">
-                  <div class="quiz-image-options grid-4">
-                    <label class="quiz-image-option">
-                      <input type="radio" name="quiz_activity" value="Couch Potato">
-                      <div class="quiz-image-card">
-                        <h4>Couch Potato</h4>
-                        {% if section.settings.q4_img_1 != blank -%}
+                  <div class="quiz-flex-wrapper">
+                    <div class="quiz-image-options grid-4">
+                      <label class="quiz-image-option">
+                        <input type="radio" name="quiz_activity" value="Couch Potato">
+                        <div class="quiz-image-card">
+                          <h4>Couch Potato</h4>
                           <img
-                            src="{{ section.settings.q4_img_1 | image_url: width: 200 }}"
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/couch_potato.webp"
                             alt="Couch Potato"
                             width="200"
                             height="200"
                             loading="lazy"
                           >
-                        {%- endif %}
-                      </div>
-                    </label>
-                    <label class="quiz-image-option">
-                      <input type="radio" name="quiz_activity" value="Playful">
-                      <div class="quiz-image-card">
-                        <h4>Playful</h4>
-                        {% if section.settings.q4_img_2 != blank -%}
+                        </div>
+                      </label>
+                      <label class="quiz-image-option">
+                        <input type="radio" name="quiz_activity" value="Playful">
+                        <div class="quiz-image-card">
+                          <h4>Playful</h4>
                           <img
-                            src="{{ section.settings.q4_img_2 | image_url: width: 200 }}"
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/playful.webp"
                             alt="Playful"
                             width="200"
                             height="200"
                             loading="lazy"
                           >
-                        {%- endif %}
-                      </div>
-                    </label>
-                    <label class="quiz-image-option">
-                      <input type="radio" name="quiz_activity" value="Explorer">
-                      <div class="quiz-image-card">
-                        <h4>Explorer</h4>
-                        {% if section.settings.q4_img_3 != blank -%}
+                        </div>
+                      </label>
+                      <label class="quiz-image-option">
+                        <input type="radio" name="quiz_activity" value="Explorer">
+                        <div class="quiz-image-card">
+                          <h4>Explorer</h4>
                           <img
-                            src="{{ section.settings.q4_img_3 | image_url: width: 200 }}"
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/explorer.webp"
                             alt="Explorer"
                             width="200"
                             height="200"
                             loading="lazy"
                           >
-                        {%- endif %}
-                      </div>
-                    </label>
-                    <label class="quiz-image-option">
-                      <input type="radio" name="quiz_activity" value="Super-active">
-                      <div class="quiz-image-card">
-                        <h4>Super-active</h4>
-                        {% if section.settings.q4_img_4 != blank -%}
+                        </div>
+                      </label>
+                      <label class="quiz-image-option">
+                        <input type="radio" name="quiz_activity" value="Super-active">
+                        <div class="quiz-image-card">
+                          <h4>Super-active</h4>
                           <img
-                            src="{{ section.settings.q4_img_4 | image_url: width: 200 }}"
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/super_active.webp"
                             alt="Super-active"
                             width="200"
                             height="200"
                             loading="lazy"
                           >
-                        {%- endif %}
-                      </div>
-                    </label>
+                        </div>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Slide 5 -->
-            <div class="byob-quiz-slide" data-step="5">
-              <div class="byob-slider-wrapper">
-                <div class="quiz-flex-wrapper">
-                  <div class="byob-quiz-header">
-                    <div class="quiz-nav">
-                      <button type="button" class="quiz-prev">
-                        <img
-                          src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/left-nav.svg?v=1790164808"
-                          alt="Previous"
-                          width="50"
-                          height="50"
-                          loading="lazy"
-                        >
-                      </button>
+              <!-- Slide 5 -->
+              <div class="byob-quiz-slide" data-step="5">
+                <div class="byob-slider-wrapper">
+                  <div class="quiz-flex-wrapper">
+                    <div class="byob-quiz-header">
+                      <div class="quiz-nav">
+                        <button type="button" class="quiz-prev">
+                          <img
+                            src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/left-nav.svg?v=1790164808"
+                            alt="Previous"
+                            width="50"
+                            height="50"
+                            loading="lazy"
+                          >
+                        </button>
+                      </div>
+                    </div>
+
+                    <h2 class="quiz-subtitle">
+                      Which part of their daily routine needs the most focus? Tick all that apply.
+                    </h2>
+                    <div class="quiz-options grid-4">
+                      <label class="quiz-option"
+                        ><input type="checkbox" name="quiz_focus[]" value="Obesity"><span>Obesity</span></label
+                      >
+                      <label class="quiz-option"
+                        ><input type="checkbox" name="quiz_focus[]" value="Hairball"><span>Hairball</span></label
+                      >
+                      <label class="quiz-option"
+                        ><input type="checkbox" name="quiz_focus[]" value="Shedding"><span>Shedding</span></label
+                      >
+                      <label class="quiz-option"
+                        ><input type="checkbox" name="quiz_focus[]" value="Loose Motions"
+                        ><span>Loose Motions</span></label
+                      >
+                      <label class="quiz-option"
+                        ><input type="checkbox" name="quiz_focus[]" value="Weak Immunity"
+                        ><span>Weak Immunity</span></label
+                      >
+                      <label class="quiz-option"
+                        ><input type="checkbox" name="quiz_focus[]" value="Dehydration"><span>Dehydration</span></label
+                      >
+                      <label class="quiz-option"
+                        ><input type="checkbox" name="quiz_focus[]" value="Under Nourishment"
+                        ><span>Under Nourishment</span></label
+                      >
+                      <label class="quiz-option"
+                        ><input type="checkbox" name="quiz_focus[]" value="Gut Issues"><span>Gut Issues</span></label
+                      >
+                      <label class="quiz-option"
+                        ><input type="checkbox" name="quiz_focus[]" value="Nursing mother"
+                        ><span>Nursing mother</span></label
+                      >
+                      <label class="quiz-option"
+                        ><input type="checkbox" name="quiz_focus[]" value="Picky eater"><span>Picky eater</span></label
+                      >
+                      <label class="quiz-option"
+                        ><input type="checkbox" name="quiz_focus[]" value="Kitty growth"
+                        ><span>Kitty growth</span></label
+                      >
+                      <label class="quiz-option"
+                        ><input type="checkbox" name="quiz_focus[]" value="Dental care"><span>Dental care</span></label
+                      >
                     </div>
                   </div>
+                  <div class="quiz-flex-wrapper">
+                    <h2 class="quiz-subtitle" style="margin-top: 40px;">
+                      Any allergies or underlying health issues. Please elaborate.
+                    </h2>
+                    <div class="quiz-textarea-wrapper">
+                      <textarea
+                        name="quiz_allergies"
+                        class="quiz-textarea"
+                        placeholder="Mention here in detail"
+                      ></textarea>
+                    </div>
 
-                  <h2 class="quiz-subtitle">
-                    Which part of their daily routine needs the most focus? Tick all that apply.
-                  </h2>
-                  <div class="quiz-options grid-4">
-                    <label class="quiz-option"
-                      ><input type="checkbox" name="quiz_focus[]" value="Obesity"><span>Obesity</span></label
-                    >
-                    <label class="quiz-option"
-                      ><input type="checkbox" name="quiz_focus[]" value="Hairball"><span>Hairball</span></label
-                    >
-                    <label class="quiz-option"
-                      ><input type="checkbox" name="quiz_focus[]" value="Shedding"><span>Shedding</span></label
-                    >
-                    <label class="quiz-option"
-                      ><input type="checkbox" name="quiz_focus[]" value="Loose Motions"
-                      ><span>Loose Motions</span></label
-                    >
-                    <label class="quiz-option"
-                      ><input type="checkbox" name="quiz_focus[]" value="Weak Immunity"
-                      ><span>Weak Immunity</span></label
-                    >
-                    <label class="quiz-option"
-                      ><input type="checkbox" name="quiz_focus[]" value="Dehydration"><span>Dehydration</span></label
-                    >
-                    <label class="quiz-option"
-                      ><input type="checkbox" name="quiz_focus[]" value="Under Nourishment"
-                      ><span>Under Nourishment</span></label
-                    >
-                    <label class="quiz-option"
-                      ><input type="checkbox" name="quiz_focus[]" value="Gut Issues"><span>Gut Issues</span></label
-                    >
-                    <label class="quiz-option"
-                      ><input type="checkbox" name="quiz_focus[]" value="Nursing mother"
-                      ><span>Nursing mother</span></label
-                    >
-                    <label class="quiz-option"
-                      ><input type="checkbox" name="quiz_focus[]" value="Picky eater"><span>Picky eater</span></label
-                    >
-                    <label class="quiz-option"
-                      ><input type="checkbox" name="quiz_focus[]" value="Kitty growth"><span>Kitty growth</span></label
-                    >
-                    <label class="quiz-option"
-                      ><input type="checkbox" name="quiz_focus[]" value="Dental care"><span>Dental care</span></label
-                    >
-                  </div>
-                </div>
-                <div class="quiz-flex-wrapper">
-                  <h2 class="quiz-subtitle" style="margin-top: 40px;">
-                    Any allergies or underlying health issues. Please elaborate.
-                  </h2>
-                  <div class="quiz-textarea-wrapper">
-                    <textarea
-                      name="quiz_allergies"
-                      class="quiz-textarea"
-                      placeholder="Mention here in detail"
-                    ></textarea>
-                  </div>
-
-
-                  <div class="quiz-submit-wrapper">
-                    <button type="submit" class="quiz-submit-btn purrkins-btn-secondary">Submit</button>
+                    <div class="quiz-submit-wrapper">
+                      <button type="submit" class="quiz-submit-btn purrkins-btn-secondary">Submit</button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>
@@ -541,6 +523,7 @@
 
   .quiz-label-inline {
     margin: 0;
+    white-space: nowrap;
   }
 
   .quiz-box-group-custom {
@@ -572,6 +555,7 @@
     font-family: var(--purrkins-heading-font);
     border-radius: 0;
     font-weight: 500;
+    width: 100%;
   }
 
   .quiz-options {
@@ -873,213 +857,219 @@
 </style>
 
 <script>
-(function() {
-  function initQuiz() {
-    const slider = document.getElementById('byob-quiz-slider');
-    const form = document.getElementById('byob-quiz-form');
-    if (!slider || !form) return;
+  (function () {
+    function initQuiz() {
+      const slider = document.getElementById('popup-byob-quiz-slider');
+      const form = document.getElementById('popup-byob-quiz-form');
+      if (!slider || !form) return;
 
-    const slides = slider.querySelectorAll('.byob-quiz-slide');
-    let currentStep = 0;
+      const slides = slider.querySelectorAll('.byob-quiz-slide');
+      let currentStep = 0;
 
-    function updateSlider() {
-      slider.style.transform = `translateX(-${currentStep * 100}%)`;
-      // Update step indicator and active class for dynamic height
-      slides.forEach((slide, index) => {
-        if (index === currentStep) {
-          slide.classList.add('active');
-        } else {
-          slide.classList.remove('active');
-        }
-        const prevBtn = slide.querySelector('.quiz-prev');
-        if (prevBtn) prevBtn.disabled = index === 0;
-      });
-    }
-
-    // Initialize first slide as active
-    updateSlider();
-
-    const checkSlideComplete = (slide) => {
-      const textInputs = Array.from(slide.querySelectorAll('input[type="text"], input[type="number"], textarea'));
-      const allTextFilled = textInputs.every(input => input.value.trim() !== '');
-
-      const radioGroups = {};
-      const radios = Array.from(slide.querySelectorAll('input[type="radio"]'));
-      radios.forEach(radio => {
-        radioGroups[radio.name] = true;
-      });
-
-      let allRadiosFilled = true;
-      for (const name in radioGroups) {
-        if (!slide.querySelector(`input[name="${name}"]:checked`)) {
-          allRadiosFilled = false;
-          break;
-        }
-      }
-
-      const checkboxes = Array.from(slide.querySelectorAll('input[type="checkbox"]'));
-      let allCheckboxesValid = true;
-      if (checkboxes.length > 0) {
-        allCheckboxesValid = checkboxes.some(cb => cb.checked);
-      }
-
-      return allTextFilled && allRadiosFilled && allCheckboxesValid;
-    };
-
-    // Bind next/prev buttons and auto-advance logic
-    slides.forEach((slide, index) => {
-      const prevBtn = slide.querySelector('.quiz-prev');
-      const nextBtn = slide.querySelector('.quiz-next');
-      
-      if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-          if (currentStep > 0) {
-            currentStep--;
-            updateSlider();
-          }
-        });
-      }
-      
-      if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-          if (!checkSlideComplete(slide)) {
-            let err = slide.querySelector('.quiz-error');
-            if (!err) {
-              err = document.createElement('div');
-              err.className = 'quiz-error';
-              err.style.color = '#ff4d4f';
-              err.style.marginTop = '20px';
-              err.style.fontWeight = '600';
-              err.style.fontSize = '16px';
-              err.textContent = 'Please fill out all required fields before continuing.';
-              slide.appendChild(err);
-            }
-            err.style.display = 'block';
-            setTimeout(() => { err.style.display = 'none'; }, 3000);
-            return;
-          }
-
-          if (currentStep < slides.length - 1) {
-            currentStep++;
-            updateSlider();
-          }
-        });
-      }
-
-      // Auto-advance logic
-      const inputs = slide.querySelectorAll('input, textarea');
-      inputs.forEach(input => {
-        input.addEventListener('change', () => {
-          // Don't auto-advance on the last slide (submit slide)
-          if (index === slides.length - 1) return;
-          
-          if (checkSlideComplete(slide)) {
-            setTimeout(() => {
-              if (currentStep === index) { // Only advance if we are still on this slide
-                currentStep++;
-                updateSlider();
-              }
-            }, 300);
-          }
-        });
-      });
-    });
-
-    // Handle AJAX Form Submission
-    // Handle Native Form Submission
-    form.addEventListener('submit', function(e) {
-      // Validate last slide before submitting
-      if (!checkSlideComplete(slides[slides.length - 1])) {
-        e.preventDefault(); // Stop submission if invalid
-        const submitWrapper = form.querySelector('.quiz-submit-wrapper');
-        let err = submitWrapper.querySelector('.quiz-error');
-        if (!err) {
-          err = document.createElement('div');
-          err.className = 'quiz-error';
-          err.style.color = '#ff4d4f';
-          err.style.marginTop = '10px';
-          err.style.fontWeight = '600';
-          err.style.fontSize = '14px';
-          err.style.textAlign = 'center';
-          err.textContent = 'Please fill out all required fields (checkboxes and text).';
-          submitWrapper.appendChild(err);
-        }
-        err.style.display = 'block';
-        setTimeout(() => { err.style.display = 'none'; }, 3000);
-        return;
-      }
-
-      // Build quiz data object dynamically
-      const quizData = {};
-      const formData = new FormData(form);
-      for (const [key, value] of formData.entries()) {
-        if (key.startsWith('quiz_') && value.trim() !== '') {
-          // If it's a checkbox array (like quiz_focus[]), handle multiple values
-          const cleanKey = key.replace('quiz_', '').replace('[]', '');
-          if (quizData[cleanKey]) {
-            quizData[cleanKey] = quizData[cleanKey] + ', ' + value.trim();
+      function updateSlider() {
+        slider.style.transform = `translateX(-${currentStep * 100}%)`;
+        // Update step indicator and active class for dynamic height
+        slides.forEach((slide, index) => {
+          if (index === currentStep) {
+            slide.classList.add('active');
           } else {
-            quizData[cleanKey] = value.trim();
+            slide.classList.remove('active');
+          }
+          const prevBtn = slide.querySelector('.quiz-prev');
+          if (prevBtn) prevBtn.disabled = index === 0;
+        });
+      }
+
+      // Initialize first slide as active
+      updateSlider();
+
+      const checkSlideComplete = (slide) => {
+        const textInputs = Array.from(slide.querySelectorAll('input[type="text"], input[type="number"], textarea'));
+        const allTextFilled = textInputs.every((input) => input.value.trim() !== '');
+
+        const radioGroups = {};
+        const radios = Array.from(slide.querySelectorAll('input[type="radio"]'));
+        radios.forEach((radio) => {
+          radioGroups[radio.name] = true;
+        });
+
+        let allRadiosFilled = true;
+        for (const name in radioGroups) {
+          if (!slide.querySelector(`input[name="${name}"]:checked`)) {
+            allRadiosFilled = false;
+            break;
           }
         }
-      }
-      
-      const submitBtn = form.querySelector('.quiz-submit-btn');
-      submitBtn.textContent = 'Submitting...';
-      submitBtn.disabled = true;
 
-      const payload = {
-        customerId: "{{ customer.id }}",
-        tag: "byob-quiz-completed",
-        quiz_data: quizData
+        const checkboxes = Array.from(slide.querySelectorAll('input[type="checkbox"]'));
+        let allCheckboxesValid = true;
+        if (checkboxes.length > 0) {
+          allCheckboxesValid = checkboxes.some((cb) => cb.checked);
+        }
+
+        return allTextFilled && allRadiosFilled && allCheckboxesValid;
       };
 
-      if (!payload.customerId) {
-        alert('You must be logged in to save this quiz!');
-        submitBtn.textContent = 'Submit';
-        submitBtn.disabled = false;
-        return;
-      }
+      // Bind next/prev buttons and auto-advance logic
+      slides.forEach((slide, index) => {
+        const prevBtn = slide.querySelector('.quiz-prev');
+        const nextBtn = slide.querySelector('.quiz-next');
 
+        if (prevBtn) {
+          prevBtn.addEventListener('click', () => {
+            if (currentStep > 0) {
+              currentStep--;
+              updateSlider();
+            }
+          });
+        }
 
-      fetch('/apps/purrkins/byob/customer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      .then(function(res) { 
-        if (!res.ok) throw new Error('Network error');
-        return res.json().catch(function(){ return {}; }); 
-      })
-      .then(function(data) {
-        console.log('[BYOB Quiz] Response:', data);
-        if (data && data.success) {
-          window.location.href = '/pages/thank-you'; // Redirect only on success
-        } else {
-          alert('Failed to save quiz: ' + (data.message || 'Unknown error'));
+        if (nextBtn) {
+          nextBtn.addEventListener('click', () => {
+            if (!checkSlideComplete(slide)) {
+              let err = slide.querySelector('.quiz-error');
+              if (!err) {
+                err = document.createElement('div');
+                err.className = 'quiz-error';
+                err.style.color = '#ff4d4f';
+                err.style.marginTop = '20px';
+                err.style.fontWeight = '600';
+                err.style.fontSize = '16px';
+                err.textContent = 'Please fill out all required fields before continuing.';
+                slide.appendChild(err);
+              }
+              err.style.display = 'block';
+              setTimeout(() => {
+                err.style.display = 'none';
+              }, 3000);
+              return;
+            }
+
+            if (currentStep < slides.length - 1) {
+              currentStep++;
+              updateSlider();
+            }
+          });
+        }
+
+        // Auto-advance logic
+        const inputs = slide.querySelectorAll('input, textarea');
+        inputs.forEach((input) => {
+          input.addEventListener('change', () => {
+            // Don't auto-advance on the last slide (submit slide)
+            if (index === slides.length - 1) return;
+
+            if (checkSlideComplete(slide)) {
+              setTimeout(() => {
+                if (currentStep === index) {
+                  // Only advance if we are still on this slide
+                  currentStep++;
+                  updateSlider();
+                }
+              }, 300);
+            }
+          });
+        });
+      });
+
+      // Handle AJAX Form Submission
+      // Handle Native Form Submission
+      form.addEventListener('submit', function (e) {
+        // Validate last slide before submitting
+        if (!checkSlideComplete(slides[slides.length - 1])) {
+          e.preventDefault(); // Stop submission if invalid
+          const submitWrapper = form.querySelector('.quiz-submit-wrapper');
+          let err = submitWrapper.querySelector('.quiz-error');
+          if (!err) {
+            err = document.createElement('div');
+            err.className = 'quiz-error';
+            err.style.color = '#ff4d4f';
+            err.style.marginTop = '10px';
+            err.style.fontWeight = '600';
+            err.style.fontSize = '14px';
+            err.style.textAlign = 'center';
+            err.textContent = 'Please fill out all required fields (checkboxes and text).';
+            submitWrapper.appendChild(err);
+          }
+          err.style.display = 'block';
+          setTimeout(() => {
+            err.style.display = 'none';
+          }, 3000);
+          return;
+        }
+
+        // Build quiz data object dynamically
+        const quizData = {};
+        const formData = new FormData(form);
+        for (const [key, value] of formData.entries()) {
+          if (key.startsWith('quiz_') && value.trim() !== '') {
+            // If it's a checkbox array (like quiz_focus[]), handle multiple values
+            const cleanKey = key.replace('quiz_', '').replace('[]', '');
+            if (quizData[cleanKey]) {
+              quizData[cleanKey] = quizData[cleanKey] + ', ' + value.trim();
+            } else {
+              quizData[cleanKey] = value.trim();
+            }
+          }
+        }
+
+        const submitBtn = form.querySelector('.quiz-submit-btn');
+        submitBtn.textContent = 'Submitting...';
+        submitBtn.disabled = true;
+
+        const payload = {
+          customerId: '{{ customer.id }}',
+          tag: 'byob-quiz-completed',
+          quiz_data: quizData,
+        };
+
+        if (!payload.customerId) {
+          alert('You must be logged in to save this quiz!');
           submitBtn.textContent = 'Submit';
           submitBtn.disabled = false;
+          return;
         }
-      })
-      .catch(function(err) {
-        console.error('[BYOB Quiz] Error:', err);
-        alert('An error occurred. Please try again.');
-        submitBtn.textContent = 'Submit';
-        submitBtn.disabled = false;
+
+        fetch('/apps/purrkins/byob/customer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(payload),
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error('Network error');
+            return res.json().catch(function () {
+              return {};
+            });
+          })
+          .then(function (data) {
+            console.log('[BYOB Quiz] Response:', data);
+            if (data && data.success) {
+              window.location.href = '/pages/thank-you'; // Redirect only on success
+            } else {
+              alert('Failed to save quiz: ' + (data.message || 'Unknown error'));
+              submitBtn.textContent = 'Submit';
+              submitBtn.disabled = false;
+            }
+          })
+          .catch(function (err) {
+            console.error('[BYOB Quiz] Error:', err);
+            alert('An error occurred. Please try again.');
+            submitBtn.textContent = 'Submit';
+            submitBtn.disabled = false;
+          });
       });
-    });
-  }
-
-  // Run on initial load
-  initQuiz();
-
-  // Run when Shopify Theme Editor reloads the section
-  document.addEventListener('shopify:section:load', function(event) {
-    if (event.detail.sectionId.includes('byob-quiz')) {
-      initQuiz();
     }
-  });
-})();
+
+    // Run on initial load
+    initQuiz();
+
+    // Run when Shopify Theme Editor reloads the section
+    document.addEventListener('shopify:section:load', function (event) {
+      if (event.detail.sectionId.includes('byob-quiz')) {
+        initQuiz();
+      }
+    });
+  })();
 </script>
 
 <style>
@@ -1089,7 +1079,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
     z-index: 999999;
     display: flex;
@@ -1128,65 +1118,7 @@
 {% schema %}
 {
   "name": "BYOB Quiz Popup",
-  "settings": [
-    {
-      "type": "header",
-      "content": "Question 2 Images"
-    },
-    {
-      "type": "image_picker",
-      "id": "q2_image",
-      "label": "Gender Image"
-    },
-    {
-      "type": "header",
-      "content": "Question 3 Images"
-    },
-    {
-      "type": "image_picker",
-      "id": "q3_img_1",
-      "label": "Skinny Image"
-    },
-    {
-      "type": "image_picker",
-      "id": "q3_img_2",
-      "label": "Lean Image"
-    },
-    {
-      "type": "image_picker",
-      "id": "q3_img_3",
-      "label": "Healthy Image"
-    },
-    {
-      "type": "image_picker",
-      "id": "q3_img_4",
-      "label": "Obese Image"
-    },
-    {
-      "type": "header",
-      "content": "Question 4 Images"
-    },
-    {
-      "type": "image_picker",
-      "id": "q4_img_1",
-      "label": "Couch Potato Image"
-    },
-    {
-      "type": "image_picker",
-      "id": "q4_img_2",
-      "label": "Playful Image"
-    },
-    {
-      "type": "image_picker",
-      "id": "q4_img_3",
-      "label": "Explorer Image"
-    },
-    {
-      "type": "image_picker",
-      "id": "q4_img_4",
-      "label": "Super-active Image"
-    }
-  ],
+  "settings": [],
   "presets": [
     {
       "name": "BYOB Quiz"
