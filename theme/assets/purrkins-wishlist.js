@@ -44,6 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
       })
     })
     .then(response => {
+      if (response.status === 401) {
+        window.location.href = '/apps/purrkins/login?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+        return Promise.reject('Unauthorized');
+      }
       if (!response.ok) throw new Error('Network response was not ok');
       return response.json();
     })
@@ -51,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Wishlist updated:', data);
     })
     .catch(error => {
+      if (error === 'Unauthorized') return;
       console.error('Error updating wishlist:', error);
       // Revert visual state on error
       btn.classList.toggle('is-saved');

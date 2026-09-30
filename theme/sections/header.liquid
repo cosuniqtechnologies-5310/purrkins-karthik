@@ -323,6 +323,7 @@
 
     var cartBadge = document.querySelector('.header-cart-count');
     if (cartBadge) {
+      // Legacy or custom view event
       document.addEventListener('cart:view', function(event) {
         if (event.detail && event.detail.cart) {
           var count = event.detail.cart.item_count || 0;
@@ -331,13 +332,26 @@
         }
       });
       // Handle the CartLinesUpdateEvent standard event
-      document.addEventListener('cart:lines-update', function(event) {
+      document.addEventListener('shopify:cart:lines-update', function(event) {
         event.promise?.then(function(payload) {
-          var count = payload?.cart?.totalQuantity ?? payload?.detail?.itemCount ?? 0;
+          var count = payload?.cart?.totalQuantity ?? payload?.cart?.item_count ?? payload?.detail?.itemCount ?? 0;
           cartBadge.textContent = count;
           cartBadge.style.display = count > 0 ? '' : 'none';
         });
       });
+      // Fallback for custom cart:build or cart:refresh events
+      function fetchAndUpdateCartBadge() {
+        fetch(window.Shopify?.routes?.root ? window.Shopify.routes.root + 'cart.js' : '/cart.js')
+          .then(function(res) { return res.json(); })
+          .then(function(cart) {
+            var count = cart.item_count || 0;
+            cartBadge.textContent = count;
+            cartBadge.style.display = count > 0 ? '' : 'none';
+          })
+          .catch(function(err) { console.error('Error fetching cart for badge update', err); });
+      }
+      document.addEventListener('cart:build', fetchAndUpdateCartBadge);
+      document.addEventListener('cart:refresh', fetchAndUpdateCartBadge);
     }
   });
 </script>
