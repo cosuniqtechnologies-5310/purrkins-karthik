@@ -1017,16 +1017,45 @@
         submitBtn.textContent = 'Submitting...';
         submitBtn.disabled = true;
 
+        let currentCustomerId = "{{ customer.id }}";
+        if (!currentCustomerId) {
+          try {
+            const t = localStorage.getItem('pk_session');
+            if (t) {
+              let base64Url = t.split('.')[1];
+              let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+              while (base64.length % 4) {
+                base64 += '=';
+              }
+              let jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                  return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+              }).join(''));
+              const payload = JSON.parse(jsonPayload);
+              currentCustomerId = payload.customerId || "";
+            }
+          } catch(e) {
+            console.error("JWT parse error", e);
+          }
+        }
+
         const payload = {
-          customerId: '{{ customer.id }}',
+          customerId: currentCustomerId,
           tag: 'byob-quiz-completed',
           quiz_data: quizData,
         };
+        
+        localStorage.setItem('recent_quiz_data', JSON.stringify(quizData));
 
         if (!payload.customerId) {
-          alert('You must be logged in to save this quiz!');
           submitBtn.textContent = 'Submit';
           submitBtn.disabled = false;
+          
+          const loginModal = document.getElementById('byob-login-modal');
+          if (loginModal) {
+            loginModal.style.display = 'flex';
+          } else {
+            window.location.href = '/apps/purrkins/login';
+          }
           return;
         }
 

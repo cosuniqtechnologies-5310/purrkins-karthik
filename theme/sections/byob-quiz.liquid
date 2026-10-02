@@ -426,7 +426,6 @@
                     ></textarea>
                   </div>
 
-
                   <div class="quiz-submit-wrapper">
                     <button type="submit" class="quiz-submit-btn purrkins-btn-secondary">Submit</button>
                   </div>
@@ -866,213 +865,254 @@
 </style>
 
 <script>
-(function() {
-  function initQuiz() {
-    const slider = document.getElementById('byob-quiz-slider');
-    const form = document.getElementById('byob-quiz-form');
-    if (!slider || !form) return;
+  (function () {
+    function initQuiz() {
+      const slider = document.getElementById('byob-quiz-slider');
+      const form = document.getElementById('byob-quiz-form');
+      if (!slider || !form) return;
 
-    const slides = slider.querySelectorAll('.byob-quiz-slide');
-    let currentStep = 0;
+      const slides = slider.querySelectorAll('.byob-quiz-slide');
+      let currentStep = 0;
 
-    function updateSlider() {
-      slider.style.transform = `translateX(-${currentStep * 100}%)`;
-      // Update step indicator and active class for dynamic height
-      slides.forEach((slide, index) => {
-        if (index === currentStep) {
-          slide.classList.add('active');
-        } else {
-          slide.classList.remove('active');
-        }
-        const prevBtn = slide.querySelector('.quiz-prev');
-        if (prevBtn) prevBtn.disabled = index === 0;
-      });
-    }
-
-    // Initialize first slide as active
-    updateSlider();
-
-    const checkSlideComplete = (slide) => {
-      const textInputs = Array.from(slide.querySelectorAll('input[type="text"], input[type="number"], textarea'));
-      const allTextFilled = textInputs.every(input => input.value.trim() !== '');
-
-      const radioGroups = {};
-      const radios = Array.from(slide.querySelectorAll('input[type="radio"]'));
-      radios.forEach(radio => {
-        radioGroups[radio.name] = true;
-      });
-
-      let allRadiosFilled = true;
-      for (const name in radioGroups) {
-        if (!slide.querySelector(`input[name="${name}"]:checked`)) {
-          allRadiosFilled = false;
-          break;
-        }
-      }
-
-      const checkboxes = Array.from(slide.querySelectorAll('input[type="checkbox"]'));
-      let allCheckboxesValid = true;
-      if (checkboxes.length > 0) {
-        allCheckboxesValid = checkboxes.some(cb => cb.checked);
-      }
-
-      return allTextFilled && allRadiosFilled && allCheckboxesValid;
-    };
-
-    // Bind next/prev buttons and auto-advance logic
-    slides.forEach((slide, index) => {
-      const prevBtn = slide.querySelector('.quiz-prev');
-      const nextBtn = slide.querySelector('.quiz-next');
-      
-      if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-          if (currentStep > 0) {
-            currentStep--;
-            updateSlider();
-          }
-        });
-      }
-      
-      if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-          if (!checkSlideComplete(slide)) {
-            let err = slide.querySelector('.quiz-error');
-            if (!err) {
-              err = document.createElement('div');
-              err.className = 'quiz-error';
-              err.style.color = '#ff4d4f';
-              err.style.marginTop = '20px';
-              err.style.fontWeight = '600';
-              err.style.fontSize = '16px';
-              err.textContent = 'Please fill out all required fields before continuing.';
-              slide.appendChild(err);
-            }
-            err.style.display = 'block';
-            setTimeout(() => { err.style.display = 'none'; }, 3000);
-            return;
-          }
-
-          if (currentStep < slides.length - 1) {
-            currentStep++;
-            updateSlider();
-          }
-        });
-      }
-
-      // Auto-advance logic
-      const inputs = slide.querySelectorAll('input, textarea');
-      inputs.forEach(input => {
-        input.addEventListener('change', () => {
-          // Don't auto-advance on the last slide (submit slide)
-          if (index === slides.length - 1) return;
-          
-          if (checkSlideComplete(slide)) {
-            setTimeout(() => {
-              if (currentStep === index) { // Only advance if we are still on this slide
-                currentStep++;
-                updateSlider();
-              }
-            }, 300);
-          }
-        });
-      });
-    });
-
-    // Handle AJAX Form Submission
-    // Handle Native Form Submission
-    form.addEventListener('submit', function(e) {
-      // Validate last slide before submitting
-      if (!checkSlideComplete(slides[slides.length - 1])) {
-        e.preventDefault(); // Stop submission if invalid
-        const submitWrapper = form.querySelector('.quiz-submit-wrapper');
-        let err = submitWrapper.querySelector('.quiz-error');
-        if (!err) {
-          err = document.createElement('div');
-          err.className = 'quiz-error';
-          err.style.color = '#ff4d4f';
-          err.style.marginTop = '10px';
-          err.style.fontWeight = '600';
-          err.style.fontSize = '14px';
-          err.style.textAlign = 'center';
-          err.textContent = 'Please fill out all required fields (checkboxes and text).';
-          submitWrapper.appendChild(err);
-        }
-        err.style.display = 'block';
-        setTimeout(() => { err.style.display = 'none'; }, 3000);
-        return;
-      }
-
-      // Build quiz data object dynamically
-      const quizData = {};
-      const formData = new FormData(form);
-      for (const [key, value] of formData.entries()) {
-        if (key.startsWith('quiz_') && value.trim() !== '') {
-          // If it's a checkbox array (like quiz_focus[]), handle multiple values
-          const cleanKey = key.replace('quiz_', '').replace('[]', '');
-          if (quizData[cleanKey]) {
-            quizData[cleanKey] = quizData[cleanKey] + ', ' + value.trim();
+      function updateSlider() {
+        slider.style.transform = `translateX(-${currentStep * 100}%)`;
+        // Update step indicator and active class for dynamic height
+        slides.forEach((slide, index) => {
+          if (index === currentStep) {
+            slide.classList.add('active');
           } else {
-            quizData[cleanKey] = value.trim();
+            slide.classList.remove('active');
+          }
+          const prevBtn = slide.querySelector('.quiz-prev');
+          if (prevBtn) prevBtn.disabled = index === 0;
+        });
+      }
+
+      // Initialize first slide as active
+      updateSlider();
+
+      const checkSlideComplete = (slide) => {
+        const textInputs = Array.from(slide.querySelectorAll('input[type="text"], input[type="number"], textarea'));
+        const allTextFilled = textInputs.every((input) => input.value.trim() !== '');
+
+        const radioGroups = {};
+        const radios = Array.from(slide.querySelectorAll('input[type="radio"]'));
+        radios.forEach((radio) => {
+          radioGroups[radio.name] = true;
+        });
+
+        let allRadiosFilled = true;
+        for (const name in radioGroups) {
+          if (!slide.querySelector(`input[name="${name}"]:checked`)) {
+            allRadiosFilled = false;
+            break;
           }
         }
-      }
-      
-      const submitBtn = form.querySelector('.quiz-submit-btn');
-      submitBtn.textContent = 'Submitting...';
-      submitBtn.disabled = true;
 
-      const payload = {
-        customerId: "{{ customer.id }}",
-        tag: "byob-quiz-completed",
-        quiz_data: quizData
+        const checkboxes = Array.from(slide.querySelectorAll('input[type="checkbox"]'));
+        let allCheckboxesValid = true;
+        if (checkboxes.length > 0) {
+          allCheckboxesValid = checkboxes.some((cb) => cb.checked);
+        }
+
+        return allTextFilled && allRadiosFilled && allCheckboxesValid;
       };
 
-      if (!payload.customerId) {
-        alert('You must be logged in to save this quiz!');
-        submitBtn.textContent = 'Submit';
-        submitBtn.disabled = false;
-        return;
-      }
+      // Bind next/prev buttons and auto-advance logic
+      slides.forEach((slide, index) => {
+        const prevBtn = slide.querySelector('.quiz-prev');
+        const nextBtn = slide.querySelector('.quiz-next');
 
+        if (prevBtn) {
+          prevBtn.addEventListener('click', () => {
+            if (currentStep > 0) {
+              currentStep--;
+              updateSlider();
+            }
+          });
+        }
 
-      fetch('/apps/purrkins/byob/customer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      .then(function(res) { 
-        if (!res.ok) throw new Error('Network error');
-        return res.json().catch(function(){ return {}; }); 
-      })
-      .then(function(data) {
-        console.log('[BYOB Quiz] Response:', data);
-        if (data && data.success) {
-          window.location.href = '/pages/thank-you'; // Redirect only on success
-        } else {
-          alert('Failed to save quiz: ' + (data.message || 'Unknown error'));
+        if (nextBtn) {
+          nextBtn.addEventListener('click', () => {
+            if (!checkSlideComplete(slide)) {
+              let err = slide.querySelector('.quiz-error');
+              if (!err) {
+                err = document.createElement('div');
+                err.className = 'quiz-error';
+                err.style.color = '#ff4d4f';
+                err.style.marginTop = '20px';
+                err.style.fontWeight = '600';
+                err.style.fontSize = '16px';
+                err.textContent = 'Please fill out all required fields before continuing.';
+                slide.appendChild(err);
+              }
+              err.style.display = 'block';
+              setTimeout(() => {
+                err.style.display = 'none';
+              }, 3000);
+              return;
+            }
+
+            if (currentStep < slides.length - 1) {
+              currentStep++;
+              updateSlider();
+            }
+          });
+        }
+
+        // Auto-advance logic
+        const inputs = slide.querySelectorAll('input, textarea');
+        inputs.forEach((input) => {
+          input.addEventListener('change', () => {
+            // Don't auto-advance on the last slide (submit slide)
+            if (index === slides.length - 1) return;
+
+            if (checkSlideComplete(slide)) {
+              setTimeout(() => {
+                if (currentStep === index) {
+                  // Only advance if we are still on this slide
+                  currentStep++;
+                  updateSlider();
+                }
+              }, 300);
+            }
+          });
+        });
+      });
+
+      // Handle AJAX Form Submission
+      // Handle Native Form Submission
+      form.addEventListener('submit', function (e) {
+        // Validate last slide before submitting
+        if (!checkSlideComplete(slides[slides.length - 1])) {
+          e.preventDefault(); // Stop submission if invalid
+          const submitWrapper = form.querySelector('.quiz-submit-wrapper');
+          let err = submitWrapper.querySelector('.quiz-error');
+          if (!err) {
+            err = document.createElement('div');
+            err.className = 'quiz-error';
+            err.style.color = '#ff4d4f';
+            err.style.marginTop = '10px';
+            err.style.fontWeight = '600';
+            err.style.fontSize = '14px';
+            err.style.textAlign = 'center';
+            err.textContent = 'Please fill out all required fields (checkboxes and text).';
+            submitWrapper.appendChild(err);
+          }
+          err.style.display = 'block';
+          setTimeout(() => {
+            err.style.display = 'none';
+          }, 3000);
+          return;
+        }
+
+        // Build quiz data object dynamically
+        const quizData = {};
+        const formData = new FormData(form);
+        for (const [key, value] of formData.entries()) {
+          if (key.startsWith('quiz_') && value.trim() !== '') {
+            // If it's a checkbox array (like quiz_focus[]), handle multiple values
+            const cleanKey = key.replace('quiz_', '').replace('[]', '');
+            if (quizData[cleanKey]) {
+              quizData[cleanKey] = quizData[cleanKey] + ', ' + value.trim();
+            } else {
+              quizData[cleanKey] = value.trim();
+            }
+          }
+        }
+
+        const submitBtn = form.querySelector('.quiz-submit-btn');
+        submitBtn.textContent = 'Submitting...';
+        submitBtn.disabled = true;
+
+        let currentCustomerId = '{{ customer.id }}';
+        if (!currentCustomerId) {
+          try {
+            const t = localStorage.getItem('pk_session');
+            if (t) {
+              let base64Url = t.split('.')[1];
+              let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+              while (base64.length % 4) {
+                base64 += '=';
+              }
+              let jsonPayload = decodeURIComponent(
+                window
+                  .atob(base64)
+                  .split('')
+                  .map(function (c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                  })
+                  .join('')
+              );
+              const payloadData = JSON.parse(jsonPayload);
+              currentCustomerId = payloadData.customerId || '';
+            }
+          } catch (e) {
+            console.error('JWT parse error', e);
+          }
+        }
+
+        const payload = {
+          customerId: currentCustomerId,
+          tag: 'byob-quiz-completed',
+          quiz_data: quizData,
+        };
+        
+        localStorage.setItem('recent_quiz_data', JSON.stringify(quizData));
+
+        if (!payload.customerId) {
           submitBtn.textContent = 'Submit';
           submitBtn.disabled = false;
+
+          const loginModal = document.getElementById('byob-login-modal');
+          if (loginModal) {
+            loginModal.style.display = 'flex';
+          } else {
+            window.location.href = '/apps/purrkins/login';
+          }
+          return;
         }
-      })
-      .catch(function(err) {
-        console.error('[BYOB Quiz] Error:', err);
-        alert('An error occurred. Please try again.');
-        submitBtn.textContent = 'Submit';
-        submitBtn.disabled = false;
+
+        fetch('/apps/purrkins/byob/customer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(payload),
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error('Network error');
+            return res.json().catch(function () {
+              return {};
+            });
+          })
+          .then(function (data) {
+            console.log('[BYOB Quiz] Response:', data);
+            if (data && data.success) {
+              window.location.href = '/pages/thank-you'; // Redirect only on success
+            } else {
+              alert('Failed to save quiz: ' + (data.message || 'Unknown error'));
+              submitBtn.textContent = 'Submit';
+              submitBtn.disabled = false;
+            }
+          })
+          .catch(function (err) {
+            console.error('[BYOB Quiz] Error:', err);
+            alert('An error occurred. Please try again.');
+            submitBtn.textContent = 'Submit';
+            submitBtn.disabled = false;
+          });
       });
-    });
-  }
-
-  // Run on initial load
-  initQuiz();
-
-  // Run when Shopify Theme Editor reloads the section
-  document.addEventListener('shopify:section:load', function(event) {
-    if (event.detail.sectionId.includes('byob-quiz')) {
-      initQuiz();
     }
-  });
-})();
+
+    // Run on initial load
+    initQuiz();
+
+    // Run when Shopify Theme Editor reloads the section
+    document.addEventListener('shopify:section:load', function (event) {
+      if (event.detail.sectionId.includes('byob-quiz')) {
+        initQuiz();
+      }
+    });
+  })();
 </script>
 
 {% schema %}
