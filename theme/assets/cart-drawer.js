@@ -67,40 +67,51 @@ class CartDrawerComponent extends Component {
     if (btn.classList.contains('active')) return;
 
     const tab = btn.dataset.tab;
+
     /** @type {any} */
     const comp = this.querySelector('cart-items-component');
     if (!comp || typeof comp.updateMultiple !== 'function') return;
 
     const rows = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-items__table-row[data-key]'));
-    /** @type {Array<any>} */
-    const updates = [];
-    let hasChanges = false;
     
-    rows.forEach(row => {
+    /** @type {number | null} */
+    let lineToUpdate = null;
+    let qtyToUpdate = 1;
+    /** @type {number | string | null} */
+    let newPlanId = null;
+    
+    rows.forEach((row, index) => {
       const key = row.dataset.key;
       if (!key) return;
       const qty = parseInt(row.dataset.currentQuantity || '1', 10);
       const planId = row.dataset.firstSellingPlanId;
       const currentType = row.dataset.subscriptionType;
 
-      if (planId) {
+      if (planId && lineToUpdate === null) {
         if (tab === 'subscribe' && currentType !== 'subscribe') {
-          updates.push({ id: key, quantity: qty, selling_plan: planId });
-          hasChanges = true;
+          lineToUpdate = index + 1; // 1-indexed for Shopify
+          qtyToUpdate = qty;
+          newPlanId = parseInt(planId, 10);
         } else if (tab === 'one-time' && currentType === 'subscribe') {
-          updates.push({ id: key, quantity: qty, selling_plan: null });
-          hasChanges = true;
+          lineToUpdate = index + 1;
+          qtyToUpdate = qty;
+          newPlanId = "";
         }
       }
     });
-    
+
     const tabs = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-drawer-tab'));
     tabs.forEach(b => {
       b.classList.toggle('active', b.dataset.tab === tab);
     });
 
-    if (hasChanges) {
-      comp.updateMultiple(updates);
+    if (lineToUpdate !== null) {
+      comp.updateQuantity({
+        line: lineToUpdate,
+        quantity: qtyToUpdate,
+        selling_plan: newPlanId,
+        action: 'change'
+      });
     }
   };
 

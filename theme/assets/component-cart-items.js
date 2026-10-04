@@ -314,6 +314,7 @@ export class CartItemsComponent extends createViewEventElement(Component) {
    * @param {number} config.line - The line.
    * @param {number} config.quantity - The quantity.
    * @param {string} config.action - The action.
+   * @param {number|string} [config.selling_plan] - The selling plan ID.
    */
   updateQuantity(config) {
     const isRemove = config.quantity === 0 || config.action === 'clear';
@@ -323,7 +324,7 @@ export class CartItemsComponent extends createViewEventElement(Component) {
 
     this.#disableCartItems();
 
-    const { line, quantity } = config;
+    const { line, quantity, selling_plan } = config;
     const { cartTotal } = this.refs;
 
     const cartItemsComponents = document.querySelectorAll('cart-items-component');
@@ -334,12 +335,17 @@ export class CartItemsComponent extends createViewEventElement(Component) {
       }
     });
 
-    const body = JSON.stringify({
+    /** @type {Record<string, any>} */
+    const bodyData = {
       line: line,
       quantity: quantity,
       sections: Array.from(sectionsToUpdate).join(','),
       sections_url: window.location.pathname,
-    });
+    };
+    if (selling_plan !== undefined) {
+      bodyData.selling_plan = selling_plan;
+    }
+    const body = JSON.stringify(bodyData);
     
     console.log(isRemove ? '[PURRKINS CART] REMOVE REQUEST' : '[PURRKINS CART] QUANTITY REQUEST');
 
