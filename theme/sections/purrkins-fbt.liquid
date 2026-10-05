@@ -48,9 +48,20 @@
                         </div>
                         
                         <div class="pf-fbt-action">
+                            {% assign first_selling_plan_id = '' %}
+                            {% for plan_group in fbt_product.selling_plan_groups %}
+                                {% for plan in plan_group.selling_plans %}
+                                    {% assign first_selling_plan_id = plan.id %}
+                                    {% break %}
+                                {% endfor %}
+                                {% if first_selling_plan_id != '' %}{% break %}{% endif %}
+                            {% endfor %}
                             <form method="post" action="/cart/add">
                                 <input type="hidden" name="id" value="{{ fbt_product.variants.first.id }}">
-                                <button type="submit" class="pf-add-to-cart-btn pf-fbt-add-btn purrkins-btn-primary">
+                                {% if first_selling_plan_id != '' %}
+                                    <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
+                                {% endif %}
+                                <button type="submit" class="pf-add-to-cart-btn pf-fbt-add-btn purrkins-btn-primary" {% if first_selling_plan_id != '' %}data-first-plan="{{ first_selling_plan_id }}"{% endif %}>
                                     Add to Cart
                                 </button>
                             </form>

@@ -107,9 +107,20 @@
                       {{ prod.metafields.custom.short_description | default: 'Nourishing fuel for growing kittens.' }}
                     </p>
 
+                    {% assign first_selling_plan_id = '' %}
+                    {% for plan_group in prod.selling_plan_groups %}
+                      {% for plan in plan_group.selling_plans %}
+                        {% assign first_selling_plan_id = plan.id %}
+                        {% break %}
+                      {% endfor %}
+                      {% if first_selling_plan_id != '' %}{% break %}{% endif %}
+                    {% endfor %}
                     <form method="post" action="{{ routes.cart_add_url }}" class="quiz-rec-form">
                       <input type="hidden" name="id" value="{{ prod.variants.first.id }}">
-                      <button type="submit" class="quiz-rec-btn">Add to Cart</button>
+                      {% if first_selling_plan_id != '' %}
+                        <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
+                      {% endif %}
+                      <button type="submit" class="quiz-rec-btn" {% if first_selling_plan_id != '' %}data-first-plan="{{ first_selling_plan_id }}"{% endif %}>Add to Cart</button>
                     </form>
                   </div>
                 </div>
@@ -292,9 +303,20 @@
                         | escape
                       }}
                     </p>
+                    {% assign first_selling_plan_id = '' %}
+                    {% for plan_group in prod.selling_plan_groups %}
+                      {% for plan in plan_group.selling_plans %}
+                        {% assign first_selling_plan_id = plan.id %}
+                        {% break %}
+                      {% endfor %}
+                      {% if first_selling_plan_id != '' %}{% break %}{% endif %}
+                    {% endfor %}
                     <form method="post" action="{{ routes.cart_add_url }}" class="quiz-rec-form">
                       <input type="hidden" name="id" value="{{ prod.variants.first.id }}">
-                      <button type="submit" class="quiz-rec-btn">Add to Cart</button>
+                      {% if first_selling_plan_id != '' %}
+                        <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
+                      {% endif %}
+                      <button type="submit" class="quiz-rec-btn" {% if first_selling_plan_id != '' %}data-first-plan="{{ first_selling_plan_id }}"{% endif %}>Add to Cart</button>
                     </form>
                   </div>
                 </div>

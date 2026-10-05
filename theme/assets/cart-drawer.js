@@ -96,6 +96,8 @@ class CartDrawerComponent extends Component {
     tabs.forEach(b => {
       b.classList.toggle('active', b.dataset.tab === tab);
     });
+    
+    document.body.dataset.cartTab = tab;
 
     if (updatesToProcess.length === 0) return;
 
