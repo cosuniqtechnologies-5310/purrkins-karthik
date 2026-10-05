@@ -81,7 +81,10 @@
                       properties[propName] = value;
                   }
               }
-              const item = { id, quantity, properties };
+              const item = { id, quantity };
+              if (Object.keys(properties).length > 0) {
+                  item.properties = properties;
+              }
               if (selling_plan) {
                   item.selling_plan = selling_plan;
               }

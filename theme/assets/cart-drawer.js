@@ -74,9 +74,8 @@ class CartDrawerComponent extends Component {
 
     const rows = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-items__table-row[data-key]'));
     
-    /** @type {Record<string, { quantity?: number, selling_plan?: string }>} */
-    const updates = {};
-    let hasUpdates = false;
+    /** @type {Array<{line: number, key: string, quantity: number, selling_plan: string}>} */
+    const updatesToProcess = [];
 
     rows.forEach((row, index) => {
       const key = row.dataset.key;
@@ -87,11 +86,9 @@ class CartDrawerComponent extends Component {
 
       if (planId) {
         if (tab === 'subscribe' && currentType !== 'subscribe') {
-          updates[key] = { quantity: qty, selling_plan: planId };
-          hasUpdates = true;
+          updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: planId });
         } else if (tab === 'one-time' && currentType === 'subscribe') {
-          updates[key] = { quantity: qty, selling_plan: "" };
-          hasUpdates = true;
+          updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: "" });
         }
       }
     });
@@ -101,9 +98,54 @@ class CartDrawerComponent extends Component {
       b.classList.toggle('active', b.dataset.tab === tab);
     });
 
-    if (hasUpdates) {
-      comp.updateMultiple(updates);
+    if (updatesToProcess.length === 0) return;
+
+    if (updatesToProcess.length === 1) {
+      // If there's only one update, just use the native method
+      const update = updatesToProcess[0];
+      if (!update) return;
+      comp.updateQuantity({
+        line: update.line,
+        quantity: update.quantity,
+        selling_plan: update.selling_plan,
+        action: 'change'
+      });
+      return;
     }
+
+    // For multiple updates, we must use /cart/change.js because /cart/update.js doesn't support selling_plan
+    // We update all but the last item silently in parallel, then use updateQuantity for the last one to refresh DOM.
+    const lastUpdate = updatesToProcess.pop();
+    if (!lastUpdate) return;
+    
+    const promises = updatesToProcess.map(update => {
+      const shopifyInfo = /** @type {any} */ (window.Shopify);
+      const url = shopifyInfo?.routes?.root ? shopifyInfo.routes.root + 'cart/change.js' : '/cart/change.js';
+      return fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          id: update.key,
+          quantity: update.quantity,
+          selling_plan: update.selling_plan
+        })
+      });
+    });
+
+    // We can't trust the line index after modifying other items, so we should really pass the 'id' but 
+    // updateQuantity expects 'line'. Wait, updateQuantity uses refs.cartItemRows[line - 1], so if we pass
+    // the original line index it will find the original DOM element before it's morphed, which is fine!
+    Promise.all(promises).then(() => {
+      comp.updateQuantity({
+        line: lastUpdate.line,
+        quantity: lastUpdate.quantity,
+        selling_plan: lastUpdate.selling_plan,
+        action: 'change'
+      });
+    }).catch(console.error);
   };
 
   /**
