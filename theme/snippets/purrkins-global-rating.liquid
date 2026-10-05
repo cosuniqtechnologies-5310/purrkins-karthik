@@ -1,15 +1,37 @@
-{% assign rating = shop.metafields.purrkins.global_reviews_rating | default: 5 | round %}
-{% assign count = shop.metafields.purrkins.global_reviews_count | default: 2 %}
+{% assign rating = shop.metafields.purrkins.global_reviews_rating.value | default: 5 | round %}
+{% assign count = shop.metafields.purrkins.global_reviews_count.value | default: 2 %}
 
-<div class="pc-preview-badge purrkins-global-reviews" style="display: flex; align-items: center; gap: 8px; margin: 4px 0; cursor: pointer;" onclick="document.getElementById('purrkins-reviews-widget') && document.getElementById('purrkins-reviews-widget').scrollIntoView({behavior: 'smooth'})">
+<div
+  class="pc-preview-badge purrkins-global-reviews"
+  style="display: flex; align-items: center; gap: 8px; margin: 4px 0; cursor: pointer;"
+  onclick="document.getElementById('purrkins-reviews-widget') && document.getElementById('purrkins-reviews-widget').scrollIntoView({behavior: 'smooth'})"
+>
   <div style="display: flex; align-items: center;">
     {% for i in (1..5) %}
       {% if i <= rating %}
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffe330" stroke="#ffe330" stroke-width="2" style="margin-right:2px">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="#ffe330"
+          stroke="#ffe330"
+          stroke-width="2"
+          style="margin-right:2px"
+        >
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
         </svg>
       {% else %}
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="transparent" stroke="#ffe330" stroke-width="2" style="margin-right:2px">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="transparent"
+          stroke="#ffe330"
+          stroke-width="2"
+          style="margin-right:2px"
+        >
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
         </svg>
       {% endif %}
