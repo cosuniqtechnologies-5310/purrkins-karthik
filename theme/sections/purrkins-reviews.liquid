@@ -1,89 +1,100 @@
 <div class="purrkins-judgeme-section purrkins-container purrkins-section-block">
-    <div style='clear:both'></div> 
-    <div id='judgeme_product_reviews' class='jdgm-widget jdgm-review-widget' data-id='{{ product.id }}'> 
-      {{ product.metafields.judgeme.widget }} 
-    </div> 
+  <div style="clear:both"></div>
+  {% assign target_product = product %}
+  {% if section.settings.review_product != blank %}
+    {% assign target_product = section.settings.review_product %}
+  {% endif %}
+  <div id="judgeme_product_reviews" class="jdgm-widget jdgm-review-widget" data-id="{{ target_product.id }}">
+    {{ target_product.metafields.judgeme.widget }}
+  </div>
 </div>
 
 <style>
-/* CSS overrides to make Judge.me match the Purrkins design */
-.purrkins-judgeme-section {
+  /* CSS overrides to make Judge.me match the Purrkins design */
+  .purrkins-judgeme-section {
     padding: 60px 0;
-}
-/* Change star color to custom yellow */
-.purrkins-judgeme-section .jdgm-star {
-    color: #FFE330 !important;
-}
-/* Style the review button */
-.purrkins-judgeme-section .jdgm-write-rev-link {
-    background-color: #FFE330 !important;
-    color: #21252A !important;
+  }
+  /* Change star color to custom yellow */
+  .purrkins-judgeme-section .jdgm-star {
+    color: #ffe330 !important;
+  }
+  /* Style the review button */
+  .purrkins-judgeme-section .jdgm-write-rev-link {
+    background-color: #ffe330 !important;
+    color: #21252a !important;
     border-radius: 999px !important;
     font-weight: 700 !important;
     padding: 12px 24px !important;
     text-transform: none !important;
     border: none !important;
     transition: transform 0.2s;
-}
-.purrkins-judgeme-section .jdgm-write-rev-link:hover {
+  }
+  .purrkins-judgeme-section .jdgm-write-rev-link:hover {
     transform: translateY(-2px);
-}
-/* Style the histogram bars to be teal */
-.purrkins-judgeme-section .jdgm-histogram__bar-content {
-    background-color: #87C6C6 !important;
-}
-.purrkins-judgeme-section .jdgm-histogram__bar {
-    background-color: #F0F0F1 !important;
+  }
+  /* Style the histogram bars to be teal */
+  .purrkins-judgeme-section .jdgm-histogram__bar-content {
+    background-color: #87c6c6 !important;
+  }
+  .purrkins-judgeme-section .jdgm-histogram__bar {
+    background-color: #f0f0f1 !important;
     border-radius: 999px !important;
-}
-/* Make the overall rating text huge */
-.purrkins-judgeme-section .jdgm-rev-widg__summary-average {
+  }
+  /* Make the overall rating text huge */
+  .purrkins-judgeme-section .jdgm-rev-widg__summary-average {
     font-size: 48px !important;
     font-weight: 800 !important;
     font-family: var(--purrkins-heading-font) !important;
-    color: #21252A !important;
-}
-/* Review headers and bodies */
-.purrkins-judgeme-section .jdgm-rev__title {
+    color: #21252a !important;
+  }
+  /* Review headers and bodies */
+  .purrkins-judgeme-section .jdgm-rev__title {
     font-size: 20px !important;
     font-weight: 700 !important;
     font-family: var(--purrkins-heading-font) !important;
-    color: #21252A !important;
+    color: #21252a !important;
     margin-bottom: 8px !important;
-}
-.purrkins-judgeme-section .jdgm-rev__body {
+  }
+  .purrkins-judgeme-section .jdgm-rev__body {
     font-size: 16px !important;
     color: #595961 !important;
     line-height: 1.5 !important;
-}
-.purrkins-judgeme-section .jdgm-rev__author {
+  }
+  .purrkins-judgeme-section .jdgm-rev__author {
     font-size: 14px !important;
     font-weight: 700 !important;
-    color: #21252A !important;
-}
-/* Verified buyer badge */
-.purrkins-judgeme-section .jdgm-rev__buyer-badge {
+    color: #21252a !important;
+  }
+  /* Verified buyer badge */
+  .purrkins-judgeme-section .jdgm-rev__buyer-badge {
     color: #595961 !important;
     background: none !important;
     border: none !important;
     font-size: 12px !important;
     padding: 0 !important;
-}
-.purrkins-judgeme-section .jdgm-rev__timestamp {
+  }
+  .purrkins-judgeme-section .jdgm-rev__timestamp {
     color: #595961 !important;
     font-size: 14px !important;
-}
-/* Divider lines */
-.purrkins-judgeme-section .jdgm-rev {
-    border-top: 1px solid #E0E0E3 !important;
+  }
+  /* Divider lines */
+  .purrkins-judgeme-section .jdgm-rev {
+    border-top: 1px solid #e0e0e3 !important;
     padding: 30px 0 !important;
-}
+  }
 </style>
 
 {% schema %}
 {
   "name": "Judge.me Reviews Widget",
-  "settings": [],
+  "settings": [
+    {
+      "type": "product",
+      "id": "review_product",
+      "label": "Master Product for Reviews",
+      "info": "Select the product whose reviews should be shown here. If empty, it will show the current product's reviews."
+    }
+  ],
   "presets": [
     {
       "name": "Judge.me Reviews Widget"

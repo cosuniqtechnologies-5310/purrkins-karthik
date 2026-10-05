@@ -1,27 +1,32 @@
 <div class="purrkins-judgeme-section purrkins-container purrkins-section-block" style="padding: 60px 0;">
   <!-- Start of Judge.me code -->
-  {% assign has_legacy = false -%}
-  {%- if product.metafields.judgeme.widget.size > 20 %}{% assign has_legacy = true %}{% endif %}
+
+
   <div style="clear:both"></div>
+  {% assign target_product = product %}
+  {% if section.settings.review_product != blank %}
+    {% assign target_product = section.settings.review_product %}
+  {% endif %}
+
   <div
     id="judgeme_product_reviews"
     class="jdgm-widget jdgm-review-widget"
-    data-product-title="{{ product.title | escape }}"
-    data-id="{{ product.id }}"
-    data-product-id="{{ product.id }}"
+    data-product-title="{{ target_product.title | escape }}"
+    data-id="{{ target_product.id }}"
+    data-product-id="{{ target_product.id }}"
     data-widget="review"
     data-auto-install="false"
     data-shop-reviews-count="{{ shop.metafields.judgeme.shop_reviews_count | default: 0 | escape }}"
     data-entry-point="review_widget.js"
     data-entry-key="review-widget/main.js"
   >
-    {% if has_legacy %}
-      <div class="jdgm-legacy-widget-content" style="display: none;">{{ product.metafields.judgeme.widget }}</div>
+    {% if target_product.metafields.judgeme.widget.size > 20 %}
+      <div class="jdgm-legacy-widget-content" style="display: none;">{{ target_product.metafields.judgeme.widget }}</div>
     {% endif %}
   </div>
-  {% if product.metafields.judgeme.review_widget_data %}
+  {% if target_product.metafields.judgeme.review_widget_data %}
     <script>
-      jdgm.data ||= {}; jdgm.data.reviewWidget ||= {}; jdgm.data.reviewWidget[{{ product.id }}] = {{ product.metafields.judgeme.review_widget_data }}
+      jdgm.data ||= {}; jdgm.data.reviewWidget ||= {}; jdgm.data.reviewWidget[{{ target_product.id }}] = {{ target_product.metafields.judgeme.review_widget_data }}
     </script>
   {% endif %}
   <!-- End of Judge.me code -->
@@ -36,35 +41,35 @@
 
   /* Header Customizations */
   .purrkins-judgeme-section .jm-review-widget-minimal-header__title {
-      font-size: 32px !important;
-      font-weight: 700 !important;
-      color: #21252A !important;
-      font-family: var(--purrkins-heading-font) !important;
-      margin-bottom: 24px !important;
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    color: #21252a !important;
+    font-family: var(--purrkins-heading-font) !important;
+    margin-bottom: 24px !important;
   }
 
   .purrkins-judgeme-section .jm-average-rating-display .jm-text:first-child {
-      font-size: 48px !important;
-      font-weight: 800 !important;
-      color: #21252A !important;
-      font-family: var(--purrkins-heading-font) !important;
-      line-height: 1 !important;
+    font-size: 48px !important;
+    font-weight: 800 !important;
+    color: #21252a !important;
+    font-family: var(--purrkins-heading-font) !important;
+    line-height: 1 !important;
   }
 
   .purrkins-judgeme-section .jm-action-buttons__button {
-      background-color: #FFE330 !important;
-      color: #21252A !important;
-      border-radius: 999px !important;
-      font-weight: 700 !important;
-      padding: 12px 24px !important;
-      border: none !important;
-      box-shadow: none !important;
+    background-color: #ffe330 !important;
+    color: #21252a !important;
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+    padding: 12px 24px !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   /* Hide some default UI elements to match cleaner design */
   .purrkins-judgeme-section .jm-review-widget-minimal-header__filters,
   .purrkins-judgeme-section .jm-reviewer-avatar {
-      display: none !important;
+    display: none !important;
   }
 
   /*
@@ -72,94 +77,110 @@
     Forces a 2-column layout exactly matching the Figma design.
   */
   .purrkins-judgeme-section .jdgm-review-list {
-      border-top: 1px solid #E0E0E3 !important;
-      padding-top: 40px !important;
-      margin-top: 40px !important;
+    border-top: 1px solid #e0e0e3 !important;
+    padding-top: 40px !important;
+    margin-top: 40px !important;
   }
 
   .purrkins-judgeme-section .jm-review-item {
-      border-bottom: 1px solid #F0F0F1 !important;
-      padding-bottom: 30px !important;
-      margin-bottom: 30px !important;
+    border-bottom: 1px solid #f0f0f1 !important;
+    padding-bottom: 30px !important;
+    margin-bottom: 30px !important;
   }
 
   .purrkins-judgeme-section .jm-review-item__content {
-      display: grid !important;
-      grid-template-columns: 225px 1fr !important;
-      grid-template-rows: auto auto !important;
-      column-gap: 60px !important;
-      row-gap: 8px !important;
+    display: grid !important;
+    grid-template-columns: 225px 1fr !important;
+    grid-template-rows: auto auto !important;
+    column-gap: 60px !important;
+    row-gap: 8px !important;
   }
 
   /* 1. Left Column: Reviewer Info */
   .purrkins-judgeme-section .jm-reviewer-info {
-      grid-column: 1 !important;
-      grid-row: 1 / span 2 !important;
-      align-self: flex-start !important;
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    align-self: flex-start !important;
   }
   .purrkins-judgeme-section .jm-reviewer-info__details {
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: flex-start !important;
-      gap: 4px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
   }
   .purrkins-judgeme-section .jm-reviewer-info__name {
-      font-size: 14px !important;
-      font-weight: 700 !important;
-      color: #21252A !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #21252a !important;
   }
   .purrkins-judgeme-section .jm-reviewer-info__name::after {
-      content: ' | Verified Buyer';
-      font-size: 12px;
-      font-weight: 400;
-      color: #595961;
+    content: ' | Verified Buyer';
+    font-size: 12px;
+    font-weight: 400;
+    color: #595961;
   }
 
   /* 2. Right Column: Stars (Top) */
   .purrkins-judgeme-section .jm-review-item__content > .jm-cluster:first-child {
-      grid-column: 2 !important;
-      grid-row: 1 !important;
-      align-self: flex-start !important;
-      justify-content: flex-start !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-self: flex-start !important;
+    justify-content: flex-start !important;
   }
 
   /* 3. Right Column: Review Text (Bottom) */
   .purrkins-judgeme-section .jm-review-content {
-      grid-column: 2 !important;
-      grid-row: 2 !important;
+    grid-column: 2 !important;
+    grid-row: 2 !important;
   }
   .purrkins-judgeme-section .jm-review-content__body p {
-      font-size: 16px !important;
-      color: #595961 !important;
-      line-height: 1.5 !important;
-      margin: 0 !important;
+    font-size: 16px !important;
+    color: #595961 !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
   }
   .purrkins-judgeme-section .jm-review-content__title {
-      font-size: 20px !important;
-      font-weight: 700 !important;
-      font-family: var(--purrkins-heading-font) !important;
-      color: #21252A !important;
-      margin-bottom: 8px !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    font-family: var(--purrkins-heading-font) !important;
+    color: #21252a !important;
+    margin-bottom: 8px !important;
   }
 
   /* Mobile Responsive */
-  @media(max-width: 991px) {
-      .purrkins-judgeme-section .jm-review-item__content {
-          grid-template-columns: 1fr !important;
-          grid-template-rows: auto auto auto !important;
-          column-gap: 0 !important;
-      }
+  @media (max-width: 991px) {
+    .purrkins-judgeme-section .jm-review-item__content {
+      grid-template-columns: 1fr !important;
+      grid-template-rows: auto auto auto !important;
+      column-gap: 0 !important;
+    }
 
-      .purrkins-judgeme-section .jm-review-item__content > .jm-cluster:first-child { grid-column: 1 !important; grid-row: 1 !important; }
-      .purrkins-judgeme-section .jm-review-content { grid-column: 1 !important; grid-row: 2 !important; }
-      .purrkins-judgeme-section .jm-reviewer-info { grid-column: 1 !important; grid-row: 3 !important; }
+    .purrkins-judgeme-section .jm-review-item__content > .jm-cluster:first-child {
+      grid-column: 1 !important;
+      grid-row: 1 !important;
+    }
+    .purrkins-judgeme-section .jm-review-content {
+      grid-column: 1 !important;
+      grid-row: 2 !important;
+    }
+    .purrkins-judgeme-section .jm-reviewer-info {
+      grid-column: 1 !important;
+      grid-row: 3 !important;
+    }
   }
 </style>
 
 {% schema %}
 {
   "name": "Judge.me Reviews Widget",
-  "settings": [],
+  "settings": [
+    {
+      "type": "product",
+      "id": "review_product",
+      "label": "Master Product for Reviews",
+      "info": "Select the product whose reviews should be shown here. If empty, it will show the current product's reviews."
+    }
+  ],
   "presets": [
     {
       "name": "Judge.me Reviews Widget"

@@ -148,12 +148,24 @@
           {{ product.metafields.custom.short_description.value | default: product.description }}
         </div>
 
-        <div class="pf-star-rating">
-          <!-- Start of Judge.me code -->
-          <div class="jdgm-widget jdgm-preview-badge" data-id="{{ product.id }}">
-            {{ product.metafields.judgeme.badge }}
-          </div>
-          <!-- End of Judge.me code -->
+        <!-- Overall Store Rating -->
+        <div class="jdgm-widget jdgm-all-reviews-text">
+          {{ shop.metafields.judgeme.all_reviews_count }} reviews
+          <a href="javascript:void(0)">
+            <span
+              data-score="{{ shop.metafields.judgeme.all_reviews_rating }}"
+              class="jdgm-all-reviews-rating"
+            >
+            </span>
+            <span
+              class="jdgm-all-reviews-text__text"
+              data-score="{{ shop.metafields.judgeme.all_reviews_rating }}"
+              data-number-of-reviews="{{ shop.metafields.judgeme.all_reviews_count }}"
+              data-locale="en"
+            >
+              {{ shop.metafields.judgeme.all_reviews_rating | round: 1 }}
+            </span>
+          </a>
         </div>
 
         <div class="pf-quick-details">
@@ -349,22 +361,33 @@
                 <option value="3">3 Packs</option>
                 <option value="4">4 Packs</option>
                 <option value="5">5 Packs</option>
+                <option value="6">6 Packs</option>
+                <option value="7">7 Packs</option>
+                <option value="8">8 Packs</option>
+                <option value="9">9 Packs</option>
+                <option value="10">10 Packs</option>
               </select>
 
-              <div class="pf-custom-select-container" id="pf-qty-custom-select">
-                <div class="pf-custom-select-trigger">
-                  <span class="pf-custom-select-label">1 Pack</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none">
-                    <path d="M1 1.5L6 6.5L11 1.5" stroke="#21252A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <div class="pf-qty-selector">
+                <button type="button" class="pf-qty-btn pf-qty-minus">
+                  <svg width="12" height="2" viewBox="0 0 12 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 1H11" stroke="#21252A" stroke-width="1.5" stroke-linecap="round"/>
                   </svg>
-                </div>
-                <div class="pf-custom-select-dropdown">
-                  <div class="pf-custom-select-option" data-value="1">1 Pack</div>
-                  <div class="pf-custom-select-option" data-value="2">2 Packs</div>
-                  <div class="pf-custom-select-option" data-value="3">3 Packs</div>
-                  <div class="pf-custom-select-option" data-value="4">4 Packs</div>
-                  <div class="pf-custom-select-option" data-value="5">5 Packs</div>
-                </div>
+                </button>
+                <input
+                  type="number"
+                  class="pf-qty-input"
+                  value="1"
+                  min="1"
+                  step="1"
+                  readonly
+                >
+                <button type="button" class="pf-qty-btn pf-qty-plus">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 6H11" stroke="#21252A" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M6 1V11" stroke="#21252A" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </button>
               </div>
 
               <button type="submit" name="add" class="btn-add-to-cart pf-add-to-cart-btn">
@@ -441,6 +464,9 @@
   .pf-product-tabs-wrap {
     width: 100%;
   }
+  .jdgm-widget.jdgm-widget {
+    margin-bottom: 10px;
+  }
   .pf-lightbox {
     display: none;
     position: fixed;
@@ -509,69 +535,54 @@
   .pf-view-more-btn {
     cursor: pointer;
   }
-  .pf-custom-select-container {
-    position: relative;
-    width: 140px;
-    flex-shrink: 0;
-    user-select: none;
-  }
-  .pf-custom-select-trigger {
+  /* Quantity Selector */
+  .pf-qty-selector {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 14px 20px;
-    border-radius: 16px;
-    border: 2px solid #21252a;
+    justify-content: space-between;
+    width: 140px;
+    height: 48px;
     background: #fff;
+    border: 2px solid #21252a;
+    border-radius: 30px;
+    padding: 0 16px;
+    margin-right: 12px;
+  }
+  .pf-qty-btn {
+    background: none;
+    border: none;
+    padding: 0;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+  }
+  .pf-qty-input {
+    width: 40px;
+    text-align: center;
+    border: none;
+    background: transparent;
     font-family: var(--purrkins-heading-font);
     font-size: 18px;
     font-weight: 700;
     color: #21252a;
+    -moz-appearance: textfield;
   }
-  .pf-custom-select-container.open .pf-custom-select-trigger {
-    border-radius: 16px 16px 0 0;
-    border-bottom-color: transparent;
+  .pf-qty-input::-webkit-outer-spin-button,
+  .pf-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
-  .pf-custom-select-trigger svg {
-    transition: transform 0.3s;
+  .pf-qty-input:focus {
+    outline: none;
   }
-  .pf-custom-select-container.open .pf-custom-select-trigger svg {
-    transform: rotate(180deg);
+  .pf-product-summary-col.pf-qv-info .jdgm-widget.jdgm-widget {
+    display: flex !important;
   }
-  .pf-custom-select-dropdown {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background: #fff;
-    border: 2px solid #21252a;
-    border-top: 1px solid #dcdcdc;
-    border-radius: 0 0 16px 16px;
-    z-index: 100;
-    margin-top: -2px;
-  }
-  .pf-custom-select-container.open .pf-custom-select-dropdown {
-    display: block;
-  }
-  .pf-custom-select-option {
-    padding: 14px 20px;
-    font-family: var(--purrkins-heading-font);
-    font-size: 16px;
-    font-weight: 700;
-    color: #21252a;
-    cursor: pointer;
-    border-bottom: 1px solid #dcdcdc;
-    margin: 0 12px;
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-  .pf-custom-select-option:last-child {
-    border-bottom: none;
-  }
-  .pf-custom-select-option:hover {
-    color: #717eef;
+  .jdgm-all-reviews-text > a {
+    margin-left: 10px;
   }
 </style>
 
@@ -762,38 +773,32 @@
           observer.observe(subContainer, { childList: true, subtree: true });
       }
 
-      // Custom Select Logic
-      const customSelect = document.getElementById('pf-qty-custom-select');
-      if (customSelect) {
-          const trigger = customSelect.querySelector('.pf-custom-select-trigger');
-          const label = customSelect.querySelector('.pf-custom-select-label');
-          const options = customSelect.querySelectorAll('.pf-custom-select-option');
+      // Qty Selector Logic
+      const qtySelector = document.querySelector('.pf-qty-selector');
+      if (qtySelector) {
+          const minusBtn = qtySelector.querySelector('.pf-qty-minus');
+          const plusBtn = qtySelector.querySelector('.pf-qty-plus');
+          const input = qtySelector.querySelector('.pf-qty-input');
           const nativeSelect = document.querySelector('.pf-qty-dropdown');
 
-          trigger.addEventListener('click', (e) => {
-              e.stopPropagation();
-              customSelect.classList.toggle('open');
-          });
-
-          options.forEach(option => {
-              option.addEventListener('click', () => {
-                  const value = option.getAttribute('data-value');
-                  const text = option.innerText;
-
-                  label.innerText = text;
-                  nativeSelect.value = value;
-
-                  customSelect.classList.remove('open');
-
-                  // Trigger change event on native select so price updates
+          const updateQuantity = (val) => {
+              input.value = val;
+              if (nativeSelect) {
+                  nativeSelect.value = val;
                   nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
-              });
+              }
+          };
+
+          minusBtn.addEventListener('click', () => {
+              let val = parseInt(input.value) || 1;
+              if (val > 1) {
+                  updateQuantity(val - 1);
+              }
           });
 
-          document.addEventListener('click', (e) => {
-              if (!customSelect.contains(e.target)) {
-                  customSelect.classList.remove('open');
-              }
+          plusBtn.addEventListener('click', () => {
+              let val = parseInt(input.value) || 1;
+              updateQuantity(val + 1);
           });
       }
 
