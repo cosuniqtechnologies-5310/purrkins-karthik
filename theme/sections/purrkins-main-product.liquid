@@ -236,50 +236,77 @@
             {% assign price = product.price %}
             {% assign discount_price = price | times: 0.85 %}
 
-            <label class="pf-purchase-option active">
-              <div class="pf-po-content">
-                <div class="pf-po-header">
-                  <div class="pf-po-title-area">
-                    <div class="pf-po-title-area-flex">
-                      <input type="radio" name="purchase_type" value="subscription" checked>
-                      <span class="pf-po-title">Monthly plan</span>
-                      <span class="pf-po-badge">Save 15%</span>
+            {% if first_selling_plan_id != '' %}
+              <label class="pf-purchase-option active">
+                <div class="pf-po-content">
+                  <div class="pf-po-header">
+                    <div class="pf-po-title-area">
+                      <div class="pf-po-title-area-flex">
+                        <input type="radio" name="purchase_type" value="subscription" checked>
+                        <span class="pf-po-title">Monthly plan</span>
+                        <span class="pf-po-badge">Save 15%</span>
+                      </div>
+                      <ul class="pf-po-features">
+                        <li>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="15"
+                            height="10"
+                            viewBox="0 0 15 10"
+                            fill="none"
+                          >
+                            <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
+                          </svg>
+                          Save 15% every order
+                        </li>
+                        <li>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="15"
+                            height="10"
+                            viewBox="0 0 15 10"
+                            fill="none"
+                          >
+                            <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
+                          </svg>
+                          Pause, edit and cancel anytime
+                        </li>
+                        <li>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="15"
+                            height="10"
+                            viewBox="0 0 15 10"
+                            fill="none"
+                          >
+                            <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
+                          </svg>
+                          Free delivery
+                        </li>
+                      </ul>
                     </div>
-                    <ul class="pf-po-features">
-                      <li>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="10" viewBox="0 0 15 10" fill="none">
-                          <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
-                        </svg>
-                        Save 15% every order
-                      </li>
-                      <li>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="10" viewBox="0 0 15 10" fill="none">
-                          <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
-                        </svg>
-                        Pause, edit and cancel anytime
-                      </li>
-                      <li>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="10" viewBox="0 0 15 10" fill="none">
-                          <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
-                        </svg>
-                        Free delivery
-                      </li>
-                    </ul>
-                  </div>
-                  <div class="pf-po-price-area">
-                    <span class="pf-po-price">₹{{ discount_price | money_without_currency }}</span>
-                    <span class="pf-po-old-price">₹{{ price | money_without_currency }}</span>
+                    <div class="pf-po-price-area">
+                      <span class="pf-po-price">₹{{ discount_price | money_without_currency }}</span>
+                      <span class="pf-po-old-price">₹{{ price | money_without_currency }}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </label>
+              </label>
+            {% endif %}
 
-            <label class="pf-purchase-option">
+            <label class="pf-purchase-option {% if first_selling_plan_id == '' %}active{% endif %}">
               <div class="pf-po-content">
                 <div class="pf-po-header">
                   <div class="pf-po-title-area">
                     <div class="pf-po-title-area-flex">
-                      <input type="radio" name="purchase_type" value="onetime">
+                      <input
+                        type="radio"
+                        name="purchase_type"
+                        value="onetime"
+                        {% if first_selling_plan_id == '' %}
+                          checked
+                        {% endif %}
+                      >
                       <span class="pf-po-title">One-time order</span>
                     </div>
                     <p class="pf-po-desc">
