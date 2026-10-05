@@ -129,7 +129,15 @@
                                             {% endif %}
                                         </div>
                                         <div class="cb-btn-col">
-                                            <button class="cb-add-to-cart purrkins-btn-secondary cb-ajax-add-to-cart" data-variant-id="{{ product.selected_or_first_available_variant.id }}">Add to Cart</button>
+                                            {% assign first_selling_plan_id = '' %}
+                                            {% for plan_group in product.selling_plan_groups %}
+                                                {% for plan in plan_group.selling_plans %}
+                                                    {% assign first_selling_plan_id = plan.id %}
+                                                    {% break %}
+                                                {% endfor %}
+                                                {% if first_selling_plan_id != '' %}{% break %}{% endif %}
+                                            {% endfor %}
+                                            <button class="cb-add-to-cart purrkins-btn-secondary cb-ajax-add-to-cart" data-variant-id="{{ product.selected_or_first_available_variant.id }}" data-first-plan="{{ first_selling_plan_id }}">Add to Cart</button>
                                         </div>
                                     </div>
                                     
@@ -188,6 +196,7 @@ function initCBAddToCart_{{ section.id | replace: '-', '_' }}() {
                 if (addBtn.disabled) return;
                 
                 const variantId = parseInt(addBtn.getAttribute('data-variant-id'), 10);
+                const firstPlan = addBtn.getAttribute('data-first-plan');
                 const qty = 1;
                 
                 if (!variantId) {
@@ -195,8 +204,16 @@ function initCBAddToCart_{{ section.id | replace: '-', '_' }}() {
                     return;
                 }
                 
+                // Build a mock FormData so the global interceptor can handle it
+                const formData = new FormData();
+                formData.append('id', variantId);
+                formData.append('quantity', qty);
+                if (firstPlan) {
+                    formData.append('data-first-plan', firstPlan);
+                }
+                
                 if (window.purrkinsAddToCart) {
-                    window.purrkinsAddToCart([{ id: variantId, quantity: qty }], addBtn);
+                    window.purrkinsAddToCart(null, addBtn, formData);
                 } else {
                     console.error('purrkinsAddToCart is not defined');
                 }

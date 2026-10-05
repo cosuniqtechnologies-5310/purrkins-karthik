@@ -14,6 +14,7 @@ import { DrawerOpenEvent } from '@theme/theme-drawer';
  *
  * @extends {Component}
  */
+
 class CartDrawerComponent extends Component {
   /** @type {number} */
   #summaryThreshold = 0.5;
@@ -112,14 +113,32 @@ class CartDrawerComponent extends Component {
     }
 
     // For multiple updates, we must use /cart/change.js because /cart/update.js doesn't support selling_plan
-    // We update all but the last item silently in parallel, then use updateQuantity for the last one to refresh DOM.
+    // We must update them SEQUENTIALLY to avoid Shopify Cart API race conditions.
     const lastUpdate = updatesToProcess.pop();
     if (!lastUpdate) return;
     
-    const promises = updatesToProcess.map(update => {
-      const shopifyInfo = /** @type {any} */ (window.Shopify);
-      const url = shopifyInfo?.routes?.root ? shopifyInfo.routes.root + 'cart/change.js' : '/cart/change.js';
-      return fetch(url, {
+    const shopifyInfo = /** @type {any} */ (window.Shopify);
+    const url = shopifyInfo?.routes?.root ? shopifyInfo.routes.root + 'cart/change.js' : '/cart/change.js';
+    
+    const updateNext = (/** @type {number} */ index) => {
+      if (index >= updatesToProcess.length) {
+        // All parallel updates finished, now trigger the final one via the theme's updateQuantity to morph the DOM
+        comp.updateQuantity({
+          line: lastUpdate.line,
+          quantity: lastUpdate.quantity,
+          selling_plan: lastUpdate.selling_plan,
+          action: 'change'
+        });
+        return;
+      }
+      
+      const update = updatesToProcess[index];
+      if (!update) {
+        updateNext(index + 1);
+        return;
+      }
+      
+      fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -130,20 +149,15 @@ class CartDrawerComponent extends Component {
           quantity: update.quantity,
           selling_plan: update.selling_plan
         })
+      })
+      .then(() => updateNext(index + 1))
+      .catch(err => {
+        console.error(err);
+        updateNext(index + 1);
       });
-    });
-
-    // We can't trust the line index after modifying other items, so we should really pass the 'id' but 
-    // updateQuantity expects 'line'. Wait, updateQuantity uses refs.cartItemRows[line - 1], so if we pass
-    // the original line index it will find the original DOM element before it's morphed, which is fine!
-    Promise.all(promises).then(() => {
-      comp.updateQuantity({
-        line: lastUpdate.line,
-        quantity: lastUpdate.quantity,
-        selling_plan: lastUpdate.selling_plan,
-        action: 'change'
-      });
-    }).catch(console.error);
+    };
+    
+    updateNext(0);
   };
 
   /**
