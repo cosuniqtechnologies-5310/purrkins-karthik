@@ -74,12 +74,10 @@ class CartDrawerComponent extends Component {
 
     const rows = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-items__table-row[data-key]'));
     
-    /** @type {number | null} */
-    let lineToUpdate = null;
-    let qtyToUpdate = 1;
-    /** @type {number | string | null} */
-    let newPlanId = null;
-    
+    /** @type {Record<string, { quantity?: number, selling_plan?: string }>} */
+    const updates = {};
+    let hasUpdates = false;
+
     rows.forEach((row, index) => {
       const key = row.dataset.key;
       if (!key) return;
@@ -87,15 +85,13 @@ class CartDrawerComponent extends Component {
       const planId = row.dataset.firstSellingPlanId;
       const currentType = row.dataset.subscriptionType;
 
-      if (planId && lineToUpdate === null) {
+      if (planId) {
         if (tab === 'subscribe' && currentType !== 'subscribe') {
-          lineToUpdate = index + 1; // 1-indexed for Shopify
-          qtyToUpdate = qty;
-          newPlanId = parseInt(planId, 10);
+          updates[key] = { quantity: qty, selling_plan: planId };
+          hasUpdates = true;
         } else if (tab === 'one-time' && currentType === 'subscribe') {
-          lineToUpdate = index + 1;
-          qtyToUpdate = qty;
-          newPlanId = "";
+          updates[key] = { quantity: qty, selling_plan: "" };
+          hasUpdates = true;
         }
       }
     });
@@ -105,13 +101,8 @@ class CartDrawerComponent extends Component {
       b.classList.toggle('active', b.dataset.tab === tab);
     });
 
-    if (lineToUpdate !== null) {
-      comp.updateQuantity({
-        line: lineToUpdate,
-        quantity: qtyToUpdate,
-        selling_plan: newPlanId,
-        action: 'change'
-      });
+    if (hasUpdates) {
+      comp.updateMultiple(updates);
     }
   };
 

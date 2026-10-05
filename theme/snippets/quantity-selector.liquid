@@ -26,6 +26,8 @@
 
   if min != null
     assign min_quantity = min
+  elsif line_index != null
+    assign min_quantity = 0
   else
     assign min_quantity = variant.quantity_rule.min | default: 1
   endif
@@ -78,7 +80,7 @@
       {% if variant.quantity_rule.max %}
         max="{{ variant.quantity_rule.max }}"
       {% endif %}
-      step="{{ variant.quantity_rule.increment | default: 1 }}"
+      step="{% if line_index != null %}1{% else %}{{ variant.quantity_rule.increment | default: 1 }}{% endif %}"
       {% if can_update_quantity == false or variant.available == false %}
         disabled
       {% endif %}
