@@ -63,14 +63,12 @@ class CartDrawerComponent extends Component {
     const target = /** @type {HTMLElement} */ (event.target);
     const btn = /** @type {HTMLElement | null} */ (target.closest('.cart-drawer-tab'));
     if (!btn) return;
-    
-    if (btn.classList.contains('active')) return;
 
     const tab = btn.dataset.tab;
 
     /** @type {any} */
     const comp = this.querySelector('cart-items-component');
-    if (!comp || typeof comp.updateMultiple !== 'function') return;
+    if (!comp || typeof comp.updateQuantity !== 'function') return;
 
     const rows = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-items__table-row[data-key]'));
     
