@@ -181,7 +181,7 @@
       }
     },
     "purrkins_judgeme_reviews": {
-      "type": "purrkins-judgeme-reviews",
+      "type": "purrkins-reviews",
       "settings": {}
     },
     "purrkins_product_faq_73ENYN": {

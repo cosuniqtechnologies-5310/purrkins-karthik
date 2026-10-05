@@ -148,24 +148,14 @@
           {{ product.metafields.custom.short_description.value | default: product.description }}
         </div>
 
-        <!-- Overall Store Rating -->
-        <div class="jdgm-widget jdgm-all-reviews-text">
-          {{ shop.metafields.judgeme.all_reviews_count }} reviews
-          <a href="javascript:void(0)">
-            <span
-              data-score="{{ shop.metafields.judgeme.all_reviews_rating }}"
-              class="jdgm-all-reviews-rating"
-            >
-            </span>
-            <span
-              class="jdgm-all-reviews-text__text"
-              data-score="{{ shop.metafields.judgeme.all_reviews_rating }}"
-              data-number-of-reviews="{{ shop.metafields.judgeme.all_reviews_count }}"
-              data-locale="en"
-            >
-              {{ shop.metafields.judgeme.all_reviews_rating | round: 1 }}
-            </span>
-          </a>
+        <!-- Purrkins Custom App Preview Badge -->
+        <div class="pc-preview-badge" style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px; cursor: pointer;" onclick="document.getElementById('purrkins-reviews-widget').scrollIntoView({behavior: 'smooth'})">
+          <div class="pc-preview-stars" id="pc-preview-stars" style="color: #ffe330; font-size: 18px;">
+            ★★★★★
+          </div>
+          <div class="pc-preview-text" id="pc-preview-text" style="font-size: 14px; font-weight: 500; color: #595961;">
+            Loading reviews...
+          </div>
         </div>
 
         <div class="pf-quick-details">
@@ -464,9 +454,6 @@
   .pf-product-tabs-wrap {
     width: 100%;
   }
-  .jdgm-widget.jdgm-widget {
-    margin-bottom: 10px;
-  }
   .pf-lightbox {
     display: none;
     position: fixed;
@@ -577,12 +564,6 @@
   }
   .pf-qty-input:focus {
     outline: none;
-  }
-  .pf-product-summary-col.pf-qv-info .jdgm-widget.jdgm-widget {
-    display: flex !important;
-  }
-  .jdgm-all-reviews-text > a {
-    margin-left: 10px;
   }
 </style>
 

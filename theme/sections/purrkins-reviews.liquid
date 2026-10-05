@@ -1,103 +1,643 @@
-<div class="purrkins-judgeme-section purrkins-container purrkins-section-block">
+<div class="purrkins-custom-reviews-section purrkins-container purrkins-section-block">
   <div style="clear:both"></div>
-  {% assign target_product = product %}
-  {% if section.settings.review_product != blank %}
-    {% assign target_product = section.settings.review_product %}
-  {% endif %}
-  <div id="judgeme_product_reviews" class="jdgm-widget jdgm-review-widget" data-id="{{ target_product.id }}">
-    {{ target_product.metafields.judgeme.widget }}
+  
+  <h2 class="pc-main-title">Customer reviews</h2>
+
+  <div class="pc-reviews-wrapper" id="purrkins-reviews-widget" data-product-id="{{ product.id }}">
+    
+    <div class="pc-reviews-header">
+      <div class="pc-reviews-summary">
+        <div class="pc-summary-left">
+          <div class="pc-summary-average" id="pc-average-rating">0.0</div>
+          <div class="pc-summary-stars" id="pc-summary-stars">☆☆☆☆☆</div>
+        </div>
+        <div class="pc-summary-bars" id="pc-summary-bars">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="pc-reviews-images" id="pc-header-images">
+         <!-- Image thumbnails will go here -->
+      </div>
+
+      <div class="pc-reviews-actions">
+        <button class="pc-write-review-btn" id="pc-write-review-btn">Write a Review</button>
+      </div>
+    </div>
+
+    <!-- Review List -->
+    <div class="pc-review-list" id="pc-review-list">
+      <div class="pc-loading">Loading reviews...</div>
+    </div>
+    
+    <div class="pc-read-more-wrapper">
+       <button class="pc-read-more-btn" id="pc-read-more-btn" style="display:none;">Read More Review</button>
+    </div>
+  </div>
+</div>
+
+<!-- Write Review Modal -->
+<div class="pc-modal-overlay" id="pc-review-modal" style="display: none;">
+  <div class="pc-modal-content">
+    <button class="pc-modal-close" id="pc-modal-close">&times;</button>
+    <h2 class="pc-modal-title">Write a review</h2>
+    
+    <div class="pc-rating-selector" id="pc-rating-selector">
+      <span class="pc-star-select active" data-val="1">★</span>
+      <span class="pc-star-select active" data-val="2">★</span>
+      <span class="pc-star-select active" data-val="3">★</span>
+      <span class="pc-star-select active" data-val="4">★</span>
+      <span class="pc-star-select active" data-val="5">★</span>
+    </div>
+
+    <form id="pc-review-form" class="pc-modal-form">
+      <input type="hidden" name="productId" value="{{ product.id }}">
+      <input type="hidden" name="rating" id="pc-form-rating" value="5">
+      <input type="hidden" name="title" value="Review"> <!-- Hidden title to satisfy DB if needed -->
+
+      <div class="pc-form-group">
+        <label>Your Name *</label>
+        <input type="text" name="author" placeholder="Full Name" required>
+      </div>
+      
+      <div class="pc-form-group">
+        <label>Add Photo</label>
+        <div class="pc-photo-upload-grid">
+          <label class="pc-photo-upload-box" id="upload-box-1">
+            <input type="file" accept="image/*" class="pc-file-input">
+            <span class="pc-plus">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </span>
+          </label>
+          <label class="pc-photo-upload-box" id="upload-box-2">
+            <input type="file" accept="image/*" class="pc-file-input">
+            <span class="pc-plus">+</span>
+          </label>
+          <label class="pc-photo-upload-box" id="upload-box-3">
+            <input type="file" accept="image/*" class="pc-file-input">
+            <span class="pc-plus">+</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="pc-form-group">
+        <label>Write Your Review *</label>
+        <textarea name="body" rows="4" placeholder="Write here" required></textarea>
+      </div>
+
+      <div class="pc-form-actions">
+        <button type="submit" class="pc-submit-btn">Submit</button>
+      </div>
+    </form>
+    <div id="pc-form-message" style="display: none; text-align: center; margin-top: 15px; font-weight: bold;"></div>
   </div>
 </div>
 
 <style>
-  /* CSS overrides to make Judge.me match the Purrkins design */
-  .purrkins-judgeme-section {
+  .purrkins-custom-reviews-section {
     padding: 60px 0;
+    font-family: var(--purrkins-body-font, sans-serif);
+    color: #21252a;
   }
-  /* Change star color to custom yellow */
-  .purrkins-judgeme-section .jdgm-star {
-    color: #ffe330 !important;
+  .pc-main-title {
+    font-size: 32px;
+    font-weight: 800;
+    font-family: var(--purrkins-heading-font, sans-serif);
+    margin-bottom: 40px;
+    color: #000;
   }
-  /* Style the review button */
-  .purrkins-judgeme-section .jdgm-write-rev-link {
-    background-color: #ffe330 !important;
-    color: #21252a !important;
-    border-radius: 999px !important;
-    font-weight: 700 !important;
-    padding: 12px 24px !important;
-    text-transform: none !important;
-    border: none !important;
+  .pc-reviews-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e3;
+    padding-bottom: 40px;
+    margin-bottom: 40px;
+  }
+  .pc-reviews-summary {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+  .pc-summary-left {
+    text-align: center;
+  }
+  .pc-summary-average {
+    font-size: 42px;
+    font-weight: 800;
+    font-family: var(--purrkins-heading-font, sans-serif);
+    color: #000;
+    line-height: 1;
+  }
+  .pc-summary-stars {
+    color: #ffe330;
+    font-size: 20px;
+    margin-top: 8px;
+    letter-spacing: 2px;
+  }
+  .pc-summary-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 200px;
+  }
+  .pc-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: #595961;
+    font-weight: 600;
+  }
+  .pc-bar-row span {
+    width: 25px;
+    text-align: right;
+  }
+  .pc-bar {
+    flex: 1;
+    height: 8px;
+    background: #f0f0f1;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .pc-bar-fill {
+    height: 100%;
+    background: #87c6c6;
+    border-radius: 4px;
+  }
+  .pc-reviews-images {
+    display: flex;
+    gap: 10px;
+  }
+  .pc-header-img {
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  .pc-write-review-btn {
+    background-color: #ffe330;
+    color: #000;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 24px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  .pc-write-review-btn:hover {
+    background-color: #ffd800;
+  }
+  
+  /* Review List */
+  .pc-review-item {
+    border-bottom: 1px solid #f0f0f1;
+    padding-bottom: 40px;
+    margin-bottom: 40px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 30px;
+  }
+  .pc-reviewer-name-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 8px;
+  }
+  .pc-reviewer-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: #000;
+  }
+  .pc-verified-text {
+    font-size: 12px;
+    color: #595961;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .pc-review-date {
+    font-size: 13px;
+    color: #595961;
+  }
+  .pc-review-content .pc-review-stars {
+    color: #ffe330;
+    font-size: 18px;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+  }
+  .pc-review-title {
+    font-size: 22px;
+    font-weight: 800;
+    font-family: var(--purrkins-heading-font, sans-serif);
+    margin-bottom: 12px;
+    color: #000;
+  }
+  .pc-review-body {
+    font-size: 16px;
+    color: #595961;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  .pc-review-item-images {
+    display: flex;
+    gap: 10px;
+  }
+  .pc-review-item-images img {
+    width: 140px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  .pc-read-more-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .pc-read-more-btn {
+    background-color: #ffe330;
+    color: #000;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 30px;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* Modal */
+  .pc-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(45, 45, 45, 0.9);
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .pc-modal-content {
+    background: #fff;
+    width: 100%;
+    max-width: 550px;
+    border-radius: 20px;
+    padding: 40px;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .pc-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #f9f6e6;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    color: #8c8868;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .pc-modal-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 800;
+    font-family: var(--purrkins-heading-font, sans-serif);
+    margin-bottom: 20px;
+    margin-top: 0;
+  }
+  .pc-rating-selector {
+    text-align: center;
+    font-size: 32px;
+    color: #e0e0e3;
+    margin-bottom: 30px;
+    cursor: pointer;
+  }
+  .pc-rating-selector .pc-star-select.active {
+    color: #ffe330;
+  }
+  .pc-rating-selector .pc-star-select.hover {
+    color: #ffe330;
+    opacity: 0.7;
+  }
+  .pc-form-group {
+    margin-bottom: 25px;
+  }
+  .pc-form-group label {
+    display: block;
+    font-size: 14px;
+    color: #595961;
+    margin-bottom: 10px;
+  }
+  .pc-form-group input[type="text"], 
+  .pc-form-group textarea {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #dcdce0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: var(--purrkins-body-font, sans-serif);
+    outline: none;
+    box-sizing: border-box;
+  }
+  .pc-form-group input[type="text"]:focus, 
+  .pc-form-group textarea:focus {
+    border-color: #ffe330;
+  }
+  .pc-photo-upload-grid {
+    display: flex;
+    gap: 15px;
+  }
+  .pc-photo-upload-box {
+    width: 70px;
+    height: 70px;
+    background: #9fa2a6;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .pc-photo-upload-box.has-image {
+    background: transparent;
+  }
+  .pc-photo-upload-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .pc-photo-upload-box .pc-plus {
+    color: #fff;
+    font-size: 24px;
+  }
+  .pc-photo-upload-box input[type="file"] {
+    display: none;
+  }
+  .pc-form-actions {
+    text-align: center;
+    margin-top: 30px;
+  }
+  .pc-submit-btn {
+    background-color: #ffe330;
+    color: #000;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 16px;
+    padding: 15px 40px;
+    border: none;
+    cursor: pointer;
     transition: transform 0.2s;
   }
-  .purrkins-judgeme-section .jdgm-write-rev-link:hover {
-    transform: translateY(-2px);
+  .pc-submit-btn:hover {
+    transform: scale(1.05);
   }
-  /* Style the histogram bars to be teal */
-  .purrkins-judgeme-section .jdgm-histogram__bar-content {
-    background-color: #87c6c6 !important;
-  }
-  .purrkins-judgeme-section .jdgm-histogram__bar {
-    background-color: #f0f0f1 !important;
-    border-radius: 999px !important;
-  }
-  /* Make the overall rating text huge */
-  .purrkins-judgeme-section .jdgm-rev-widg__summary-average {
-    font-size: 48px !important;
-    font-weight: 800 !important;
-    font-family: var(--purrkins-heading-font) !important;
-    color: #21252a !important;
-  }
-  /* Review headers and bodies */
-  .purrkins-judgeme-section .jdgm-rev__title {
-    font-size: 20px !important;
-    font-weight: 700 !important;
-    font-family: var(--purrkins-heading-font) !important;
-    color: #21252a !important;
-    margin-bottom: 8px !important;
-  }
-  .purrkins-judgeme-section .jdgm-rev__body {
-    font-size: 16px !important;
-    color: #595961 !important;
-    line-height: 1.5 !important;
-  }
-  .purrkins-judgeme-section .jdgm-rev__author {
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    color: #21252a !important;
-  }
-  /* Verified buyer badge */
-  .purrkins-judgeme-section .jdgm-rev__buyer-badge {
-    color: #595961 !important;
-    background: none !important;
-    border: none !important;
-    font-size: 12px !important;
-    padding: 0 !important;
-  }
-  .purrkins-judgeme-section .jdgm-rev__timestamp {
-    color: #595961 !important;
-    font-size: 14px !important;
-  }
-  /* Divider lines */
-  .purrkins-judgeme-section .jdgm-rev {
-    border-top: 1px solid #e0e0e3 !important;
-    padding: 30px 0 !important;
+
+  @media (max-width: 768px) {
+    .pc-reviews-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 30px;
+    }
+    .pc-reviews-summary {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .pc-review-item {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+    .pc-reviews-images {
+      display: none; /* Hide images in header on mobile */
+    }
   }
 </style>
 
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const widget = document.getElementById('purrkins-reviews-widget');
+    const productId = widget.getAttribute('data-product-id');
+    const appProxyUrl = '/apps/purrkins/reviews';
+
+    const listContainer = document.getElementById('pc-review-list');
+    
+    // Modal
+    const modal = document.getElementById('pc-review-modal');
+    const writeBtn = document.getElementById('pc-write-review-btn');
+    const closeBtn = document.getElementById('pc-modal-close');
+    
+    writeBtn.addEventListener('click', () => { modal.style.display = 'flex'; });
+    closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+    
+    // Close modal on outside click
+    modal.addEventListener('click', (e) => {
+      if(e.target === modal) modal.style.display = 'none';
+    });
+
+    // Star rating selection
+    const stars = document.querySelectorAll('.pc-star-select');
+    const ratingInput = document.getElementById('pc-form-rating');
+    
+    stars.forEach(star => {
+      star.addEventListener('click', function() {
+        const val = this.getAttribute('data-val');
+        ratingInput.value = val;
+        updateStarsUI(val);
+      });
+      star.addEventListener('mouseover', function() {
+        const val = this.getAttribute('data-val');
+        stars.forEach(s => {
+          if (s.getAttribute('data-val') <= val) s.classList.add('hover');
+          else s.classList.remove('hover');
+        });
+      });
+      star.addEventListener('mouseout', function() {
+        stars.forEach(s => s.classList.remove('hover'));
+      });
+    });
+
+    function updateStarsUI(val) {
+      stars.forEach(s => {
+        if (s.getAttribute('data-val') <= val) {
+          s.classList.add('active');
+          s.textContent = '★';
+        } else {
+          s.classList.remove('active');
+          s.textContent = '☆';
+        }
+      });
+    }
+    
+    // Photo upload preview (Base64 encoding)
+    const fileInputs = document.querySelectorAll('.pc-file-input');
+    const b64Images = [];
+    
+    fileInputs.forEach((input, index) => {
+      input.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const result = e.target.result;
+            b64Images[index] = result;
+            const box = input.parentElement;
+            box.classList.add('has-image');
+            box.innerHTML = '<img src="' + result + '" />' + '<input type="file" accept="image/*" class="pc-file-input" style="display:none;">';
+          }
+          reader.readAsDataURL(file);
+        }
+      });
+    });
+
+    function getStarsStr(rating) {
+      return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+    }
+
+    // Fetch and render reviews
+    function fetchReviews() {
+      fetch(appProxyUrl + "?productId=" + encodeURIComponent(productId))
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) throw new Error(data.error);
+
+          const avg = data.totalCount > 0 ? parseFloat(data.averageRating).toFixed(1) : "0.0";
+          const avgStars = data.totalCount > 0 ? getStarsStr(Math.round(avg)) : "☆☆☆☆☆";
+          
+          document.getElementById('pc-average-rating').textContent = avg;
+          document.getElementById('pc-summary-stars').textContent = avgStars;
+          
+          // Compute bars manually
+          const counts = {1:0, 2:0, 3:0, 4:0, 5:0};
+          data.reviews.forEach(r => { counts[r.rating] = (counts[r.rating] || 0) + 1; });
+          
+          let barsHtml = '';
+          for(let i=5; i>=1; i--) {
+            const perc = data.totalCount > 0 ? (counts[i]/data.totalCount) * 100 : 0;
+            barsHtml += `
+              <div class="pc-bar-row">
+                <span>${i} ★</span><div class="pc-bar"><div class="pc-bar-fill" style="width: ${perc}%"></div></div>
+              </div>
+            `;
+          }
+          document.getElementById('pc-summary-bars').innerHTML = barsHtml;
+
+          // Update preview badge globally if it exists
+          const previewBadgeText = document.getElementById('pc-preview-text');
+          const previewBadgeStars = document.getElementById('pc-preview-stars');
+          
+          if (data.totalCount === 0) {
+            if(previewBadgeText) previewBadgeText.textContent = `No reviews yet`;
+            if(previewBadgeStars) previewBadgeStars.textContent = "☆☆☆☆☆";
+            listContainer.innerHTML = '<p style="text-align: center; color: #595961;">No reviews yet. Be the first to write one!</p>';
+            return;
+          }
+
+          if(previewBadgeText) previewBadgeText.textContent = `${data.totalCount} Review${data.totalCount > 1 ? 's' : ''}`;
+          if(previewBadgeStars) previewBadgeStars.textContent = avgStars;
+
+          listContainer.innerHTML = data.reviews.map(r => {
+            let imagesHtml = '';
+            if (r.images && r.images.length > 0) {
+               imagesHtml = '<div class="pc-review-item-images">' + r.images.map(img => `<img src="${img}" />`).join('') + '</div>';
+            }
+            return `
+            <div class="pc-review-item">
+              <div class="pc-reviewer-info">
+                <div class="pc-reviewer-name-row">
+                  <span class="pc-reviewer-name">${r.author || 'Anonymous'}</span> 
+                  <span class="pc-verified-text">| Verified Buyer 
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#000"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  </span>
+                </div>
+                <div class="pc-review-date">${new Date(r.createdAt || Date.now()).toLocaleDateString()}</div>
+              </div>
+              <div class="pc-review-content">
+                <div class="pc-review-stars">${getStarsStr(r.rating)}</div>
+                <div class="pc-review-title">${r.title || 'Great product!'}</div>
+                <div class="pc-review-body">${r.body || ''}</div>
+                ${imagesHtml}
+              </div>
+            </div>
+          `}).join('');
+        })
+        .catch(err => {
+          console.error(err);
+          listContainer.innerHTML = '<p style="text-align: center; color: #595961;">No reviews yet.</p>';
+          const previewBadgeText = document.getElementById('pc-preview-text');
+          const previewBadgeStars = document.getElementById('pc-preview-stars');
+          if(previewBadgeText) previewBadgeText.textContent = `No reviews yet`;
+          if(previewBadgeStars) previewBadgeStars.textContent = "☆☆☆☆☆";
+        });
+    }
+
+    // Submit review
+    const reviewForm = document.getElementById('pc-review-form');
+    reviewForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(reviewForm);
+      
+      // Append base64 images if any
+      b64Images.forEach((b64) => {
+         if(b64) formData.append('images[]', b64);
+      });
+      
+      const submitBtn = reviewForm.querySelector('.pc-submit-btn');
+      const msg = document.getElementById('pc-form-message');
+      submitBtn.textContent = 'Submitting...';
+      submitBtn.disabled = true;
+
+      fetch(appProxyUrl, {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        submitBtn.textContent = 'Submit';
+        submitBtn.disabled = false;
+        if (data.success) {
+          msg.style.display = 'block';
+          msg.style.color = '#2e7d32';
+          msg.textContent = 'Review submitted successfully!';
+          reviewForm.reset();
+          updateStarsUI(5);
+          setTimeout(() => {
+            modal.style.display = 'none';
+            msg.style.display = 'none';
+            fetchReviews();
+          }, 1500);
+        } else {
+          throw new Error(data.error);
+        }
+      })
+      .catch(err => {
+        submitBtn.textContent = 'Submit';
+        submitBtn.disabled = false;
+        msg.style.display = 'block';
+        msg.style.color = 'red';
+        msg.textContent = err.message || 'Error submitting review.';
+      });
+    });
+
+    fetchReviews();
+  });
+</script>
+
 {% schema %}
 {
-  "name": "Judge.me Reviews Widget",
-  "settings": [
-    {
-      "type": "product",
-      "id": "review_product",
-      "label": "Master Product for Reviews",
-      "info": "Select the product whose reviews should be shown here. If empty, it will show the current product's reviews."
-    }
-  ],
+  "name": "Purrkins Custom Reviews",
+  "settings": [],
   "presets": [
     {
-      "name": "Judge.me Reviews Widget"
+      "name": "Purrkins Custom Reviews"
     }
   ]
 }
