@@ -245,6 +245,30 @@
           }, 400); // 400ms matches the typical View Transition duration
         }
       }
+
+      // GLOBAL INTERCEPTOR FOR ALL ADD TO CART FORMS
+      window.addEventListener(
+        'submit',
+        function (e) {
+          if (e.target && e.target.tagName === 'FORM') {
+            var action = e.target.getAttribute('action') || '';
+            if (action.indexOf('/cart/add') !== -1) {
+              e.preventDefault();
+              e.stopPropagation(); // Stop product-form.js or local listeners from firing
+              var btn =
+                e.target.querySelector('button[type="submit"]') ||
+                e.target.querySelector('.add-to-cart') ||
+                e.target.querySelector('input[type="submit"]');
+              if (window.purrkinsAddToCart) {
+                window.purrkinsAddToCart(null, btn, new FormData(e.target));
+              } else {
+                e.target.submit();
+              }
+            }
+          }
+        },
+        true
+      ); // useCapture = true to intercept BEFORE bubble phase listeners
     </script>
 
     {{ content_for_header }}

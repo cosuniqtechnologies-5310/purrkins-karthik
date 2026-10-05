@@ -1,345 +1,420 @@
 <div id="product-{{ product.id }}" class="pf-single-product-wrap">
-    {% assign image_bg_color = '#f9f9f9' %}
-    {% if product.collections.first != blank and product.collections.first.metafields.custom.card_bg_color %}
-        {% assign image_bg_color = product.collections.first.metafields.custom.card_bg_color.value %}
+  {% assign image_bg_color = '#f9f9f9' %}
+  {% if product.collections.first != blank and product.collections.first.metafields.custom.card_bg_color %}
+    {% assign image_bg_color = product.collections.first.metafields.custom.card_bg_color.value %}
+  {% endif %}
+
+  <div class="pf-product-grid-container purrkins-container purrkins-section-block">
+    <!-- LEFT COLUMN: Image Gallery -->
+    {% assign in_wishlist = false %}
+    {% if customer and customer.metafields.custom.wishlist %}
+      {% for w_product in customer.metafields.custom.wishlist.value %}
+        {% if w_product.id == product.id %}
+          {% assign in_wishlist = true %}
+        {% endif %}
+      {% endfor %}
     {% endif %}
 
-    <div class="pf-product-grid-container purrkins-container purrkins-section-block">
-        
-        <!-- LEFT COLUMN: Image Gallery -->
-        {% assign in_wishlist = false %}
-{% if customer and customer.metafields.custom.wishlist %}
-  {% for w_product in customer.metafields.custom.wishlist.value %}
-    {% if w_product.id == product.id %}
-      {% assign in_wishlist = true %}
-    {% endif %}
-  {% endfor %}
-{% endif %}
+    <div class="pf-product-gallery-col">
+      <div
+        class="pf-custom-gallery-wrap images"
+        data-columns="4"
+        style="opacity: 1; transition: opacity .25s ease-in-out;"
+      >
+        <figure class="woocommerce-product-gallery__wrapper pf-desktop-gallery">
+          {% if product.media.size > 1 %}
+            {% assign main_image = product.media[1] %}
+            {% assign main_index = 1 %}
+          {% else %}
+            {% assign main_image = product.featured_media %}
+            {% assign main_index = 0 %}
+          {% endif %}
+          <div
+            class="pf-main-image-container"
+            style="background-color: {{ image_bg_color }};"
+            data-index="{{ main_index }}"
+          >
+            {% if product.tags.size > 0 %}
+              <div class="pf-qv-lifestage">{{ product.tags | join: ', ' }}</div>
+            {% endif %}
+            <button class="pf-qv-fav {% if in_wishlist %}is-saved{% endif %}" data-product-id="{{ product.id }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
+                <path d="M15.1606 25.0003C14.7521 25.1445 14.0794 25.1445 13.6709 25.0003C10.187 23.811 2.40234 18.8495 2.40234 10.4401C2.40234 6.72796 5.39368 3.72461 9.08179 3.72461C11.2682 3.72461 13.2024 4.78179 14.4157 6.41561C15.6291 4.78179 17.5753 3.72461 19.7497 3.72461C23.4378 3.72461 26.4291 6.72796 26.4291 10.4401C26.4291 18.8495 18.6444 23.811 15.1606 25.0003Z" stroke="#21252A" stroke-width="1.80201" stroke-linecap="round" stroke-linejoin="round" {% if in_wishlist %}fill="#21252A"{% endif %}/>
+              </svg>
+            </button>
+            {% if main_image %}
+              <img
+                src="{{ main_image | image_url: width: 800 }}"
+                alt="{{ product.title | escape }}"
+                class="wp-post-image"
+                loading="lazy"
+                width="800"
+                height="auto"
+              >
+            {% endif %}
+          </div>
 
-        <div class="pf-product-gallery-col">
-            <div class="pf-custom-gallery-wrap images" data-columns="4" style="opacity: 1; transition: opacity .25s ease-in-out;">
-                
-                <figure class="woocommerce-product-gallery__wrapper pf-desktop-gallery">
-                        {% if product.media.size > 1 %}
-                            {% assign main_image = product.media[1] %}
-                            {% assign main_index = 1 %}
-                        {% else %}
-                            {% assign main_image = product.featured_media %}
-                            {% assign main_index = 0 %}
-                        {% endif %}
-                    <div class="pf-main-image-container" style="background-color: {{ image_bg_color }};" data-index="{{ main_index }}">
-                        {% if product.tags.size > 0 %}
-                            <div class="pf-qv-lifestage">{{ product.tags | join: ', ' }}</div>
-                        {% endif %}
-                        <button class="pf-qv-fav {% if in_wishlist %}is-saved{% endif %}" data-product-id="{{ product.id }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
-                                <path d="M15.1606 25.0003C14.7521 25.1445 14.0794 25.1445 13.6709 25.0003C10.187 23.811 2.40234 18.8495 2.40234 10.4401C2.40234 6.72796 5.39368 3.72461 9.08179 3.72461C11.2682 3.72461 13.2024 4.78179 14.4157 6.41561C15.6291 4.78179 17.5753 3.72461 19.7497 3.72461C23.4378 3.72461 26.4291 6.72796 26.4291 10.4401C26.4291 18.8495 18.6444 23.811 15.1606 25.0003Z" stroke="#21252A" stroke-width="1.80201" stroke-linecap="round" stroke-linejoin="round" {% if in_wishlist %}fill="#21252A"{% endif %}/>
-                            </svg>
-                        </button>
-                        {% if main_image %}
-                            <img src="{{ main_image | image_url: width: 800 }}" alt="{{ product.title | escape }}" class="wp-post-image" loading="lazy" width="800" height="auto">
-                        {% endif %}
-                    </div>
-                    
-                    {% if product.media.size > 1 %}
-                        <!-- Thumbnails Grid -->
-                        <div class="pf-thumbnails-grid">
-                            {% for media in product.media offset: 1 %}
-                                <div class="pf-thumb-item" data-index="{{ forloop.index }}">
-                                    <img src="{{ media | image_url: width: 200 }}" alt="{{ product.title | escape }}" loading="lazy" width="200" height="auto">
-                                </div>
-                            {% endfor %}
-                        </div>
-                        
-                        {% if product.media.size > 4 %}
-                            <div class="pf-view-more-container">
-                                <a class="pf-view-more-btn">View More</a>
-                            </div>
-                        {% endif %}
-                    {% endif %}
-                </figure>
-                
-                <!-- Mobile Slider Container -->
-                <div class="swiper pf-mobile-product-slider">
-                    {% if product.tags.size > 0 %}
-                        <div class="pf-qv-lifestage">{{ product.tags | join: ', ' }}</div>
-                    {% endif %}
-                    <button class="pf-qv-fav {% if in_wishlist %}is-saved{% endif %}" data-product-id="{{ product.id }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
-                            <path d="M15.1606 25.0003C14.7521 25.1445 14.0794 25.1445 13.6709 25.0003C10.187 23.811 2.40234 18.8495 2.40234 10.4401C2.40234 6.72796 5.39368 3.72461 9.08179 3.72461C11.2682 3.72461 13.2024 4.78179 14.4157 6.41561C15.6291 4.78179 17.5753 3.72461 19.7497 3.72461C23.4378 3.72461 26.4291 6.72796 26.4291 10.4401C26.4291 18.8495 18.6444 23.811 15.1606 25.0003Z" stroke="#21252A" stroke-width="1.80201" stroke-linecap="round" stroke-linejoin="round" {% if in_wishlist %}fill="#21252A"{% endif %}/>
-                        </svg>
-                    </button>
-                    <div class="swiper-wrapper">
-                        {% for media in product.media offset: 1 %}
-                            <div class="swiper-slide pf-main-image-container" style="background-color: {{ image_bg_color }};" data-index="{{ forloop.index }}">
-                                <img src="{{ media | image_url: width: 800 }}" class="pf-mobile-slider-img wp-post-image" alt="{{ product.title | escape }}" loading="lazy" width="800" height="auto">
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <div class="swiper-pagination pf-product-pagination"></div>
+          {% if product.media.size > 1 %}
+            <!-- Thumbnails Grid -->
+            <div class="pf-thumbnails-grid">
+              {% for media in product.media offset: 1 %}
+                <div class="pf-thumb-item" data-index="{{ forloop.index }}">
+                  <img
+                    src="{{ media | image_url: width: 200 }}"
+                    alt="{{ product.title | escape }}"
+                    loading="lazy"
+                    width="200"
+                    height="auto"
+                  >
                 </div>
-
+              {% endfor %}
             </div>
+
+            {% if product.media.size > 4 %}
+              <div class="pf-view-more-container">
+                <a class="pf-view-more-btn">View More</a>
+              </div>
+            {% endif %}
+          {% endif %}
+        </figure>
+
+        <!-- Mobile Slider Container -->
+        <div class="swiper pf-mobile-product-slider">
+          {% if product.tags.size > 0 %}
+            <div class="pf-qv-lifestage">{{ product.tags | join: ', ' }}</div>
+          {% endif %}
+          <button class="pf-qv-fav {% if in_wishlist %}is-saved{% endif %}" data-product-id="{{ product.id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
+              <path d="M15.1606 25.0003C14.7521 25.1445 14.0794 25.1445 13.6709 25.0003C10.187 23.811 2.40234 18.8495 2.40234 10.4401C2.40234 6.72796 5.39368 3.72461 9.08179 3.72461C11.2682 3.72461 13.2024 4.78179 14.4157 6.41561C15.6291 4.78179 17.5753 3.72461 19.7497 3.72461C23.4378 3.72461 26.4291 6.72796 26.4291 10.4401C26.4291 18.8495 18.6444 23.811 15.1606 25.0003Z" stroke="#21252A" stroke-width="1.80201" stroke-linecap="round" stroke-linejoin="round" {% if in_wishlist %}fill="#21252A"{% endif %}/>
+            </svg>
+          </button>
+          <div class="swiper-wrapper">
+            {% for media in product.media offset: 1 %}
+              <div
+                class="swiper-slide pf-main-image-container"
+                style="background-color: {{ image_bg_color }};"
+                data-index="{{ forloop.index }}"
+              >
+                <img
+                  src="{{ media | image_url: width: 800 }}"
+                  class="pf-mobile-slider-img wp-post-image"
+                  alt="{{ product.title | escape }}"
+                  loading="lazy"
+                  width="800"
+                  height="auto"
+                >
+              </div>
+            {% endfor %}
+          </div>
+          <div class="swiper-pagination pf-product-pagination"></div>
         </div>
-
-        <!-- RIGHT COLUMN: Product Summary -->
-        <div class="pf-product-summary-col pf-qv-info">
-            
-            <div class="pf-product-header">
-                {% assign badge_text = 'Product' %}
-                {% assign badge_bg = '#f9f9f9' %}
-                {% assign badge_color = '#333' %}
-                {% if product.collections.size > 0 %}
-                    {% assign badge_text = product.collections.first.title %}
-                    
-                    {% if badge_text == 'Wet Food' %}
-                        {% assign badge_bg = '#E6E6FA' %}
-                        {% assign badge_color = '#4B0082' %}
-                    {% elsif badge_text == 'Treats' %}
-                        {% assign badge_bg = '#FFE4E1' %}
-                        {% assign badge_color = '#8B0000' %}
-                    {% endif %}
-                    
-                    {% if product.collections.first.metafields.custom.card_bg_color %}
-                        {% assign badge_bg = product.collections.first.metafields.custom.card_bg_color.value %}
-                    {% endif %}
-                    {% if product.collections.first.metafields.custom.card_primary_color %}
-                        {% assign badge_color = product.collections.first.metafields.custom.card_primary_color.value %}
-                    {% endif %}
-                {% endif %}
-                
-                <span class="pf-qv-badge" style="background-color: {{ badge_bg }}; border: 1px solid {{ badge_color }}; color: {{ badge_color }};">{{ badge_text }}</span>
-                <h1 class="purrkins-h3-text purrkins-heading-mb">{{ product.title }}</h1>
-                
-                <div class="pf-product-short-desc">
-                    {{ product.metafields.custom.short_description.value | default: product.description }}
-                </div>
-                
-                <div class="pf-star-rating">
-                    <!-- Start of Judge.me code --> 
-                    <div class='jdgm-widget jdgm-preview-badge' data-id='{{ product.id }}'> 
-                      {{ product.metafields.judgeme.badge }} 
-                    </div> 
-                    <!-- End of Judge.me code -->
-                </div>
-                
-                <div class="pf-quick-details">
-                    <div class="pf-weight-selector">
-                        <span class="pf-qv-weight">70g</span>
-                    </div>
-                    <span class="pf-qd-item">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="31" height="23" viewBox="0 0 31 23" fill="none">
-                          <path d="M26.9488 14.5563C26.9488 8.45595 21.7356 3.5108 15.3045 3.5108C8.87389 3.5108 3.66016 8.45595 3.66016 14.5563C3.66016 18.6233 7.136 21.9199 11.4231 21.9199H19.186C23.4735 21.9199 26.9488 18.6233 26.9488 14.5563Z" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M15.3072 12.7146V14.5555C15.3072 15.0439 15.103 15.5119 14.7391 15.8571C14.3752 16.2027 13.8813 16.3965 13.3665 16.3965C12.2948 16.3965 11.4258 15.5722 11.4258 14.5555" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M15.3027 12.7146V14.5555C15.3027 15.0439 15.5075 15.5119 15.8714 15.8571C16.2352 16.2027 16.7292 16.3965 17.2434 16.3965C18.3157 16.3965 19.1842 15.5722 19.1842 14.5555" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M14.3359 12.7148H16.2767" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M5.60179 12.7148H0.75" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M29.8616 12.7148H25.0098" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M5.60179 16.3965H0.75" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M29.8616 16.3965H25.0098" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M4.63184 10.1348V0.749312H4.63232C6.4959 0.749312 8.28331 1.45163 9.60151 2.70158L11.1992 4.21718" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M25.9819 10.1348V0.749312C24.1179 0.749312 22.3305 1.45163 21.0128 2.70158L19.415 4.21718" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M10.4521 9.95312C10.9878 9.44502 11.8577 9.44502 12.3929 9.95312" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M18.2178 9.95312C18.7534 9.44502 19.6233 9.44502 20.1585 9.95312" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        For 3-week+ kittens
-                    </span>
-                    <span class="pf-qd-item">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
-                            <path d="M8.38 1.89617L8.95309 1.32308C9.71719 0.558974 10.9561 0.558974 11.7202 1.32308C12.4843 2.08718 12.4843 3.32605 11.7202 4.09016L8.38 7.43033L5.03987 4.09021C4.27577 3.3261 4.27577 2.08723 5.03987 1.32313C5.80398 0.559023 7.04285 0.559023 7.80696 1.32313L8.38 1.89617Z" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M19.9247 23.837H4.66321C2.50199 23.837 0.75 22.085 0.75 19.9238H23.838C23.838 22.085 22.086 23.837 19.9247 23.837Z" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M23.8393 6.22852L17.8193 12.4442" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M20.1192 19.9256C21.1999 19.9256 22.0758 19.0495 22.0758 17.969C22.0758 16.8884 21.1999 16.0124 20.1192 16.0124C20.1192 13.8511 18.3672 12.0992 16.206 12.0992C16.0349 12.0992 15.8667 12.111 15.7021 12.1335C15.0305 10.9449 13.7554 10.1426 12.2928 10.1426C10.8302 10.1426 9.55506 10.9449 8.88346 12.1335C8.71886 12.111 8.55074 12.0992 8.37958 12.0992C6.21841 12.0992 4.46637 13.8511 4.46637 16.0124C3.38574 16.0124 2.50977 16.8884 2.50977 17.969C2.50977 19.0495 3.38574 19.9256 4.46637 19.9256" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                            <circle cx="8.38065" cy="16.0115" r="0.978303" fill="#21252A"/>
-                            <circle cx="12.2937" cy="14.0545" r="0.978303" fill="#21252A"/>
-                        </svg>
-                        Balanced meal
-                    </span>
-                </div>
-            </div>
-
-            <!-- Benefits Grid Placeholder -->
-            <div class="pf-benefits-grid">
-                <div class="pf-qv-benefits">
-                    {% if product.metafields.custom.key_benefits.value != blank %}
-                        {% for benefit in product.metafields.custom.key_benefits.value %}
-                            <div>
-                                <div class="pf-qv-benefits-icon">
-                                    {% if benefit.icon %}
-                                        <img src="{{ benefit.icon | image_url: width: 54 }}" alt="{{ benefit.title | default: benefit.name | default: benefit.system.handle }}" width="54" height="54" style="display:inline-block;">
-                                    {% else %}
-                                        &#128049;
-                                    {% endif %}
-                                </div>
-                                <span>{{ benefit.title | default: benefit.name | default: benefit.system.handle }}</span>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Purchase Box -->
-            <div class="pf-purchase-options">
-                {% form 'product', product %}
-                <div class="pf-purchase-box">
-                    
-                    {% assign price = product.price %}
-                    {% assign discount_price = price | times: 0.85 %}
-                    
-                    <label class="pf-purchase-option active">
-                        <div class="pf-po-content">
-                            <div class="pf-po-header">
-                                <div class="pf-po-title-area">
-                                    <div class="pf-po-title-area-flex">
-                                        <input type="radio" name="purchase_type" value="subscription" checked>
-                                        <span class="pf-po-title">Monthly plan</span>
-                                        <span class="pf-po-badge">Save 15%</span>
-                                    </div>
-                                    <ul class="pf-po-features">
-                                        <li><svg xmlns="http://www.w3.org/2000/svg" width="15" height="10" viewBox="0 0 15 10" fill="none"><path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/></svg> Save 15% every order</li>
-                                        <li><svg xmlns="http://www.w3.org/2000/svg" width="15" height="10" viewBox="0 0 15 10" fill="none"><path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/></svg> Pause, edit and cancel anytime</li>
-                                        <li><svg xmlns="http://www.w3.org/2000/svg" width="15" height="10" viewBox="0 0 15 10" fill="none"><path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/></svg> Free delivery</li>
-                                    </ul>
-                                </div>
-                                <div class="pf-po-price-area">
-                                    <span class="pf-po-price">₹{{ discount_price | money_without_currency }}</span>
-                                    <span class="pf-po-old-price">₹{{ price | money_without_currency }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </label>
-
-                    <label class="pf-purchase-option">
-                        <div class="pf-po-content">
-                            <div class="pf-po-header">
-                                <div class="pf-po-title-area">
-                                    <div class="pf-po-title-area-flex">
-                                        <input type="radio" name="purchase_type" value="onetime">
-                                        <span class="pf-po-title">One-time order</span>
-                                    </div>
-                                    <p class="pf-po-desc">Try it first.<br>Move to a plan whenever you're ready.</p>
-                                </div>
-                                <div class="pf-po-price-area">
-                                    <span class="pf-po-price">₹{{ price | money_without_currency }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </label>
-
-                    <div class="subscriptions_app_embed_block"></div>
-
-                    <div class="pf-qv-addtocart" id="pf-single-addtocart-container" data-product-id="{{ product.id }}" data-reg-price="{{ price }}" data-sub-price="{{ discount_price }}">
-                        
-                        <select name="id" class="pf-qv-packs-select" style="display:none;">
-                            {% for variant in product.variants %}
-                                <option value="{{ variant.id }}" {% if variant == product.selected_or_first_available_variant %}selected{% endif %}>
-                                    {{ variant.title }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        
-                        <select name="quantity" class="pf-qv-packs-select pf-qty-dropdown" style="display:none;">
-                            <option value="1">1 Pack</option>
-                            <option value="2">2 Packs</option>
-                            <option value="3">3 Packs</option>
-                            <option value="4">4 Packs</option>
-                            <option value="5">5 Packs</option>
-                        </select>
-
-                        <div class="pf-custom-select-container" id="pf-qty-custom-select">
-                            <div class="pf-custom-select-trigger">
-                                <span class="pf-custom-select-label">1 Pack</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none">
-                                    <path d="M1 1.5L6 6.5L11 1.5" stroke="#21252A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </div>
-                            <div class="pf-custom-select-dropdown">
-                                <div class="pf-custom-select-option" data-value="1">1 Pack</div>
-                                <div class="pf-custom-select-option" data-value="2">2 Packs</div>
-                                <div class="pf-custom-select-option" data-value="3">3 Packs</div>
-                                <div class="pf-custom-select-option" data-value="4">4 Packs</div>
-                                <div class="pf-custom-select-option" data-value="5">5 Packs</div>
-                            </div>
-                        </div>
-                        
-                        <button type="submit" name="add" class="btn-add-to-cart pf-add-to-cart-btn">
-                            <span class="pf-button-price-display">₹{{ discount_price | money_without_currency }}</span> | Add to Cart
-                        </button>
-                    </div>
-
-                </div>
-                {% endform %}
-            </div>
-
-            <div class="pf-bundle-save">
-                <a href="/collections/bundles">Bundle & save more</a>
-            </div>
-
-            <!-- Custom Tabs -->
-            <div class="pf-product-tabs-wrap">
-                <div class="pf-custom-tabs">
-                    <div class="pf-bowl-tabs">
-                        <button class="pf-bowl-tab active" data-target="bowl-ingredients-tab">Ingredients</button>
-                        <button class="pf-bowl-tab" data-target="bowl-feeding-tab">Description</button>
-                        <button class="pf-bowl-tab" data-target="bowl-delivery-tab">Product Information</button>
-                    </div>
-
-                    <div class="pf-tabs-content">
-                        <!-- Ingredients Tab -->
-                        <div class="pf-bowl-tab-content active" id="bowl-ingredients-tab">
-                            {% if product.metafields.custom.key_ingredients_tab.value != blank %}
-                                <div class="pf-bowl-key-ingredients">
-                                    {% for ingredient in product.metafields.custom.key_ingredients_tab.value %}
-                                        <div class="pf-bowl-ingredient">
-                                            <h4>{{ ingredient.name }}</h4>
-                                            <h2>{{ ingredient.percentage }}</h2>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                            <div class="pf-bowl-full-ingredients">
-                                {{ product.metafields.custom.full_ingredients | metafield_tag }}
-                            </div>
-                        </div>
-
-                        <!-- Feeding Guide Tab -->
-                        <div class="pf-bowl-tab-content" id="bowl-feeding-tab">
-                            <div class="pf-bowl-text-content">
-                                {{ product.description }}
-                            </div>
-                        </div>
-
-                        <!-- Delivery Tab -->
-                        <div class="pf-bowl-tab-content" id="bowl-delivery-tab">
-                            <div class="pf-bowl-text-content">
-                                {{ product.metafields.custom.product_information | metafield_tag }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
+      </div>
     </div>
 
+    <!-- RIGHT COLUMN: Product Summary -->
+    <div class="pf-product-summary-col pf-qv-info">
+      <div class="pf-product-header">
+        {% assign badge_text = 'Product' %}
+        {% assign badge_bg = '#f9f9f9' %}
+        {% assign badge_color = '#333' %}
+        {% if product.collections.size > 0 %}
+          {% assign badge_text = product.collections.first.title %}
 
+          {% if badge_text == 'Wet Food' %}
+            {% assign badge_bg = '#E6E6FA' %}
+            {% assign badge_color = '#4B0082' %}
+          {% elsif badge_text == 'Treats' %}
+            {% assign badge_bg = '#FFE4E1' %}
+            {% assign badge_color = '#8B0000' %}
+          {% endif %}
 
-    <!-- Lightbox Modal -->
-    <div id="pf-gallery-lightbox" class="pf-lightbox" style="display: none;">
-        <span class="pf-lightbox-close">&times;</span>
-        <div class="pf-lightbox-content">
-            <img id="pf-lightbox-img" src="" alt="Gallery Image" width="1200" height="auto">
+          {% if product.collections.first.metafields.custom.card_bg_color %}
+            {% assign badge_bg = product.collections.first.metafields.custom.card_bg_color.value %}
+          {% endif %}
+          {% if product.collections.first.metafields.custom.card_primary_color %}
+            {% assign badge_color = product.collections.first.metafields.custom.card_primary_color.value %}
+          {% endif %}
+        {% endif %}
+
+        <span
+          class="pf-qv-badge"
+          style="background-color: {{ badge_bg }}; border: 1px solid {{ badge_color }}; color: {{ badge_color }};"
+        >
+          {{- badge_text -}}
+        </span>
+        <h1 class="purrkins-h3-text purrkins-heading-mb">{{ product.title }}</h1>
+
+        <div class="pf-product-short-desc">
+          {{ product.metafields.custom.short_description.value | default: product.description }}
         </div>
-        <a class="pf-lightbox-prev">&#10094;</a>
-        <a class="pf-lightbox-next">&#10095;</a>
+
+        <div class="pf-star-rating">
+          <!-- Start of Judge.me code -->
+          <div class="jdgm-widget jdgm-preview-badge" data-id="{{ product.id }}">
+            {{ product.metafields.judgeme.badge }}
+          </div>
+          <!-- End of Judge.me code -->
+        </div>
+
+        <div class="pf-quick-details">
+          <div class="pf-weight-selector">
+            <span class="pf-qv-weight">70g</span>
+          </div>
+          <span class="pf-qd-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="31" height="23" viewBox="0 0 31 23" fill="none">
+              <path d="M26.9488 14.5563C26.9488 8.45595 21.7356 3.5108 15.3045 3.5108C8.87389 3.5108 3.66016 8.45595 3.66016 14.5563C3.66016 18.6233 7.136 21.9199 11.4231 21.9199H19.186C23.4735 21.9199 26.9488 18.6233 26.9488 14.5563Z" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M15.3072 12.7146V14.5555C15.3072 15.0439 15.103 15.5119 14.7391 15.8571C14.3752 16.2027 13.8813 16.3965 13.3665 16.3965C12.2948 16.3965 11.4258 15.5722 11.4258 14.5555" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M15.3027 12.7146V14.5555C15.3027 15.0439 15.5075 15.5119 15.8714 15.8571C16.2352 16.2027 16.7292 16.3965 17.2434 16.3965C18.3157 16.3965 19.1842 15.5722 19.1842 14.5555" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M14.3359 12.7148H16.2767" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5.60179 12.7148H0.75" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M29.8616 12.7148H25.0098" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5.60179 16.3965H0.75" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M29.8616 16.3965H25.0098" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4.63184 10.1348V0.749312H4.63232C6.4959 0.749312 8.28331 1.45163 9.60151 2.70158L11.1992 4.21718" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M25.9819 10.1348V0.749312C24.1179 0.749312 22.3305 1.45163 21.0128 2.70158L19.415 4.21718" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M10.4521 9.95312C10.9878 9.44502 11.8577 9.44502 12.3929 9.95312" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M18.2178 9.95312C18.7534 9.44502 19.6233 9.44502 20.1585 9.95312" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            For 3-week+ kittens
+          </span>
+          <span class="pf-qd-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25" fill="none">
+              <path d="M8.38 1.89617L8.95309 1.32308C9.71719 0.558974 10.9561 0.558974 11.7202 1.32308C12.4843 2.08718 12.4843 3.32605 11.7202 4.09016L8.38 7.43033L5.03987 4.09021C4.27577 3.3261 4.27577 2.08723 5.03987 1.32313C5.80398 0.559023 7.04285 0.559023 7.80696 1.32313L8.38 1.89617Z" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M19.9247 23.837H4.66321C2.50199 23.837 0.75 22.085 0.75 19.9238H23.838C23.838 22.085 22.086 23.837 19.9247 23.837Z" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M23.8393 6.22852L17.8193 12.4442" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M20.1192 19.9256C21.1999 19.9256 22.0758 19.0495 22.0758 17.969C22.0758 16.8884 21.1999 16.0124 20.1192 16.0124C20.1192 13.8511 18.3672 12.0992 16.206 12.0992C16.0349 12.0992 15.8667 12.111 15.7021 12.1335C15.0305 10.9449 13.7554 10.1426 12.2928 10.1426C10.8302 10.1426 9.55506 10.9449 8.88346 12.1335C8.71886 12.111 8.55074 12.0992 8.37958 12.0992C6.21841 12.0992 4.46637 13.8511 4.46637 16.0124C3.38574 16.0124 2.50977 16.8884 2.50977 17.969C2.50977 19.0495 3.38574 19.9256 4.46637 19.9256" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="8.38065" cy="16.0115" r="0.978303" fill="#21252A"/>
+              <circle cx="12.2937" cy="14.0545" r="0.978303" fill="#21252A"/>
+            </svg>
+            Balanced meal
+          </span>
+        </div>
+      </div>
+
+      <!-- Benefits Grid Placeholder -->
+      <div class="pf-benefits-grid">
+        <div class="pf-qv-benefits">
+          {% if product.metafields.custom.key_benefits.value != blank %}
+            {% for benefit in product.metafields.custom.key_benefits.value %}
+              <div>
+                <div class="pf-qv-benefits-icon">
+                  {% if benefit.icon %}
+                    <img
+                      src="{{ benefit.icon | image_url: width: 54 }}"
+                      alt="{{ benefit.title | default: benefit.name | default: benefit.system.handle }}"
+                      width="54"
+                      height="54"
+                      style="display:inline-block;"
+                    >
+                  {% else %}
+                    &#128049;
+                  {% endif %}
+                </div>
+                <span>{{ benefit.title | default: benefit.name | default: benefit.system.handle }}</span>
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Purchase Box -->
+      <div class="pf-purchase-options">
+        {% assign first_selling_plan_id = '' %}
+        {% for plan_group in product.selling_plan_groups %}
+          {% for plan in plan_group.selling_plans %}
+            {% assign first_selling_plan_id = plan.id %}
+            {% break %}
+          {% endfor %}
+          {% if first_selling_plan_id != '' %}{% break %}{% endif %}
+        {% endfor %}
+
+        {% form 'product', product, class: 'pf-main-form' %}
+          {% if first_selling_plan_id != '' %}
+            <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
+          {% endif %}
+          <div class="pf-purchase-box">
+            {% assign price = product.price %}
+            {% assign discount_price = price | times: 0.85 %}
+
+            <label class="pf-purchase-option active">
+              <div class="pf-po-content">
+                <div class="pf-po-header">
+                  <div class="pf-po-title-area">
+                    <div class="pf-po-title-area-flex">
+                      <input type="radio" name="purchase_type" value="subscription" checked>
+                      <span class="pf-po-title">Monthly plan</span>
+                      <span class="pf-po-badge">Save 15%</span>
+                    </div>
+                    <ul class="pf-po-features">
+                      <li>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="10" viewBox="0 0 15 10" fill="none">
+                          <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
+                        </svg>
+                        Save 15% every order
+                      </li>
+                      <li>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="10" viewBox="0 0 15 10" fill="none">
+                          <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
+                        </svg>
+                        Pause, edit and cancel anytime
+                      </li>
+                      <li>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="10" viewBox="0 0 15 10" fill="none">
+                          <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
+                        </svg>
+                        Free delivery
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="pf-po-price-area">
+                    <span class="pf-po-price">₹{{ discount_price | money_without_currency }}</span>
+                    <span class="pf-po-old-price">₹{{ price | money_without_currency }}</span>
+                  </div>
+                </div>
+              </div>
+            </label>
+
+            <label class="pf-purchase-option">
+              <div class="pf-po-content">
+                <div class="pf-po-header">
+                  <div class="pf-po-title-area">
+                    <div class="pf-po-title-area-flex">
+                      <input type="radio" name="purchase_type" value="onetime">
+                      <span class="pf-po-title">One-time order</span>
+                    </div>
+                    <p class="pf-po-desc">
+                      Try it first.<br>
+                      Move to a plan whenever you're ready.
+                    </p>
+                  </div>
+                  <div class="pf-po-price-area">
+                    <span class="pf-po-price">₹{{ price | money_without_currency }}</span>
+                  </div>
+                </div>
+              </div>
+            </label>
+
+            <div class="subscriptions_app_embed_block"></div>
+
+            <div
+              class="pf-qv-addtocart"
+              id="pf-single-addtocart-container"
+              data-product-id="{{ product.id }}"
+              data-reg-price="{{ price }}"
+              data-sub-price="{{ discount_price }}"
+            >
+              <select name="id" class="pf-qv-packs-select" style="display:none;">
+                {% for variant in product.variants %}
+                  <option
+                    value="{{ variant.id }}"
+                    {% if variant == product.selected_or_first_available_variant %}
+                      selected
+                    {% endif %}
+                  >
+                    {{ variant.title }}
+                  </option>
+                {% endfor %}
+              </select>
+
+              <select name="quantity" class="pf-qv-packs-select pf-qty-dropdown" style="display:none;">
+                <option value="1">1 Pack</option>
+                <option value="2">2 Packs</option>
+                <option value="3">3 Packs</option>
+                <option value="4">4 Packs</option>
+                <option value="5">5 Packs</option>
+              </select>
+
+              <div class="pf-custom-select-container" id="pf-qty-custom-select">
+                <div class="pf-custom-select-trigger">
+                  <span class="pf-custom-select-label">1 Pack</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" fill="none">
+                    <path d="M1 1.5L6 6.5L11 1.5" stroke="#21252A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div class="pf-custom-select-dropdown">
+                  <div class="pf-custom-select-option" data-value="1">1 Pack</div>
+                  <div class="pf-custom-select-option" data-value="2">2 Packs</div>
+                  <div class="pf-custom-select-option" data-value="3">3 Packs</div>
+                  <div class="pf-custom-select-option" data-value="4">4 Packs</div>
+                  <div class="pf-custom-select-option" data-value="5">5 Packs</div>
+                </div>
+              </div>
+
+              <button type="submit" name="add" class="btn-add-to-cart pf-add-to-cart-btn">
+                <span class="pf-button-price-display">₹{{ discount_price | money_without_currency }}</span> | Add to
+                Cart
+              </button>
+            </div>
+          </div>
+        {% endform %}
+      </div>
+
+      <div class="pf-bundle-save">
+        <a href="/collections/bundles">Bundle & save more</a>
+      </div>
+
+      <!-- Custom Tabs -->
+      <div class="pf-product-tabs-wrap">
+        <div class="pf-custom-tabs">
+          <div class="pf-bowl-tabs">
+            <button class="pf-bowl-tab active" data-target="bowl-ingredients-tab">Ingredients</button>
+            <button class="pf-bowl-tab" data-target="bowl-feeding-tab">Description</button>
+            <button class="pf-bowl-tab" data-target="bowl-delivery-tab">Product Information</button>
+          </div>
+
+          <div class="pf-tabs-content">
+            <!-- Ingredients Tab -->
+            <div class="pf-bowl-tab-content active" id="bowl-ingredients-tab">
+              {% if product.metafields.custom.key_ingredients_tab.value != blank %}
+                <div class="pf-bowl-key-ingredients">
+                  {% for ingredient in product.metafields.custom.key_ingredients_tab.value %}
+                    <div class="pf-bowl-ingredient">
+                      <h4>{{ ingredient.name }}</h4>
+                      <h2>{{ ingredient.percentage }}</h2>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <div class="pf-bowl-full-ingredients">
+                {{ product.metafields.custom.full_ingredients | metafield_tag }}
+              </div>
+            </div>
+
+            <!-- Feeding Guide Tab -->
+            <div class="pf-bowl-tab-content" id="bowl-feeding-tab">
+              <div class="pf-bowl-text-content">
+                {{ product.description }}
+              </div>
+            </div>
+
+            <!-- Delivery Tab -->
+            <div class="pf-bowl-tab-content" id="bowl-delivery-tab">
+              <div class="pf-bowl-text-content">
+                {{ product.metafields.custom.product_information | metafield_tag }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- Lightbox Modal -->
+  <div id="pf-gallery-lightbox" class="pf-lightbox" style="display: none;">
+    <span class="pf-lightbox-close">&times;</span>
+    <div class="pf-lightbox-content">
+      <img id="pf-lightbox-img" src="" alt="Gallery Image" width="1200" height="auto">
+    </div>
+    <a class="pf-lightbox-prev">&#10094;</a>
+    <a class="pf-lightbox-next">&#10095;</a>
+  </div>
 </div>
 
 <style>
-.pf-product-tabs-wrap {
+  .pf-product-tabs-wrap {
     width: 100%;
-}
-.pf-lightbox {
+  }
+  .pf-lightbox {
     display: none;
     position: fixed;
     z-index: 9999;
@@ -348,9 +423,9 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background-color: rgba(0,0,0,0.9);
-}
-.pf-lightbox-content {
+    background-color: rgba(0, 0, 0, 0.9);
+  }
+  .pf-lightbox-content {
     margin: auto;
     display: flex;
     justify-content: center;
@@ -358,14 +433,14 @@
     width: 80%;
     height: 100%;
     max-width: 900px;
-}
-.pf-lightbox-content img {
+  }
+  .pf-lightbox-content img {
     max-width: 100%;
     max-height: 90vh;
     object-fit: contain;
     border-radius: 8px;
-}
-.pf-lightbox-close {
+  }
+  .pf-lightbox-close {
     position: absolute;
     top: 15px;
     right: 35px;
@@ -374,8 +449,9 @@
     font-weight: bold;
     cursor: pointer;
     z-index: 10000;
-}
-.pf-lightbox-prev, .pf-lightbox-next {
+  }
+  .pf-lightbox-prev,
+  .pf-lightbox-next {
     cursor: pointer;
     position: absolute;
     top: 50%;
@@ -390,337 +466,336 @@
     user-select: none;
     -webkit-user-select: none;
     z-index: 10000;
-}
-.pf-lightbox-next {
+  }
+  .pf-lightbox-next {
     right: 0;
     border-radius: 3px 0 0 3px;
-}
-.pf-lightbox-prev {
+  }
+  .pf-lightbox-prev {
     left: 0;
-}
-.subscriptions_app_embed_block {
+  }
+  .subscriptions_app_embed_block {
     display: none !important;
-}
-.pf-main-image-container, .pf-thumb-item, .pf-view-more-btn {
+  }
+  .pf-main-image-container,
+  .pf-thumb-item,
+  .pf-view-more-btn {
     cursor: pointer;
-}
-.pf-custom-select-container {
+  }
+  .pf-custom-select-container {
     position: relative;
     width: 140px;
     flex-shrink: 0;
     user-select: none;
-}
-.pf-custom-select-trigger {
+  }
+  .pf-custom-select-trigger {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 14px 20px;
     border-radius: 16px;
-    border: 2px solid #21252A;
-    background: #FFF;
+    border: 2px solid #21252a;
+    background: #fff;
     cursor: pointer;
     font-family: var(--purrkins-heading-font);
     font-size: 18px;
     font-weight: 700;
-    color: #21252A;
-}
-.pf-custom-select-container.open .pf-custom-select-trigger {
+    color: #21252a;
+  }
+  .pf-custom-select-container.open .pf-custom-select-trigger {
     border-radius: 16px 16px 0 0;
     border-bottom-color: transparent;
-}
-.pf-custom-select-trigger svg {
+  }
+  .pf-custom-select-trigger svg {
     transition: transform 0.3s;
-}
-.pf-custom-select-container.open .pf-custom-select-trigger svg {
+  }
+  .pf-custom-select-container.open .pf-custom-select-trigger svg {
     transform: rotate(180deg);
-}
-.pf-custom-select-dropdown {
+  }
+  .pf-custom-select-dropdown {
     display: none;
     position: absolute;
     top: 100%;
     left: 0;
     width: 100%;
-    background: #FFF;
-    border: 2px solid #21252A;
+    background: #fff;
+    border: 2px solid #21252a;
     border-top: 1px solid #dcdcdc;
     border-radius: 0 0 16px 16px;
     z-index: 100;
     margin-top: -2px;
-}
-.pf-custom-select-container.open .pf-custom-select-dropdown {
+  }
+  .pf-custom-select-container.open .pf-custom-select-dropdown {
     display: block;
-}
-.pf-custom-select-option {
+  }
+  .pf-custom-select-option {
     padding: 14px 20px;
     font-family: var(--purrkins-heading-font);
     font-size: 16px;
     font-weight: 700;
-    color: #21252A;
+    color: #21252a;
     cursor: pointer;
     border-bottom: 1px solid #dcdcdc;
     margin: 0 12px;
     padding-left: 8px;
     padding-right: 8px;
-}
-.pf-custom-select-option:last-child {
+  }
+  .pf-custom-select-option:last-child {
     border-bottom: none;
-}
-.pf-custom-select-option:hover {
-    color: #717EEF;
-}
-
+  }
+  .pf-custom-select-option:hover {
+    color: #717eef;
+  }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Lightbox & Gallery Logic
-    const lightbox = document.getElementById('pf-gallery-lightbox');
-    const lightboxImg = document.getElementById('pf-lightbox-img');
-    const closeLightbox = document.querySelector('.pf-lightbox-close');
-    const prevBtn = document.querySelector('.pf-lightbox-prev');
-    const nextBtn = document.querySelector('.pf-lightbox-next');
-    
-    const galleryUrls = [
-        {% for media in product.media %}
-            "{{ media | image_url: width: 1200 }}"{% unless forloop.last %},{% endunless %}
-        {% endfor %}
-    ];
-    let currentImageIndex = 0;
+  document.addEventListener('DOMContentLoaded', function() {
+      // Lightbox & Gallery Logic
+      const lightbox = document.getElementById('pf-gallery-lightbox');
+      const lightboxImg = document.getElementById('pf-lightbox-img');
+      const closeLightbox = document.querySelector('.pf-lightbox-close');
+      const prevBtn = document.querySelector('.pf-lightbox-prev');
+      const nextBtn = document.querySelector('.pf-lightbox-next');
 
-    const updateLightboxImage = (index) => {
-        if (index >= 0 && index < galleryUrls.length) {
-            currentImageIndex = index;
-            if (lightboxImg) lightboxImg.src = galleryUrls[currentImageIndex];
-        }
-    };
+      const galleryUrls = [
+          {% for media in product.media %}
+              "{{ media | image_url: width: 1200 }}"{% unless forloop.last %},{% endunless %}
+          {% endfor %}
+      ];
+      let currentImageIndex = 0;
 
-    // Open lightbox from main images
-    document.querySelectorAll('.pf-main-image-container').forEach(container => {
-        container.addEventListener('click', function(e) {
-            if (e.target.closest('.pf-qv-fav')) return; // Ignore click on fav button
-            const index = parseInt(this.getAttribute('data-index')) || 0;
-            updateLightboxImage(index);
-            if (lightbox) lightbox.style.display = 'flex';
-        });
-    });
+      const updateLightboxImage = (index) => {
+          if (index >= 0 && index < galleryUrls.length) {
+              currentImageIndex = index;
+              if (lightboxImg) lightboxImg.src = galleryUrls[currentImageIndex];
+          }
+      };
 
-    // Thumbnails click: open lightbox AND update main image
-    document.querySelectorAll('.pf-thumb-item').forEach(thumb => {
-        thumb.addEventListener('click', function() {
-            const index = parseInt(this.getAttribute('data-index')) || 0;
-            updateLightboxImage(index);
-            
-            // Update the main image on the page
-            const mainPageImg = document.querySelector('.pf-desktop-gallery .pf-main-image-container img');
-            const mainPageContainer = document.querySelector('.pf-desktop-gallery .pf-main-image-container');
-            if(mainPageImg) mainPageImg.src = galleryUrls[currentImageIndex];
-            if(mainPageContainer) mainPageContainer.setAttribute('data-index', currentImageIndex);
-            
-            // Open lightbox
-            if (lightbox) lightbox.style.display = 'flex';
-        });
-    });
+      // Open lightbox from main images
+      document.querySelectorAll('.pf-main-image-container').forEach(container => {
+          container.addEventListener('click', function(e) {
+              if (e.target.closest('.pf-qv-fav')) return; // Ignore click on fav button
+              const index = parseInt(this.getAttribute('data-index')) || 0;
+              updateLightboxImage(index);
+              if (lightbox) lightbox.style.display = 'flex';
+          });
+      });
 
-    // View More button click: open lightbox
-    document.querySelectorAll('.pf-view-more-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            // Start at the 4th image (index 3) or 0
-            const startIndex = galleryUrls.length > 3 ? 3 : 0;
-            updateLightboxImage(startIndex);
-            if (lightbox) lightbox.style.display = 'flex';
-        });
-    });
+      // Thumbnails click: open lightbox AND update main image
+      document.querySelectorAll('.pf-thumb-item').forEach(thumb => {
+          thumb.addEventListener('click', function() {
+              const index = parseInt(this.getAttribute('data-index')) || 0;
+              updateLightboxImage(index);
 
-    if (closeLightbox && lightbox) {
-        closeLightbox.addEventListener('click', () => { lightbox.style.display = 'none'; });
-        lightbox.addEventListener('click', (e) => {
-            if (e.target === lightbox) lightbox.style.display = 'none';
-        });
-    }
+              // Update the main image on the page
+              const mainPageImg = document.querySelector('.pf-desktop-gallery .pf-main-image-container img');
+              const mainPageContainer = document.querySelector('.pf-desktop-gallery .pf-main-image-container');
+              if(mainPageImg) mainPageImg.src = galleryUrls[currentImageIndex];
+              if(mainPageContainer) mainPageContainer.setAttribute('data-index', currentImageIndex);
 
-    if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-            let newIndex = (currentImageIndex > 0) ? currentImageIndex - 1 : galleryUrls.length - 1;
-            updateLightboxImage(newIndex);
-        });
-    }
-    if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-            let newIndex = (currentImageIndex < galleryUrls.length - 1) ? currentImageIndex + 1 : 0;
-            updateLightboxImage(newIndex);
-        });
-    }
+              // Open lightbox
+              if (lightbox) lightbox.style.display = 'flex';
+          });
+      });
 
-    // Tabs Logic
-    const tabBtns = document.querySelectorAll('.pf-custom-tabs .pf-bowl-tab');
-    const tabPanes = document.querySelectorAll('.pf-custom-tabs .pf-bowl-tab-content');
+      // View More button click: open lightbox
+      document.querySelectorAll('.pf-view-more-btn').forEach(btn => {
+          btn.addEventListener('click', function(e) {
+              e.preventDefault();
+              // Start at the 4th image (index 3) or 0
+              const startIndex = galleryUrls.length > 3 ? 3 : 0;
+              updateLightboxImage(startIndex);
+              if (lightbox) lightbox.style.display = 'flex';
+          });
+      });
 
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            tabBtns.forEach(b => b.classList.remove('active'));
-            tabPanes.forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
-            const target = document.getElementById(btn.dataset.target);
-            if (target) target.classList.add('active');
-        });
-    });
-    
-    // Pricing Logic
-    document.addEventListener('change', function(e) {
-        const isRadio = e.target.name === 'purchase_type';
-        const isSelect = e.target.classList.contains('pf-qty-dropdown');
-        
-        if (isRadio || isSelect) {
-            const purchaseBox = e.target.closest('.pf-purchase-box');
-            if (!purchaseBox) return;
-            
-            const container = purchaseBox.querySelector('.pf-qv-addtocart');
-            if (!container) return;
-            
-            const qtyDropdown = container.querySelector('.pf-qty-dropdown');
-            const priceDisplay = container.querySelector('.pf-button-price-display');
-            
-            const regPrice = parseFloat(container.getAttribute('data-reg-price')) / 100 || 0;
-            const subPrice = parseFloat(container.getAttribute('data-sub-price')) / 100 || 0;
-            
-            const qty = qtyDropdown ? (parseInt(qtyDropdown.value) || 1) : 1;
-            const selectedRadio = purchaseBox.querySelector('input[name="purchase_type"]:checked');
-            const plan = selectedRadio ? selectedRadio.value : 'subscription';
-            
-            const basePrice = plan === 'subscription' ? subPrice : regPrice;
-            const total = basePrice * qty;
-            
-            if (priceDisplay) {
-                // Formatting for display with ₹ symbol and 2 decimal digits
-                priceDisplay.textContent = '₹' + total.toFixed(2);
-            }
-            
-            if (isRadio && selectedRadio) {
-                purchaseBox.querySelectorAll('.pf-purchase-option').forEach(el => el.classList.remove('active'));
-                selectedRadio.closest('.pf-purchase-option').classList.add('active');
-                
-                // Sync with subscription app widget manually when clicked
-                const appContainer = document.querySelector('.subscriptions_app_embed_block');
-                if (appContainer) {
-                    if (plan === 'subscription') {
-                        const subGroup = appContainer.querySelector('input[data-radio-type="selling_plan_group"]');
-                        if (subGroup && !subGroup.checked) subGroup.click();
-                        
-                        const subPlan = appContainer.querySelector('input[data-radio-type="selling_plan"]');
-                        if (subPlan && !subPlan.checked) subPlan.click();
-                    } else {
-                        const oneTime = appContainer.querySelector('input[data-radio-type="one_time_purchase"]');
-                        if (oneTime && !oneTime.checked) oneTime.click();
-                    }
-                }
-            }
-        }
-    });
+      if (closeLightbox && lightbox) {
+          closeLightbox.addEventListener('click', () => { lightbox.style.display = 'none'; });
+          lightbox.addEventListener('click', (e) => {
+              if (e.target === lightbox) lightbox.style.display = 'none';
+          });
+      }
 
-    // Swiper Init
-    if (typeof Swiper !== 'undefined') {
-        new Swiper('.pf-mobile-product-slider', {
-            slidesPerView: 1,
-            spaceBetween: 16,
-            observer: true,
-            observeParents: true,
-            pagination: {
-                el: '.pf-product-pagination',
-                clickable: true,
-            },
-        });
-    }
+      if (prevBtn) {
+          prevBtn.addEventListener('click', () => {
+              let newIndex = (currentImageIndex > 0) ? currentImageIndex - 1 : galleryUrls.length - 1;
+              updateLightboxImage(newIndex);
+          });
+      }
+      if (nextBtn) {
+          nextBtn.addEventListener('click', () => {
+              let newIndex = (currentImageIndex < galleryUrls.length - 1) ? currentImageIndex + 1 : 0;
+              updateLightboxImage(newIndex);
+          });
+      }
 
-    // Sync UI to subscription app when app loads
-    const syncSubscriptionWidget = () => {
-        const appContainer = document.querySelector('.subscriptions_app_embed_block');
-        if (!appContainer || !appContainer.innerHTML.trim()) return;
-        
-        const selectedRadio = document.querySelector('input[name="purchase_type"]:checked');
-        const plan = selectedRadio ? selectedRadio.value : 'subscription';
-        
-        if (plan === 'subscription') {
-            const subGroup = appContainer.querySelector('input[data-radio-type="selling_plan_group"]');
-            if (subGroup && !subGroup.checked) subGroup.click();
-            
-            const subPlan = appContainer.querySelector('input[data-radio-type="selling_plan"]');
-            if (subPlan && !subPlan.checked) subPlan.click();
-        } else {
-            const oneTime = appContainer.querySelector('input[data-radio-type="one_time_purchase"]');
-            if (oneTime && !oneTime.checked) oneTime.click();
-        }
-    };
-    
-    const subContainer = document.querySelector('.subscriptions_app_embed_block');
-    if (subContainer) {
-        const observer = new MutationObserver(syncSubscriptionWidget);
-        observer.observe(subContainer, { childList: true, subtree: true });
-    }
+      // Tabs Logic
+      const tabBtns = document.querySelectorAll('.pf-custom-tabs .pf-bowl-tab');
+      const tabPanes = document.querySelectorAll('.pf-custom-tabs .pf-bowl-tab-content');
 
-    // Custom Select Logic
-    const customSelect = document.getElementById('pf-qty-custom-select');
-    if (customSelect) {
-        const trigger = customSelect.querySelector('.pf-custom-select-trigger');
-        const label = customSelect.querySelector('.pf-custom-select-label');
-        const options = customSelect.querySelectorAll('.pf-custom-select-option');
-        const nativeSelect = document.querySelector('.pf-qty-dropdown');
+      tabBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+              tabBtns.forEach(b => b.classList.remove('active'));
+              tabPanes.forEach(p => p.classList.remove('active'));
+              btn.classList.add('active');
+              const target = document.getElementById(btn.dataset.target);
+              if (target) target.classList.add('active');
+          });
+      });
 
-        trigger.addEventListener('click', (e) => {
-            e.stopPropagation();
-            customSelect.classList.toggle('open');
-        });
+      // Pricing Logic
+      document.addEventListener('change', function(e) {
+          const isRadio = e.target.name === 'purchase_type';
+          const isSelect = e.target.classList.contains('pf-qty-dropdown');
 
-        options.forEach(option => {
-            option.addEventListener('click', () => {
-                const value = option.getAttribute('data-value');
-                const text = option.innerText;
-                
-                label.innerText = text;
-                nativeSelect.value = value;
-                
-                customSelect.classList.remove('open');
-                
-                // Trigger change event on native select so price updates
-                nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
-            });
-        });
+          if (isRadio || isSelect) {
+              const purchaseBox = e.target.closest('.pf-purchase-box');
+              if (!purchaseBox) return;
 
-        document.addEventListener('click', (e) => {
-            if (!customSelect.contains(e.target)) {
-                customSelect.classList.remove('open');
-            }
-        });
-    }
+              const container = purchaseBox.querySelector('.pf-qv-addtocart');
+              if (!container) return;
 
-    // Add to cart AJAX Intercept
-    const productForm = document.querySelector('.pf-purchase-options form');
-    if (productForm) {
-        productForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            
-            const btn = productForm.querySelector('.pf-add-to-cart-btn');
+              const qtyDropdown = container.querySelector('.pf-qty-dropdown');
+              const priceDisplay = container.querySelector('.pf-button-price-display');
 
-            const formData = new FormData(productForm);
-            
-            if (window.purrkinsAddToCart) {
-                window.purrkinsAddToCart(null, btn, formData);
-            } else {
-                console.error('purrkinsAddToCart is not defined');
-            }
-        });
-    }
-});
+              const regPrice = parseFloat(container.getAttribute('data-reg-price')) / 100 || 0;
+              const subPrice = parseFloat(container.getAttribute('data-sub-price')) / 100 || 0;
+
+              const qty = qtyDropdown ? (parseInt(qtyDropdown.value) || 1) : 1;
+              const selectedRadio = purchaseBox.querySelector('input[name="purchase_type"]:checked');
+              const plan = selectedRadio ? selectedRadio.value : 'subscription';
+
+              const basePrice = plan === 'subscription' ? subPrice : regPrice;
+              const total = basePrice * qty;
+
+              if (priceDisplay) {
+                  // Formatting for display with ₹ symbol and 2 decimal digits
+                  priceDisplay.textContent = '₹' + total.toFixed(2);
+              }
+
+              if (isRadio && selectedRadio) {
+                  purchaseBox.querySelectorAll('.pf-purchase-option').forEach(el => el.classList.remove('active'));
+                  selectedRadio.closest('.pf-purchase-option').classList.add('active');
+
+                  // Sync with subscription app widget manually when clicked
+                  const appContainer = document.querySelector('.subscriptions_app_embed_block');
+                  if (appContainer) {
+                      if (plan === 'subscription') {
+                          const subGroup = appContainer.querySelector('input[data-radio-type="selling_plan_group"]');
+                          if (subGroup && !subGroup.checked) subGroup.click();
+
+                          const subPlan = appContainer.querySelector('input[data-radio-type="selling_plan"]');
+                          if (subPlan && !subPlan.checked) subPlan.click();
+                      } else {
+                          const oneTime = appContainer.querySelector('input[data-radio-type="one_time_purchase"]');
+                          if (oneTime && !oneTime.checked) oneTime.click();
+                      }
+                  }
+              }
+          }
+      });
+
+      // Swiper Init
+      if (typeof Swiper !== 'undefined') {
+          new Swiper('.pf-mobile-product-slider', {
+              slidesPerView: 1,
+              spaceBetween: 16,
+              observer: true,
+              observeParents: true,
+              pagination: {
+                  el: '.pf-product-pagination',
+                  clickable: true,
+              },
+          });
+      }
+
+      // Sync UI to subscription app when app loads
+      const syncSubscriptionWidget = () => {
+          const appContainer = document.querySelector('.subscriptions_app_embed_block');
+          if (!appContainer || !appContainer.innerHTML.trim()) return;
+
+          const selectedRadio = document.querySelector('input[name="purchase_type"]:checked');
+          const plan = selectedRadio ? selectedRadio.value : 'subscription';
+
+          if (plan === 'subscription') {
+              const subGroup = appContainer.querySelector('input[data-radio-type="selling_plan_group"]');
+              if (subGroup && !subGroup.checked) subGroup.click();
+
+              const subPlan = appContainer.querySelector('input[data-radio-type="selling_plan"]');
+              if (subPlan && !subPlan.checked) subPlan.click();
+          } else {
+              const oneTime = appContainer.querySelector('input[data-radio-type="one_time_purchase"]');
+              if (oneTime && !oneTime.checked) oneTime.click();
+          }
+      };
+
+      const subContainer = document.querySelector('.subscriptions_app_embed_block');
+      if (subContainer) {
+          const observer = new MutationObserver(syncSubscriptionWidget);
+          observer.observe(subContainer, { childList: true, subtree: true });
+      }
+
+      // Custom Select Logic
+      const customSelect = document.getElementById('pf-qty-custom-select');
+      if (customSelect) {
+          const trigger = customSelect.querySelector('.pf-custom-select-trigger');
+          const label = customSelect.querySelector('.pf-custom-select-label');
+          const options = customSelect.querySelectorAll('.pf-custom-select-option');
+          const nativeSelect = document.querySelector('.pf-qty-dropdown');
+
+          trigger.addEventListener('click', (e) => {
+              e.stopPropagation();
+              customSelect.classList.toggle('open');
+          });
+
+          options.forEach(option => {
+              option.addEventListener('click', () => {
+                  const value = option.getAttribute('data-value');
+                  const text = option.innerText;
+
+                  label.innerText = text;
+                  nativeSelect.value = value;
+
+                  customSelect.classList.remove('open');
+
+                  // Trigger change event on native select so price updates
+                  nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+              });
+          });
+
+          document.addEventListener('click', (e) => {
+              if (!customSelect.contains(e.target)) {
+                  customSelect.classList.remove('open');
+              }
+          });
+      }
+
+      // Add to cart AJAX Intercept
+      const productForm = document.querySelector('.pf-purchase-options form');
+      if (productForm) {
+          productForm.addEventListener('submit', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              e.stopImmediatePropagation();
+
+              const btn = productForm.querySelector('.pf-add-to-cart-btn');
+
+              const formData = new FormData(productForm);
+
+              if (window.purrkinsAddToCart) {
+                  window.purrkinsAddToCart(null, btn, formData);
+              } else {
+                  console.error('purrkinsAddToCart is not defined');
+              }
+          });
+      }
+  });
 </script>
 
 {% schema %}
 {
   "name": "Purrkins Main Product",
-  "settings": [
-    
-  ],
+  "settings": [],
   "presets": [
     {
       "name": "Purrkins Main Product"
