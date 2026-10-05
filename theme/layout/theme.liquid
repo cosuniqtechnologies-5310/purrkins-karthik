@@ -87,11 +87,19 @@
             }
           });
 
+          const fallback_plan = formData.get('data-first-plan');
+
           if (existingRow) {
             if (existingRow.dataset.subscriptionType === 'subscribe' && existingRow.dataset.firstSellingPlanId) {
               selling_plan = existingRow.dataset.firstSellingPlanId;
             } else {
               selling_plan = null;
+            }
+          } else if (!selling_plan && fallback_plan) {
+            // New product: check if the cart is in subscribe mode
+            const activeTab = document.querySelector('.cart-drawer-tab.active');
+            if (activeTab && activeTab.dataset.tab === 'subscribe') {
+              selling_plan = fallback_plan;
             }
           }
 
