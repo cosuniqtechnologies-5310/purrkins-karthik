@@ -417,6 +417,67 @@
     {% endif %}
 
     <script src="{{ 'purrkins-wishlist.js' | asset_url }}" defer="defer"></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var pkInfo = localStorage.getItem('pk_checkout_info');
+        if (pkInfo) {
+          try {
+            var info = JSON.parse(pkInfo);
+            if (info.email) {
+              document.addEventListener('click', function (e) {
+                var target = e.target.closest('button[name="checkout"], [href^="/checkout"]');
+                if (target) {
+                  var form = target.closest('form[action^="/cart"]');
+                  if (form) {
+                    var inputs = [
+                      { name: 'checkout[email]', value: info.email },
+                      { name: 'checkout[shipping_address][first_name]', value: info.firstName },
+                      { name: 'checkout[shipping_address][last_name]', value: info.lastName },
+                      { name: 'checkout[shipping_address][phone]', value: info.phone },
+                      { name: 'checkout[shipping_address][address1]', value: info.address1 },
+                      { name: 'checkout[shipping_address][address2]', value: info.address2 },
+                      { name: 'checkout[shipping_address][city]', value: info.city },
+                      { name: 'checkout[shipping_address][province]', value: info.province },
+                      { name: 'checkout[shipping_address][zip]', value: info.zip },
+                      { name: 'checkout[shipping_address][country]', value: info.country },
+                    ];
+                    inputs.forEach(function (i) {
+                      if (i.value) {
+                        var el = form.querySelector('input[name="' + i.name + '"]');
+                        if (!el) {
+                          el = document.createElement('input');
+                          el.type = 'hidden';
+                          el.name = i.name;
+                          form.appendChild(el);
+                        }
+                        el.value = i.value;
+                      }
+                    });
+                  } else if (target.tagName === 'A') {
+                    // For direct links to checkout
+                    e.preventDefault();
+                    var url = new URL(target.href, window.location.origin);
+                    url.searchParams.set('checkout[email]', info.email);
+                    if (info.firstName) url.searchParams.set('checkout[shipping_address][first_name]', info.firstName);
+                    if (info.lastName) url.searchParams.set('checkout[shipping_address][last_name]', info.lastName);
+                    if (info.phone) url.searchParams.set('checkout[shipping_address][phone]', info.phone);
+                    if (info.address1) url.searchParams.set('checkout[shipping_address][address1]', info.address1);
+                    if (info.address2) url.searchParams.set('checkout[shipping_address][address2]', info.address2);
+                    if (info.city) url.searchParams.set('checkout[shipping_address][city]', info.city);
+                    if (info.province) url.searchParams.set('checkout[shipping_address][province]', info.province);
+                    if (info.zip) url.searchParams.set('checkout[shipping_address][zip]', info.zip);
+                    url.searchParams.set('checkout[shipping_address][country]', info.country || 'India');
+                    window.location.href = url.toString();
+                  }
+                }
+              });
+            }
+          } catch (e) {}
+        }
+      });
+    </script>
+
     {% section 'byob-quiz-popup' %}
   </body>
 </html>
