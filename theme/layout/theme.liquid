@@ -425,39 +425,63 @@
           try {
             var info = JSON.parse(pkInfo);
             if (info.email) {
-              document.addEventListener('click', function (e) {
-                var target = e.target.closest('button[name="checkout"], [href^="/checkout"]');
-                if (target) {
-                  var form = target.closest('form[action^="/cart"]');
-                  if (form) {
-                    var inputs = [
-                      { name: 'checkout[email]', value: info.email },
-                      { name: 'checkout[shipping_address][first_name]', value: info.firstName },
-                      { name: 'checkout[shipping_address][last_name]', value: info.lastName },
-                      { name: 'checkout[shipping_address][phone]', value: info.phone },
-                      { name: 'checkout[shipping_address][address1]', value: info.address1 },
-                      { name: 'checkout[shipping_address][address2]', value: info.address2 },
-                      { name: 'checkout[shipping_address][city]', value: info.city },
-                      { name: 'checkout[shipping_address][province]', value: info.province },
-                      { name: 'checkout[shipping_address][zip]', value: info.zip },
-                      { name: 'checkout[shipping_address][country]', value: info.country },
-                    ];
-                    inputs.forEach(function (i) {
-                      if (i.value) {
-                        var el = form.querySelector('input[name="' + i.name + '"]');
-                        if (!el) {
-                          el = document.createElement('input');
-                          el.type = 'hidden';
-                          el.name = i.name;
-                          form.appendChild(el);
-                        }
-                        el.value = i.value;
+              function injectCheckoutData() {
+                var inputs = [
+                  { name: 'checkout[email]', value: info.email },
+                  { name: 'checkout[shipping_address][first_name]', value: info.firstName },
+                  { name: 'checkout[shipping_address][last_name]', value: info.lastName },
+                  { name: 'checkout[shipping_address][phone]', value: info.phone },
+                  { name: 'checkout[shipping_address][address1]', value: info.address1 },
+                  { name: 'checkout[shipping_address][address2]', value: info.address2 },
+                  { name: 'checkout[shipping_address][city]', value: info.city },
+                  { name: 'checkout[shipping_address][province]', value: info.province },
+                  { name: 'checkout[shipping_address][zip]', value: info.zip },
+                  { name: 'checkout[shipping_address][country]', value: info.country || 'India' },
+                ];
+
+                document.querySelectorAll('form[action*="/cart"], form[id="cart"]').forEach(function (form) {
+                  inputs.forEach(function (i) {
+                    if (i.value) {
+                      var el = form.querySelector('input[name="' + i.name + '"]');
+                      if (!el) {
+                        el = document.createElement('input');
+                        el.type = 'hidden';
+                        el.name = i.name;
+                        form.appendChild(el);
                       }
-                    });
-                  } else if (target.tagName === 'A') {
-                    // For direct links to checkout
+                      el.value = i.value;
+                    }
+                  });
+                });
+              }
+
+              injectCheckoutData();
+              setInterval(injectCheckoutData, 500);
+
+              document.addEventListener(
+                'click',
+                function (e) {
+                  var targetLink = e.target.closest('a[href*="/checkout"]');
+                  var targetBtn = e.target.closest('button[name="checkout"]');
+
+                  if (targetLink || targetBtn) {
+                    // Ensure it's not a third party pay button like Shop Pay that needs its own flow
+                    if (targetBtn && targetBtn.closest('.additional-checkout-buttons')) return;
+
                     e.preventDefault();
-                    var url = new URL(target.href, window.location.origin);
+                    e.stopImmediatePropagation();
+
+                    var baseUrl = window.location.origin + '/checkout';
+                    if (targetLink && targetLink.href) {
+                      baseUrl = targetLink.href;
+                    } else if (targetBtn) {
+                      var form = targetBtn.closest('form');
+                      if (form && form.action) {
+                        baseUrl = form.action.replace(/\/cart$/i, '/checkout').replace(/\/cart\?/i, '/checkout?');
+                      }
+                    }
+
+                    var url = new URL(baseUrl, window.location.origin);
                     url.searchParams.set('checkout[email]', info.email);
                     if (info.firstName) url.searchParams.set('checkout[shipping_address][first_name]', info.firstName);
                     if (info.lastName) url.searchParams.set('checkout[shipping_address][last_name]', info.lastName);
@@ -468,10 +492,12 @@
                     if (info.province) url.searchParams.set('checkout[shipping_address][province]', info.province);
                     if (info.zip) url.searchParams.set('checkout[shipping_address][zip]', info.zip);
                     url.searchParams.set('checkout[shipping_address][country]', info.country || 'India');
+
                     window.location.href = url.toString();
                   }
-                }
-              });
+                },
+                true
+              );
             }
           } catch (e) {}
         }
