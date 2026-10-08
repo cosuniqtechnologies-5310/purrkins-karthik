@@ -6,7 +6,7 @@
   style="display: flex; align-items: center; gap: 8px; margin: 4px 0; cursor: pointer;"
   onclick="document.getElementById('purrkins-reviews-widget') && document.getElementById('purrkins-reviews-widget').scrollIntoView({behavior: 'smooth'})"
 >
-  <div style="display: flex; align-items: center;">
+  <div style="display: flex; align-items: center;" id="pc-preview-stars">
     {% for i in (1..5) %}
       {% if i <= rating %}
         <svg
@@ -37,7 +37,7 @@
       {% endif %}
     {% endfor %}
   </div>
-  <div style="font-size: 14px; font-weight: 500; color: #595961;">
+  <div style="font-size: 14px; font-weight: 500; color: #595961;" id="pc-preview-text">
     {{ count }} Review{% if count != 1 %}s{% endif %}
   </div>
 </div>

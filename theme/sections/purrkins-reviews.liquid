@@ -212,8 +212,9 @@
   .pc-reviewer-name-row {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     margin-bottom: 8px;
+    flex-wrap: wrap;
   }
   .pc-reviewer-name {
     font-size: 15px;
@@ -221,11 +222,12 @@
     color: #000;
   }
   .pc-verified-text {
-    font-size: 12px;
+    font-size: 13px;
     color: #595961;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 4px;
+    font-weight: 600;
   }
   .pc-review-date {
     font-size: 13px;
@@ -573,8 +575,12 @@
                   ${
                     r.isVerified
                       ? `
-                  <span class="pc-verified-text">| Verified Buyer 
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#000"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  <span class="pc-verified-text" title="Verified Buyer">
+                    <span style="color: #c4c4ca; margin: 0 2px;">|</span>
+                    <svg width="15" height="15" viewBox="0 0 20 20" fill="#108043" style="display:inline-block; vertical-align:middle; flex-shrink:0;">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <span style="color: #21252a;">Verified Buyer</span>
                   </span>`
                       : ''
                   }
