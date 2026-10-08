@@ -159,6 +159,10 @@
             qvContainer.innerHTML = newContent.innerHTML;
             qvContainer.setAttribute('data-current-product', productId);
 
+            if (typeof window['purrkinsUpdateWishlistButtons'] === 'function') {
+              window['purrkinsUpdateWishlistButtons'](qvContainer);
+            }
+
             // Set height to scroll height for smooth animation
             setTimeout(() => {
               qvContainer.style.maxHeight = qvContainer.scrollHeight + 100 + 'px';

@@ -39,7 +39,7 @@
             {% endif %}
             <button class="pf-qv-fav {% if in_wishlist %}is-saved{% endif %}" data-product-id="{{ product.id }}">
               <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
-                <path d="M15.1606 25.0003C14.7521 25.1445 14.0794 25.1445 13.6709 25.0003C10.187 23.811 2.40234 18.8495 2.40234 10.4401C2.40234 6.72796 5.39368 3.72461 9.08179 3.72461C11.2682 3.72461 13.2024 4.78179 14.4157 6.41561C15.6291 4.78179 17.5753 3.72461 19.7497 3.72461C23.4378 3.72461 26.4291 6.72796 26.4291 10.4401C26.4291 18.8495 18.6444 23.811 15.1606 25.0003Z" stroke="#21252A" stroke-width="1.80201" stroke-linecap="round" stroke-linejoin="round" {% if in_wishlist %}fill="#21252A"{% endif %}/>
+                <path d="M15.1606 25.0003C14.7521 25.1445 14.0794 25.1445 13.6709 25.0003C10.187 23.811 2.40234 18.8495 2.40234 10.4401C2.40234 6.72796 5.39368 3.72461 9.08179 3.72461C11.2682 3.72461 13.2024 4.78179 14.4157 6.41561C15.6291 4.78179 17.5753 3.72461 19.7497 3.72461C23.4378 3.72461 26.4291 6.72796 26.4291 10.4401C26.4291 18.8495 18.6444 23.811 15.1606 25.0003Z" stroke="{% if in_wishlist %}#FFE330{% else %}#21252A{% endif %}" stroke-width="1.80201" stroke-linecap="round" stroke-linejoin="round" {% if in_wishlist %}fill="#FFE330"{% endif %}/>
               </svg>
             </button>
             {% if main_image %}
@@ -85,7 +85,7 @@
           {% endif %}
           <button class="pf-qv-fav {% if in_wishlist %}is-saved{% endif %}" data-product-id="{{ product.id }}">
             <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
-              <path d="M15.1606 25.0003C14.7521 25.1445 14.0794 25.1445 13.6709 25.0003C10.187 23.811 2.40234 18.8495 2.40234 10.4401C2.40234 6.72796 5.39368 3.72461 9.08179 3.72461C11.2682 3.72461 13.2024 4.78179 14.4157 6.41561C15.6291 4.78179 17.5753 3.72461 19.7497 3.72461C23.4378 3.72461 26.4291 6.72796 26.4291 10.4401C26.4291 18.8495 18.6444 23.811 15.1606 25.0003Z" stroke="#21252A" stroke-width="1.80201" stroke-linecap="round" stroke-linejoin="round" {% if in_wishlist %}fill="#21252A"{% endif %}/>
+              <path d="M15.1606 25.0003C14.7521 25.1445 14.0794 25.1445 13.6709 25.0003C10.187 23.811 2.40234 18.8495 2.40234 10.4401C2.40234 6.72796 5.39368 3.72461 9.08179 3.72461C11.2682 3.72461 13.2024 4.78179 14.4157 6.41561C15.6291 4.78179 17.5753 3.72461 19.7497 3.72461C23.4378 3.72461 26.4291 6.72796 26.4291 10.4401C26.4291 18.8495 18.6444 23.811 15.1606 25.0003Z" stroke="{% if in_wishlist %}#FFE330{% else %}#21252A{% endif %}" stroke-width="1.80201" stroke-linecap="round" stroke-linejoin="round" {% if in_wishlist %}fill="#FFE330"{% endif %}/>
             </svg>
           </button>
           <div class="swiper-wrapper">
@@ -558,6 +558,10 @@
   }
   .pf-qty-input:focus {
     outline: none;
+  }
+  button.pf-qv-fav.is-saved svg path {
+    fill: #ffe330 !important;
+    stroke: #ffe330 !important;
   }
 </style>
 

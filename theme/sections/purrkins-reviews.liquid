@@ -64,16 +64,19 @@
 
     <form id="pc-review-form" class="pc-modal-form">
       <input type="hidden" name="productId" value="{{ product.id }}">
+      {% if customer %}
+        <input type="hidden" name="customerId" value="{{ customer.id }}">
+      {% endif %}
       <input type="hidden" name="rating" id="pc-form-rating" value="5">
 
       <div class="pc-form-group">
         <label>Your Name *</label>
-        <input type="text" name="author" placeholder="Full Name" required>
+        <input type="text" name="author" {% if customer %}value="{{ customer.name }}"{% endif %} placeholder="Full Name" required>
       </div>
 
       <div class="pc-form-group">
         <label>Your Email *</label>
-        <input type="email" name="email" placeholder="youdname@example.com" required>
+        <input type="email" name="email" {% if customer %}value="{{ customer.email }}"{% endif %} placeholder="youdname@example.com" required>
       </div>
 
       <div class="pc-form-group">
@@ -508,7 +511,8 @@
 
     // Fetch and render reviews
     function fetchReviews() {
-      fetch(appProxyUrl)
+      const fetchUrl = productId ? `${appProxyUrl}?productId=${encodeURIComponent(productId)}` : appProxyUrl;
+      fetch(fetchUrl)
         .then((res) => res.json())
         .then((data) => {
           if (data.error) throw new Error(data.error);

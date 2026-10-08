@@ -1364,6 +1364,11 @@ button.pf-qv-fav {
   aspect-ratio: 1 / 1;
 }
 
+button.pf-qv-fav.is-saved svg path {
+  fill: #FFE330 !important;
+  stroke: #FFE330 !important;
+}
+
 .pf-qv-thumbnails {
   display: flex;
   flex-direction: column;

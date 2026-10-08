@@ -243,7 +243,7 @@
             <div class="pc-review-item">
               <div class="pc-reviewer-info">
                 <div class="pc-reviewer-name">${review.author || 'Anonymous'}</div>
-                <div class="pc-reviewer-badge">Verified Buyer</div>
+                ${review.isVerified ? '<div class="pc-reviewer-badge">Verified Buyer</div>' : ''}
               </div>
               <div class="pc-review-content">
                 <div class="pc-review-stars">${generateStars(review.rating)}</div>

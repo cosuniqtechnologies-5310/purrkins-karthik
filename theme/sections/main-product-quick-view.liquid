@@ -3,6 +3,14 @@
 {% assign cat_bg_color = collection_to_use.metafields.custom.card_bg_color | default: '#f9f9f9' %}
 {% assign badge_text = collection_to_use.title | default: 'Product' %}
 {% assign life_stage = product.metafields.custom.suitable_for_age | default: '3-week+' %}
+{% assign in_wishlist = false %}
+{% if customer and customer.metafields.custom.wishlist %}
+  {% for w_product in customer.metafields.custom.wishlist.value %}
+    {% if w_product.id == product.id %}
+      {% assign in_wishlist = true %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
 
 <div class="pf-qv-inner" id="QuickView-{{ product.id }}">
   <!-- Left: Gallery -->
@@ -58,9 +66,9 @@
         {% endif %}
 
         <!-- Favourite Icon -->
-        <button class="pf-qv-fav" data-product-id="{{ product.id }}">
+        <button class="pf-qv-fav {% if in_wishlist %}is-saved{% endif %}" data-product-id="{{ product.id }}">
           <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
-            <path d="M15.1609 25.0003C14.7524 25.1445 14.0797 25.1445 13.6712 25.0003C10.1874 23.811 2.40268 18.8495 2.40268 10.4401C2.40268 6.72796 5.39401 3.72461 9.08212 3.72461C11.2686 3.72461 13.2027 4.78179 14.4161 6.41561C15.6294 4.78179 17.5756 3.72461 19.75 3.72461C23.4381 3.72461 26.4295 6.72796 26.4295 10.4401C26.4295 18.8495 18.6448 23.811 15.1609 25.0003Z" stroke="#21252A" stroke-width="1.80201" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M15.1609 25.0003C14.7524 25.1445 14.0797 25.1445 13.6712 25.0003C10.1874 23.811 2.40268 18.8495 2.40268 10.4401C2.40268 6.72796 5.39401 3.72461 9.08212 3.72461C11.2686 3.72461 13.2027 4.78179 14.4161 6.41561C15.6294 4.78179 17.5756 3.72461 19.75 3.72461C23.4381 3.72461 26.4295 6.72796 26.4295 10.4401C26.4295 18.8495 18.6448 23.811 15.1609 25.0003Z" stroke="{% if in_wishlist %}#FFE330{% else %}#21252A{% endif %}" stroke-width="1.80201" stroke-linecap="round" stroke-linejoin="round" {% if in_wishlist %}fill="#FFE330"{% endif %}/>
           </svg>
         </button>
 
@@ -431,6 +439,10 @@
     align-items: center;
     gap: 9.611px;
     aspect-ratio: 1 / 1;
+  }
+  button.pf-qv-fav.is-saved svg path {
+    fill: #FFE330 !important;
+    stroke: #FFE330 !important;
   }
   .pf-qv-info .pf-qv-addtocart {
     display: flex;
