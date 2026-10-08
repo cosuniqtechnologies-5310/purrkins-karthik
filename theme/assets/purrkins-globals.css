@@ -224,3 +224,9 @@ main[data-template="collection"] .comp-table-inner {
     display: none;
   }
 }
+
+#header-group {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 999999 !important;
+}
