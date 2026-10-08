@@ -177,13 +177,28 @@
       {% form 'product', product %}
         <input type="hidden" name="id" value="{{ product.variants.first.id }}">
         <div class="pf-qv-addtocart">
-          <select name="quantity" class="pf-qv-packs-select">
-            <option value="1">1 Pack</option>
-            <option value="2">2 Packs</option>
-            <option value="3">3 Packs</option>
-            <option value="4">4 Packs</option>
-            <option value="5">5 Packs</option>
-          </select>
+          <div class="pf-qty-selector">
+            <button type="button" class="pf-qty-btn pf-qty-minus" aria-label="Decrease quantity">
+              <svg width="12" height="2" viewBox="0 0 12 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1H11" stroke="#21252A" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <input
+              type="number"
+              class="pf-qty-input"
+              name="quantity"
+              value="1"
+              min="1"
+              step="1"
+              readonly
+            >
+            <button type="button" class="pf-qty-btn pf-qty-plus" aria-label="Increase quantity">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 6H11" stroke="#21252A" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M6 1V11" stroke="#21252A" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
           <button
             type="submit"
             class="btn-add-to-cart pf-add-to-cart-btn"
@@ -419,31 +434,65 @@
   }
   .pf-qv-info .pf-qv-addtocart {
     display: flex;
-    gap: 40px;
+    align-items: center;
+    gap: 24px;
   }
-  .pf-qv-info .pf-qv-addtocart select {
-    border-radius: var(--radius-pill, 999px);
-    border: 2px solid var(--brand-slate-900, #21252a);
-    display: flex;
+  .pf-qty-selector {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
     width: 140px;
     height: 52px;
-    padding: 0 32px 0 16px;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
+    box-sizing: border-box;
+    background: #fff;
+    border: 2px solid var(--brand-slate-900, #21252a);
+    border-radius: var(--radius-pill, 999px);
+    padding: 0 16px;
     flex-shrink: 0;
-    color: var(--color-text-primary, #121217);
+  }
+  .pf-qty-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .pf-qty-btn:hover {
+    background-color: rgba(33, 37, 42, 0.08);
+  }
+  .pf-qty-btn:active {
+    transform: scale(0.9);
+  }
+  .pf-qty-input {
+    width: 44px;
     text-align: center;
+    border: none;
+    background: transparent;
     font-family: var(--purrkins-heading-font);
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
-    line-height: 20px;
+    color: var(--color-text-primary, #21252a);
+    -moz-appearance: textfield;
+    appearance: textfield;
+    padding: 0;
+    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .pf-qty-input::-webkit-outer-spin-button,
+  .pf-qty-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
-    appearance: none;
-    background-color: transparent;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="11" height="6" viewBox="0 0 11 6" fill="none"><path d="M0.750015 0.75L5.25002 4.75L9.75002 0.75" stroke="%2321252A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 16px center;
+    margin: 0;
+  }
+  .pf-qty-input:focus {
     outline: none;
   }
   .pf-qv-info .pf-qv-addtocart .btn-add-to-cart {
@@ -723,14 +772,15 @@
       gap: 16px;
       flex-direction: column;
       width: 100%;
+      align-items: center;
+    }
+    .pf-qv-info .pf-qv-addtocart .pf-qty-selector {
+      width: 140px;
     }
     .pf-qv-info .pf-qv-addtocart .btn-add-to-cart {
       width: 100%;
       max-width: 100%;
       font-size: 18px;
-    }
-    .pf-qv-info .pf-qv-addtocart select {
-      width: 100%;
     }
     .pf-qv-benefits {
       gap: 16px;

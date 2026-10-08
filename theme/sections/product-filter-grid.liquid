@@ -260,6 +260,30 @@
       });
 
       qvContainer.addEventListener('click', function (e) {
+        // Handle Quantity selector (- / +) clicks
+        const minusBtn = e.target.closest('.pf-qty-minus');
+        const plusBtn = e.target.closest('.pf-qty-plus');
+        if (minusBtn || plusBtn) {
+          e.preventDefault();
+          const selector = (minusBtn || plusBtn).closest('.pf-qty-selector');
+          if (selector) {
+            const input = selector.querySelector('.pf-qty-input');
+            if (input) {
+              let qty = parseInt(input.value, 10) || 1;
+              if (minusBtn) {
+                if (qty > 1) {
+                  qty -= 1;
+                }
+              } else if (plusBtn) {
+                qty += 1;
+              }
+              input.value = qty;
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          }
+          return;
+        }
+
         // Handle "What's in the bowl" click
         const btnBowl = e.target.closest('.pf-btn-bowl');
         if (btnBowl) {
