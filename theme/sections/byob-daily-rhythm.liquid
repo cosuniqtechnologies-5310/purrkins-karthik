@@ -35,12 +35,6 @@
                 <h4 class="byob-rhythm-block-heading">{{ block.settings.heading }}</h4>
                 <p class="byob-rhythm-block-paragraph">{{ block.settings.text }}</p>
               </div>
-              <div class="byob-rhythm-block-toggle">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M1 8H15" stroke="#1F2937" stroke-width="2" stroke-linecap="round"/>
-                  <path class="vertical-line" d="M8 1V15" stroke="#1F2937" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-              </div>
             </div>
           {% endfor %}
         </div>
@@ -133,15 +127,7 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    var toggles = document.querySelectorAll('.byob-rhythm-block-toggle');
-    toggles.forEach(function (toggle) {
-      toggle.addEventListener('click', function () {
-        var block = this.closest('.byob-rhythm-block');
-        if (block) {
-          block.classList.toggle('collapsed');
-        }
-      });
-    });
+
 
     const quizBtns = document.querySelectorAll('.byob-trigger-quiz');
     const quizSection = document.getElementById('byob-quiz-section');
@@ -402,41 +388,6 @@
     font-size: 18px;
     font-weight: 400;
     line-height: 1.4;
-    transition: all 0.3s ease;
-    overflow: hidden;
-    max-height: 300px;
-  }
-  .byob-rhythm-block-toggle {
-    border-radius: 9.116px;
-    border: 0.912px solid var(--brand-slate-900, #21252a);
-    display: flex;
-    width: 45px;
-    height: 45px;
-    padding: 11.85px;
-    justify-content: center;
-    align-items: center;
-    gap: 9.116px;
-    flex-shrink: 0;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-
-  .byob-rhythm-block-toggle:hover {
-    background-color: #f3f4f6;
-  }
-
-  .byob-rhythm-block:not(.collapsed) .vertical-line {
-    display: none;
-  }
-
-  .byob-rhythm-block.collapsed {
-    align-items: center;
-  }
-
-  .byob-rhythm-block.collapsed .byob-rhythm-block-paragraph {
-    max-height: 0;
-    margin-top: 0;
-    opacity: 0;
   }
 
   .byob-rhythm-btn-wrapper .purrkins-btn-secondary {
@@ -487,7 +438,7 @@
   /* Embedded Login Styles */
   .pk-login-card {
     display: flex;
-    background: linear-gradient(135deg, #FFFAE0 0%, #E8F0FF 100%);
+    background: linear-gradient(135deg, #fffae0 0%, #e8f0ff 100%);
     overflow: hidden;
     width: 100%;
     margin: 0;
@@ -530,7 +481,7 @@
     box-sizing: border-box;
     outline: none;
     transition: 0.2s;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
   }
   .pk-inline-input-group input:focus {
     border-color: #004494;
@@ -564,7 +515,7 @@
     gap: 12px;
     margin-bottom: 40px;
   }
-  .pk-checkbox-group input[type="checkbox"] {
+  .pk-checkbox-group input[type='checkbox'] {
     appearance: none;
     width: 20px;
     height: 20px;
@@ -574,11 +525,11 @@
     cursor: pointer;
     position: relative;
   }
-  .pk-checkbox-group input[type="checkbox"]:checked {
+  .pk-checkbox-group input[type='checkbox']:checked {
     background: #121217;
     border-color: #121217;
   }
-  .pk-checkbox-group input[type="checkbox"]:checked::after {
+  .pk-checkbox-group input[type='checkbox']:checked::after {
     content: '';
     position: absolute;
     top: 2px;
@@ -637,7 +588,7 @@
     border-width: 2px;
     box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
   }
-  
+
   .errors {
     background: #fff0f0;
     color: #d8000c;
@@ -729,11 +680,6 @@
     .byob-rhythm-block {
       padding: 16px;
       gap: 16px;
-    }
-    .byob-rhythm-block-toggle {
-      width: 27px;
-      height: 27px;
-      padding: 8px;
     }
     byob-rhythm-btn-wrapper .purrkins-btn-secondary {
       font-size: 18px;
