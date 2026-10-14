@@ -19,7 +19,7 @@
 ></div>
 
 <results-list
-  class="section product-grid-container spacing-style{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
+  class="section product-grid-container purrkins-container pf-collection-main-grid{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
   style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
   section-id="{{ section.id }}"
   infinite-scroll="{{ section.settings.enable_infinite_scroll }}"
@@ -37,7 +37,6 @@
 
     {% paginate search.results by products_per_page %}
       {% if search.results_count > 0 %}
-        {% content_for 'block', type: 'filters', id: 'filters', results: search, results_size: search.results_count %}
         {% assign products = search.results | where: 'object_type', 'product' %}
       {% else %}
         {% assign collection = settings.empty_state_collection | default: collections.all %}
@@ -46,36 +45,131 @@
         {% assign products = collection.products %}
       {% endif %}
 
-      {% capture children %}
-        {% for product in products %}
-          <li
-            id="{{ section.id }}-{{ product.id }}"
-            class="product-grid__item product-grid__item--{{ forloop.index0 }}"
-            data-page="{{ paginate.current_page }}"
-            data-product-id="{{ product.id }}"
-            ref="cards[]"
-          >
-            {% content_for 'block',
-              type: '_product-card',
-              id: 'product-card',
-              closest.product: product,
-              product_view_context: 'search'
-            %}
-          </li>
-        {% endfor %}
-      {% endcapture %}
+      <div
+        id="ResultsList"
+        class="grid main-collection-grid spacing-style"
+        style="
+          --grid--margin--mobile: 0;
+          --grid-column--desktop: var(--centered);
+          --grid-column--mobile: var(--full-width);
+          --padding-inline-start: 0px;
+          --padding-inline-end: 0px;
+        "
+      >
+        <div
+          style="
+            grid-column: var(--full-width);
+            --product-grid-gap-mobile: {{ section.settings.columns_gap_vertical | at_most: 12 }}px {{ section.settings.columns_gap_horizontal | at_most: 12 }}px;
+            --product-grid-gap-desktop: {{ section.settings.columns_gap_vertical }}px {{ section.settings.columns_gap_horizontal }}px;
+            container-type: inline-size;
+            container-name: product-grid;
+          "
+        >
+          {% if products.size == 0 %}
+            <div class="main-collection-grid__empty pf-search-empty-container">
+              <div class="pf-search-empty-icon">🐱</div>
+              <h2 class="pf-search-empty-title purrkins-h2-text">No products found</h2>
+              <p class="pf-search-empty-subtitle purrkins-subtext">
+                {% if search.terms != blank %}
+                  We couldn't find any products matching "<strong>{{ search.terms | escape }}</strong>". Try searching for chicken, broth, wet food, or treats.
+                {% else %}
+                  Please enter a search term above to explore our products.
+                {% endif %}
+              </p>
+              <div class="pf-search-empty-actions">
+                <a href="/collections/all" class="purrkins-btn-primary">Browse All Products</a>
+              </div>
+            </div>
+          {% else %}
+            <ul
+              class="product-grid product-grid--{{ section.id }} product-grid--{{ section.settings.layout_type }} pf-search-grid {% if section.settings.mobile_product_card_size == 'large' %} product-grid-mobile--large{% endif %}"
+              data-testid="product-grid"
+              product-grid-view="default"
+              role="list"
+              style="--mobile-columns: {% if section.settings.mobile_product_card_size == 'large' %}1{% else %}2{% endif %};"
+            >
+              {% for product in products %}
+                <li
+                  id="{{ section.id }}-{{ product.id }}"
+                  class="product-grid__item product-grid__item--{{ forloop.index0 }}"
+                  data-page="{{ paginate.current_page }}"
+                  data-product-id="{{ product.id }}"
+                >
+                  {% render 'purrkins-collection-card', product: product %}
+                </li>
+              {% endfor %}
+            </ul>
 
-      {% render 'product-grid',
-        section: section,
-        children: children,
-        products: products,
-        paginate: paginate,
-        enable_infinite_scroll: section.settings.enable_infinite_scroll,
-        title: title
-      %}
+            {% if paginate.pages > 1 %}
+              {% render 'pagination-controls', paginate: paginate %}
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
     {% endpaginate %}
   </div>
 </results-list>
+
+<style>
+  .pf-search-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: {{ section.settings.columns_gap_vertical }}px {{ section.settings.columns_gap_horizontal }}px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .pf-search-grid .product-grid__item {
+    display: flex;
+  }
+  .pf-search-grid .pf-collection-card-wrap {
+    width: 100%;
+  }
+  .pf-search-empty-container {
+    text-align: center;
+    padding: 60px 20px 80px;
+    max-width: 580px;
+    margin: 0 auto;
+  }
+  .pf-search-empty-icon {
+    font-size: 54px;
+    margin-bottom: 16px;
+    line-height: 1;
+  }
+  .pf-search-empty-title {
+    font-size: 38px;
+    margin: 0 0 12px 0;
+    color: var(--semantic-text-primary, #121217);
+    font-family: var(--purrkins-heading-font, 'Bricolage Grotesque', sans-serif);
+  }
+  .pf-search-empty-subtitle {
+    font-size: 18px;
+    margin: 0 0 28px 0;
+    color: var(--semantic-text-secondary, #595961);
+    line-height: 1.5;
+  }
+  .pf-search-empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+  @media (max-width: 767px) {
+    .pf-search-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .pf-search-empty-container {
+      padding: 40px 16px 60px;
+    }
+    .pf-search-empty-title {
+      font-size: 28px;
+    }
+    .pf-search-empty-subtitle {
+      font-size: 16px;
+    }
+  }
+</style>
+
 
 {% schema %}
 {

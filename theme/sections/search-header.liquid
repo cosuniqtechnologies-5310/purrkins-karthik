@@ -6,31 +6,311 @@
   endif
 %}
 
-<div
-  class="section-background{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
-></div>
-<div class="section section--page-width{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}">
-  <div
-    class="spacing-style search-page__header"
-    style="
-      --horizontal-alignment: {{ section.settings.alignment }};
-      {% render 'spacing-style', settings: section.settings %}
-    "
-  >
-    {% assign heading_text = 'content.search' | t %}
+<div class="pf-search-header-section{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}" style="padding-top: {{ section.settings.padding-block-start | default: 40 }}px; padding-bottom: {{ section.settings.padding-block-end | default: 20 }}px;">
+  <div class="purrkins-container pf-search-header-container">
+    <div class="pf-search-header-main">
+      <div class="pf-search-title-row">
+        <h1 class="pf-search-title purrkins-h1-text">
+          {% if search.performed and search.terms != blank %}
+            Search Results
+          {% else %}
+            Search
+          {% endif %}
+        </h1>
+        <div class="pf-search-description purrkins-subtext">
+          {% if search.performed and search.terms != blank %}
+            <p>Showing <strong>{{ search.results_count }}</strong> {% if search.results_count == 1 %}product{% else %}products{% endif %} found for "<strong>{{ search.terms | escape }}</strong>"</p>
+          {% else %}
+            <p>Complete meals in 70g pouches. 90% real meat and broth, zero fillers.</p>
+          {% endif %}
+        </div>
+      </div>
 
-    {% if search.performed %}
-      {% assign heading_text = 'content.search_results' | t %}
-    {% endif %}
+      <div class="pf-search-bar-container">
+        <form action="{{ routes.search_url }}" method="get" role="search" class="pf-search-form">
+          <input type="hidden" name="type" value="product">
+          <div class="pf-search-input-box">
+            <span class="pf-search-icon-wrapper" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </span>
+            <input
+              type="search"
+              name="q"
+              id="PurrkinsSearchInput"
+              value="{{ search.terms | escape }}"
+              placeholder="Search wet food, chicken, treats, broth..."
+              class="pf-search-input-field"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+            >
+            {% if search.terms != blank %}
+              <a href="{{ routes.search_url }}" class="pf-search-clear-btn" aria-label="Clear search" title="Clear search">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </a>
+            {% endif %}
+            <button type="submit" class="pf-search-btn purrkins-btn-primary">
+              <span>Search</span>
+            </button>
+          </div>
+        </form>
 
-    {% capture heading_text %}
-      <h3>{{ heading_text }}</h3>
-    {% endcapture %}
-
-    {% content_for 'block', id: 'heading', type: '_heading', text: heading_text %}
-    {% content_for 'block', id: 'search', type: '_search-input' %}
+        <div class="pf-search-suggestions">
+          <span class="pf-search-suggestions-label">Popular searches:</span>
+          <div class="pf-search-tags-list">
+            <a href="{{ routes.search_url }}?type=product&q=Wet+Food" class="pf-search-tag-chip">Wet Food</a>
+            <a href="{{ routes.search_url }}?type=product&q=Dry+Food" class="pf-search-tag-chip">Dry Food</a>
+            <a href="{{ routes.search_url }}?type=product&q=Treats" class="pf-search-tag-chip">Treats</a>
+            <a href="{{ routes.search_url }}?type=product&q=Wellness" class="pf-search-tag-chip">Wellness</a>
+            <a href="{{ routes.search_url }}?type=product&q=Chicken" class="pf-search-tag-chip">Chicken</a>
+            <a href="{{ routes.search_url }}?type=product&q=Broth" class="pf-search-tag-chip">Broth</a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
+<style>
+.pf-search-header-section {
+  width: 100%;
+  background: var(--color-background, #ffffff);
+}
+
+.pf-search-header-container {
+  padding: 30px 20px 0;
+}
+
+.pf-search-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  gap: 40px;
+}
+
+.pf-search-title {
+  margin: 0;
+  color: var(--brand-black, #121217);
+  font-size: 58px;
+  font-family: var(--purrkins-heading-font, 'Bricolage Grotesque', sans-serif);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1.2px;
+}
+
+.pf-search-description {
+  flex: 1;
+  max-width: 440px;
+  color: var(--color-text-primary, #121217);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.6;
+  font-family: var(--purrkins-primary-font, 'greycliff-cf', sans-serif);
+}
+
+.pf-search-description p {
+  margin: 0;
+}
+
+.pf-search-bar-container {
+  max-width: 720px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.pf-search-form {
+  width: 100%;
+}
+
+.pf-search-input-box {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #E2E4E8;
+  border-radius: 999px;
+  padding: 6px 8px 6px 20px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pf-search-input-box:focus-within {
+  border-color: #121217;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+}
+
+.pf-search-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #717680;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.pf-search-input-field {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 17px;
+  font-family: var(--purrkins-primary-font, 'greycliff-cf', sans-serif);
+  color: #121217;
+  padding: 10px 4px;
+}
+
+.pf-search-input-field::placeholder {
+  color: #9CA3AF;
+}
+
+.pf-search-input-field::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  display: none;
+}
+
+.pf-search-clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #6B7280;
+  margin-right: 8px;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.pf-search-clear-btn:hover {
+  background: #F3F4F6;
+  color: #121217;
+}
+
+.pf-search-btn {
+  border-radius: 999px;
+  background: var(--semantic-brand, #FFE330);
+  color: var(--semantic-text-primary, #21252A);
+  font-family: var(--purrkins-heading-font, 'Bricolage Grotesque', sans-serif);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 12px 28px;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pf-search-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 227, 48, 0.4);
+}
+
+.pf-search-suggestions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.pf-search-suggestions-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #717680;
+  font-family: var(--purrkins-primary-font, 'greycliff-cf', sans-serif);
+  margin-right: 4px;
+}
+
+.pf-search-tags-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pf-search-tag-chip {
+  display: inline-block;
+  padding: 5px 14px;
+  background: #F3F4F6;
+  color: #21252A;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--purrkins-primary-font, 'greycliff-cf', sans-serif);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.pf-search-tag-chip:hover {
+  background: #FFE330;
+  border-color: #FFE330;
+  color: #121217;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1024px) {
+  .pf-search-title {
+    font-size: 44px;
+  }
+}
+
+@media (max-width: 767px) {
+  .pf-search-header-container {
+    padding: 10px 16px 0;
+  }
+
+  .pf-search-title-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .pf-search-title {
+    font-size: 32px;
+    text-align: center;
+  }
+
+  .pf-search-description {
+    text-align: center;
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  .pf-search-input-box {
+    padding: 4px 6px 4px 14px;
+  }
+
+  .pf-search-input-field {
+    font-size: 15px;
+    padding: 8px 2px;
+  }
+
+  .pf-search-btn {
+    padding: 10px 18px;
+    font-size: 14px;
+  }
+
+  .pf-search-suggestions {
+    justify-content: center;
+  }
+
+  .pf-search-tags-list {
+    justify-content: center;
+  }
+}
+</style>
 
 {% schema %}
 {
@@ -74,7 +354,7 @@
       "max": 100,
       "step": 1,
       "unit": "px",
-      "default": 0
+      "default": 30
     },
     {
       "type": "range",
@@ -84,7 +364,7 @@
       "max": 100,
       "step": 1,
       "unit": "px",
-      "default": 0
+      "default": 10
     }
   ]
 }
