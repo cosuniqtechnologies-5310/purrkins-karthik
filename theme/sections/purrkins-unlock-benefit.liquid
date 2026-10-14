@@ -41,28 +41,30 @@
 
         <div class="pf-ub-modal-form-wrapper">
             <!-- Plain HTML form — submits JSON to app proxy, no page reload -->
-            <form id="ub-claim-form-{{ section.id }}" class="ub-ajax-form">
-                <div class="ub-form-success" id="ub-success-{{ section.id }}" style="display:none; color:#25D366; text-align:center; margin-bottom:20px; font-weight:bold;">
+            <form id="ub-claim-form-{{ section.id }}" class="ub-ajax-form" novalidate>
+                <div class="ub-form-success" id="ub-success-{{ section.id }}" style="display:none; color:#10B981; text-align:center; margin-bottom:20px; font-weight:700; font-size:16px;">
                     Thank you! We've received your request.
                 </div>
-                <div class="ub-form-error" id="ub-error-{{ section.id }}" style="display:none; color:#D32F2F; text-align:center; margin-bottom:16px; font-size:14px;"></div>
+                <div class="ub-form-error" id="ub-error-{{ section.id }}" style="display:none; color:#D32F2F; text-align:center; margin-bottom:16px; font-size:14px; font-weight:500;"></div>
 
                 <div class="ub-placeholder-form" id="ub-fields-{{ section.id }}">
                     <div class="ub-form-row">
                         <div class="ub-form-col">
                             <label for="ubName-{{ section.id }}">Your Name *</label>
-                            <input type="text" id="ubName-{{ section.id }}" name="ub_name" placeholder="Full Name" required>
+                            <input type="text" id="ubName-{{ section.id }}" name="ub_name" placeholder="Full Name" required autocomplete="name">
+                            <div class="ub-field-error" id="ubNameError-{{ section.id }}"></div>
                         </div>
                         <div class="ub-form-col">
                             <label for="ubPhone-{{ section.id }}">Mobile Number *</label>
-                            <input type="tel" id="ubPhone-{{ section.id }}" name="ub_phone" placeholder="10-digit number" required
-                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            <input type="tel" id="ubPhone-{{ section.id }}" name="ub_phone" placeholder="10-digit number" maxlength="10" inputmode="numeric" required autocomplete="tel">
+                            <div class="ub-field-error" id="ubPhoneError-{{ section.id }}"></div>
                         </div>
                     </div>
                     <div class="ub-form-row">
                         <div class="ub-form-col" style="flex:1;">
                             <label for="ubEmail-{{ section.id }}">Your Email *</label>
-                            <input type="email" id="ubEmail-{{ section.id }}" name="ub_email" placeholder="yourname@example.com" required>
+                            <input type="email" id="ubEmail-{{ section.id }}" name="ub_email" placeholder="yourname@example.com" required autocomplete="email">
+                            <div class="ub-field-error" id="ubEmailError-{{ section.id }}"></div>
                         </div>
                     </div>
 
@@ -115,76 +117,249 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Form Submit → App Proxy API
+    // Form Submit & Real-Time Validation
     var ubForm = document.getElementById('ub-claim-form-{{ section.id }}');
     if (ubForm) {
+        var nameInput = document.getElementById('ubName-{{ section.id }}');
+        var phoneInput = document.getElementById('ubPhone-{{ section.id }}');
+        var emailInput = document.getElementById('ubEmail-{{ section.id }}');
+
+        var nameError = document.getElementById('ubNameError-{{ section.id }}');
+        var phoneError = document.getElementById('ubPhoneError-{{ section.id }}');
+        var emailError = document.getElementById('ubEmailError-{{ section.id }}');
+
+        var submitBtn = document.getElementById('ub-submit-{{ section.id }}');
+        var fieldsEl = document.getElementById('ub-fields-{{ section.id }}');
+        var successEl = document.getElementById('ub-success-{{ section.id }}');
+        var errorEl = document.getElementById('ub-error-{{ section.id }}');
+
+        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        function showFieldError(input, errBox, message) {
+            if (input) {
+                input.classList.add('has-error');
+                input.classList.remove('is-valid');
+            }
+            if (errBox) {
+                errBox.textContent = message;
+                errBox.classList.add('is-visible');
+            }
+        }
+
+        function clearFieldError(input, errBox) {
+            if (input) {
+                input.classList.remove('has-error');
+                input.classList.add('is-valid');
+            }
+            if (errBox) {
+                errBox.textContent = '';
+                errBox.classList.remove('is-visible');
+            }
+        }
+
+        // Phone Input Handlers
+        if (phoneInput) {
+            // Block non-digits and prevent typing when already at 10 digits
+            phoneInput.addEventListener('keydown', function (e) {
+                var navigationKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'];
+                if (navigationKeys.indexOf(e.key) !== -1 || e.ctrlKey || e.metaKey) {
+                    return;
+                }
+                if (!/^[0-9]$/.test(e.key)) {
+                    e.preventDefault();
+                    showFieldError(phoneInput, phoneError, 'Only numbers are allowed.');
+                    return;
+                }
+                var selectedText = window.getSelection().toString();
+                if (this.value.length >= 10 && !selectedText) {
+                    e.preventDefault();
+                    showFieldError(phoneInput, phoneError, 'Mobile number cannot exceed 10 digits.');
+                    return;
+                }
+            });
+
+            phoneInput.addEventListener('input', function () {
+                var cleaned = this.value.replace(/\D/g, '');
+                if (this.value !== cleaned) {
+                    this.value = cleaned;
+                }
+
+                if (cleaned.length > 10) {
+                    this.value = cleaned.slice(0, 10);
+                    showFieldError(phoneInput, phoneError, 'Mobile number cannot exceed 10 digits.');
+                    return;
+                }
+
+                if (this.value.length === 10) {
+                    if (!/^[6-9]\d{9}$/.test(this.value)) {
+                        showFieldError(phoneInput, phoneError, 'Please enter a valid 10-digit mobile number.');
+                    } else {
+                        clearFieldError(phoneInput, phoneError);
+                    }
+                } else if (this.value.length > 0 && phoneInput.classList.contains('has-error')) {
+                    showFieldError(phoneInput, phoneError, 'Must be 10 digits (' + this.value.length + '/10)');
+                }
+            });
+
+            phoneInput.addEventListener('paste', function (e) {
+                var paste = (e.clipboardData || window.clipboardData).getData('text');
+                var digits = paste.replace(/\D/g, '');
+                if (digits.length > 10) {
+                    e.preventDefault();
+                    this.value = digits.slice(0, 10);
+                    showFieldError(phoneInput, phoneError, 'Mobile number cannot exceed 10 digits.');
+                }
+            });
+
+            phoneInput.addEventListener('blur', function () {
+                var digits = this.value.replace(/\D/g, '');
+                if (!digits) {
+                    showFieldError(phoneInput, phoneError, 'Mobile number is required.');
+                } else if (digits.length !== 10) {
+                    showFieldError(phoneInput, phoneError, 'Mobile number must be exactly 10 digits.');
+                } else if (!/^[6-9]\d{9}$/.test(digits)) {
+                    showFieldError(phoneInput, phoneError, 'Please enter a valid 10-digit mobile number.');
+                } else {
+                    clearFieldError(phoneInput, phoneError);
+                }
+            });
+        }
+
+        // Name Input Handlers
+        if (nameInput) {
+            nameInput.addEventListener('blur', function () {
+                var val = this.value.trim();
+                if (!val) {
+                    showFieldError(nameInput, nameError, 'Your name is required.');
+                } else if (val.length < 2) {
+                    showFieldError(nameInput, nameError, 'Name must be at least 2 characters.');
+                } else {
+                    clearFieldError(nameInput, nameError);
+                }
+            });
+
+            nameInput.addEventListener('input', function () {
+                if (nameInput.classList.contains('has-error') && this.value.trim().length >= 2) {
+                    clearFieldError(nameInput, nameError);
+                }
+            });
+        }
+
+        // Email Input Handlers
+        if (emailInput) {
+            emailInput.addEventListener('blur', function () {
+                var val = this.value.trim();
+                if (!val) {
+                    showFieldError(emailInput, emailError, 'Your email is required.');
+                } else if (!emailPattern.test(val)) {
+                    showFieldError(emailInput, emailError, 'Please enter a valid email address.');
+                } else {
+                    clearFieldError(emailInput, emailError);
+                }
+            });
+
+            emailInput.addEventListener('input', function () {
+                if (emailInput.classList.contains('has-error') && emailPattern.test(this.value.trim())) {
+                    clearFieldError(emailInput, emailError);
+                }
+            });
+        }
+
+        // Submit Handler
         ubForm.addEventListener('submit', function (e) {
             e.preventDefault();
             e.stopPropagation();
 
-            var submitBtn = document.getElementById('ub-submit-{{ section.id }}');
-            var fieldsEl = document.getElementById('ub-fields-{{ section.id }}');
-            var successEl = document.getElementById('ub-success-{{ section.id }}');
-            var errorEl = document.getElementById('ub-error-{{ section.id }}');
-
             if (submitBtn.disabled) return false;
+
+            var isValid = true;
+            var name = nameInput ? nameInput.value.trim() : '';
+            var rawPhone = phoneInput ? phoneInput.value.replace(/\D/g, '') : '';
+            var email = emailInput ? emailInput.value.trim() : '';
+
+            // Name Check
+            if (!name || name.length < 2) {
+                showFieldError(nameInput, nameError, name ? 'Name must be at least 2 characters.' : 'Your name is required.');
+                isValid = false;
+            } else {
+                clearFieldError(nameInput, nameError);
+            }
+
+            // Phone Check (Strict 10 digits, valid starting digit)
+            if (!rawPhone) {
+                showFieldError(phoneInput, phoneError, 'Mobile number is required.');
+                isValid = false;
+            } else if (rawPhone.length !== 10) {
+                showFieldError(phoneInput, phoneError, 'Mobile number must be exactly 10 digits.');
+                isValid = false;
+            } else if (!/^[6-9]\d{9}$/.test(rawPhone)) {
+                showFieldError(phoneInput, phoneError, 'Please enter a valid 10-digit mobile number.');
+                isValid = false;
+            } else {
+                clearFieldError(phoneInput, phoneError);
+            }
+
+            // Email Check
+            if (!email) {
+                showFieldError(emailInput, emailError, 'Your email is required.');
+                isValid = false;
+            } else if (!emailPattern.test(email)) {
+                showFieldError(emailInput, emailError, 'Please enter a valid email address.');
+                isValid = false;
+            } else {
+                clearFieldError(emailInput, emailError);
+            }
+
+            if (!isValid) {
+                var firstError = ubForm.querySelector('.has-error');
+                if (firstError) firstError.focus();
+                return false;
+            }
+
             submitBtn.disabled = true;
             submitBtn.textContent = 'Submitting...';
             errorEl.style.display = 'none';
 
-            try {
-                var name = ubForm.querySelector('[name="ub_name"]').value.trim();
-                var rawPhone = ubForm.querySelector('[name="ub_phone"]').value.trim();
-                var email = ubForm.querySelector('[name="ub_email"]').value.trim();
+            // Format phone with +91 country code
+            var phone = '+91' + rawPhone.replace(/^\+91/, '');
 
-                if (!name || !rawPhone || !email) {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Claim';
-                    return false;
-                }
+            var payload = {
+                name: name,
+                phone: phone,
+                email: email,
+                tag: 'unlock-benefit',
+                accepts_marketing: true
+            };
 
-                // Format phone with +91 country code
-                var phone = '+91' + rawPhone.replace(/^\+91/, '');
-
-                var payload = {
-                    name: name,
-                    phone: phone,
-                    email: email,
-                    tag: 'unlock-benefit',
-                    accepts_marketing: true
-                };
-
-                console.log('[UnlockBenefit] Sending:', JSON.stringify(payload));
-
-                fetch('/apps/purrkins/unlock-benefit/customer', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify(payload)
-                })
-                .then(function (response) {
-                    return response.json().catch(function () { return {}; });
-                })
-                .then(function (data) {
-                    console.log('[UnlockBenefit] Response:', data);
-                    // Show success, hide form fields
-                    if (fieldsEl) fieldsEl.style.display = 'none';
-                    if (successEl) successEl.style.display = 'block';
-                    submitBtn.textContent = 'Claim';
-                    submitBtn.disabled = false;
-                })
-                .catch(function (err) {
-                    console.error('[UnlockBenefit] Error:', err);
-                    errorEl.textContent = 'Something went wrong. Please try again.';
-                    errorEl.style.display = 'block';
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Claim';
+            fetch('/apps/purrkins/unlock-benefit/customer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    return { ok: response.ok, data: data };
+                }).catch(function () {
+                    return { ok: response.ok, data: {} };
                 });
-
-            } catch (err) {
-                console.error('[UnlockBenefit] Submit error:', err);
+            })
+            .then(function (result) {
+                if (!result.ok || (result.data && result.data.success === false)) {
+                    throw new Error((result.data && result.data.message) || 'Something went wrong. Please try again.');
+                }
+                // Show success, hide form fields
+                if (fieldsEl) fieldsEl.style.display = 'none';
+                if (successEl) successEl.style.display = 'block';
+                submitBtn.textContent = 'Claim';
+                submitBtn.disabled = false;
+            })
+            .catch(function (err) {
+                console.error('[UnlockBenefit] Error:', err);
+                errorEl.textContent = err.message || 'Something went wrong. Please try again.';
+                errorEl.style.display = 'block';
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Claim';
-            }
+            });
 
             return false;
         }, false);

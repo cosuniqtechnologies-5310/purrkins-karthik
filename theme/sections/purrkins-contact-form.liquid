@@ -57,7 +57,8 @@
             placeholder="+91 |"
             value="{% if customer %}{{ customer.phone }}{% endif %}"
             required
-            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+            maxlength="10"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
           >
         </div>
       </div>

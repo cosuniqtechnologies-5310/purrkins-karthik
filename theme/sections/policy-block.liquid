@@ -34,7 +34,7 @@
                                     <input type="text" name="fs_name" placeholder="Full Name" required />
                                 </div>
                                 <div class="fs-form-group">
-                                    <input type="tel" name="fs_phone" placeholder="Mobile Number" required oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                    <input type="tel" name="fs_phone" placeholder="Mobile Number" maxlength="10" required oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" />
                                 </div>
                                 <div class="fs-form-group fs-form-submit">
                                     <button type="submit" class="fs-submit-btn">Claim Free Sample</button>
@@ -57,7 +57,7 @@
                                     <input type="text" name="customer[first_name]" placeholder="Full Name" required />
                                 </div>
                                 <div class="fs-form-group">
-                                    <input type="tel" name="customer[addresses][0][phone]" placeholder="Mobile Number" required oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                    <input type="tel" name="customer[addresses][0][phone]" placeholder="Mobile Number" maxlength="10" required oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" />
                                 </div>
                                 <div class="fs-form-group fs-form-submit">
                                     <button type="submit" class="fs-submit-btn">Claim Free Sample</button>
