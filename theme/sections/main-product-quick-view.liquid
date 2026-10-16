@@ -60,9 +60,18 @@
       </div>
       <div class="pf-qv-main-image" style="position: relative;">
         {% if product.tags.size > 0 %}
-          <div class="pf-qv-lifestage">
-            {{ product.tags.last }}
-          </div>
+          {% assign qv_filtered_tag = '' %}
+          {% for t in product.tags %}
+            {% assign t_low = t | downcase %}
+            {% unless t_low contains 'age 3 week' %}
+              {% assign qv_filtered_tag = t %}
+            {% endunless %}
+          {% endfor %}
+          {% if qv_filtered_tag != '' %}
+            <div class="pf-qv-lifestage">
+              {{ qv_filtered_tag }}
+            </div>
+          {% endif %}
         {% endif %}
 
         <!-- Favourite Icon -->

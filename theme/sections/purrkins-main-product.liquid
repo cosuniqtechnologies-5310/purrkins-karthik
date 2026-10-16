@@ -35,7 +35,20 @@
             data-index="{{ main_index }}"
           >
             {% if product.tags.size > 0 %}
-              <div class="pf-qv-lifestage">{{ product.tags | join: ', ' }}</div>
+              {% assign filtered_tags = '' %}
+              {% for t in product.tags %}
+                {% assign t_low = t | downcase %}
+                {% unless t_low contains 'age 3 week' %}
+                  {% if filtered_tags == '' %}
+                    {% assign filtered_tags = t %}
+                  {% else %}
+                    {% assign filtered_tags = filtered_tags | append: ', ' | append: t %}
+                  {% endif %}
+                {% endunless %}
+              {% endfor %}
+              {% if filtered_tags != '' %}
+                <div class="pf-qv-lifestage">{{ filtered_tags }}</div>
+              {% endif %}
             {% endif %}
             <button class="pf-qv-fav {% if in_wishlist %}is-saved{% endif %}" data-product-id="{{ product.id }}">
               <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
@@ -81,7 +94,20 @@
         <!-- Mobile Slider Container -->
         <div class="swiper pf-mobile-product-slider">
           {% if product.tags.size > 0 %}
-            <div class="pf-qv-lifestage">{{ product.tags | join: ', ' }}</div>
+            {% assign mobile_filtered_tags = '' %}
+            {% for t in product.tags %}
+              {% assign t_low = t | downcase %}
+              {% unless t_low contains 'age 3 week' %}
+                {% if mobile_filtered_tags == '' %}
+                  {% assign mobile_filtered_tags = t %}
+                {% else %}
+                  {% assign mobile_filtered_tags = mobile_filtered_tags | append: ', ' | append: t %}
+                {% endif %}
+              {% endunless %}
+            {% endfor %}
+            {% if mobile_filtered_tags != '' %}
+              <div class="pf-qv-lifestage">{{ mobile_filtered_tags }}</div>
+            {% endif %}
           {% endif %}
           <button class="pf-qv-fav {% if in_wishlist %}is-saved{% endif %}" data-product-id="{{ product.id }}">
             <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
