@@ -229,4 +229,14 @@ main[data-template="collection"] .comp-table-inner {
   position: sticky !important;
   top: 0 !important;
   z-index: 999999 !important;
+  overflow: visible !important;
+}
+
+#header-group .purrkins-container,
+.site-header .purrkins-container,
+.header-inner,
+.main-header,
+.site-header,
+.shopify-section-group-header-group {
+  overflow: visible !important;
 }
