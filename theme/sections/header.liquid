@@ -271,7 +271,11 @@
             </svg>
           </a>
           {% if shop.customer_accounts_enabled and page.handle != 'thank-you' %}
-            <div id="purrkins-header-user-wrap" style="position: relative; display: flex; align-items: center;">
+            <div
+              id="purrkins-header-user-wrap"
+              data-customer="{% if customer %}true{% else %}false{% endif %}"
+              style="position: relative; display: flex; align-items: center;"
+            >
               <a
                 href="{% if customer %}/apps/purrkins/dashboard{% else %}/apps/purrkins/login{% endif %}"
                 id="purrkins-header-user-btn"
@@ -294,14 +298,42 @@
               <!-- User Icon Click Popup (Screenshot 1) -->
               <div
                 id="purrkins-user-dropdown"
-                style="display: none; position: absolute; top: calc(100% + 14px); right: -10px; background: #fff; border: 2px solid #595961; border-radius: 18px; padding: 14px 0; min-width: 175px; text-align: left; box-shadow: 0 10px 30px rgba(0,0,0,0.12); z-index: 99999999;"
+                style="display: none; position: absolute; top: calc(100% + 14px); right: -10px; background: #fff; border: 2px solid #595961; border-radius: 20px; padding: 16px 0; min-width: 185px; text-align: left; box-shadow: 0 12px 36px rgba(0,0,0,0.15); z-index: 99999999;"
               >
-                <a href="/apps/purrkins/dashboard#overview" class="pk-nav-item" style="display: block; padding: 8px 22px; color: #121217; text-decoration: none; font-size: 14px; font-weight: 800;">Profile</a>
-                <div style="border-bottom: 1px solid #eaeaea; margin: 6px 18px 8px 18px;"></div>
-                <a href="/apps/purrkins/dashboard#subscriptions" class="pk-nav-item" style="display: block; padding: 8px 22px; color: #121217; text-decoration: none; font-size: 14px; font-weight: 800;">Subscriptions (<span id="pk-header-sub-count">0</span>)</a>
-                <a href="/apps/purrkins/dashboard#reviews" class="pk-nav-item" style="display: block; padding: 8px 22px; color: #121217; text-decoration: none; font-size: 14px; font-weight: 800;">My Reviews (<span id="pk-header-rev-count">0</span>)</a>
-                <a href="/apps/purrkins/dashboard#wishlist" class="pk-nav-item" style="display: block; padding: 8px 22px; color: #121217; text-decoration: none; font-size: 14px; font-weight: 800;">Wishlist</a>
-                <button type="button" id="pk-header-logout-btn" style="display: block; width: 100%; text-align: left; padding: 8px 22px; color: #121217; text-decoration: none; font-size: 14px; font-weight: 800; background: none; border: none; cursor: pointer;">Log out</button>
+                <style>
+                  #purrkins-user-dropdown a.pk-nav-item,
+                  #purrkins-user-dropdown button.pk-logout-btn {
+                    display: block;
+                    width: 100%;
+                    box-sizing: border-box;
+                    padding: 9px 24px;
+                    color: #121217;
+                    text-decoration: none;
+                    font-size: 14px;
+                    font-weight: 800;
+                    background: none;
+                    border: none;
+                    text-align: left;
+                    cursor: pointer;
+                    transition: background 0.15s ease, color 0.15s ease;
+                    font-family: inherit;
+                  }
+                  #purrkins-user-dropdown a.pk-nav-item:hover,
+                  #purrkins-user-dropdown button.pk-logout-btn:hover {
+                    background: #f4f4f5;
+                    color: #000;
+                  }
+                </style>
+                <a href="/apps/purrkins/dashboard#overview" class="pk-nav-item">Profile</a>
+                <div style="border-bottom: 1px solid #e5e7eb; margin: 6px 20px 8px 20px;"></div>
+                <a href="/apps/purrkins/dashboard#subscriptions" class="pk-nav-item"
+                  >Subscriptions (<span id="pk-header-sub-count">0</span>)</a
+                >
+                <a href="/apps/purrkins/dashboard#reviews" class="pk-nav-item"
+                  >My Reviews (<span id="pk-header-rev-count">0</span>)</a
+                >
+                <a href="/apps/purrkins/dashboard#wishlist" class="pk-nav-item">Wishlist</a>
+                <button type="button" id="pk-header-logout-btn" class="pk-logout-btn">Log out</button>
               </div>
             </div>
           {% endif %}
@@ -444,10 +476,26 @@
     var logoutBtn = document.getElementById('pk-header-logout-btn');
 
     function checkLoggedIn() {
+      var wrap = document.getElementById('purrkins-header-user-wrap');
+      var isCustomer = wrap && wrap.getAttribute('data-customer') === 'true';
       var token = localStorage.getItem('pk_session');
       var cookieMatch = document.cookie.match(/pk_session=([^;]+)/);
-      return !!(token || cookieMatch);
+      return !!(isCustomer || token || cookieMatch);
     }
+
+    // Restore cached counts immediately so dropdown is populated on every page
+    try {
+      var cachedSub = localStorage.getItem('pk_sub_count');
+      if (cachedSub !== null) {
+        var scEl = document.getElementById('pk-header-sub-count');
+        if (scEl) scEl.textContent = cachedSub;
+      }
+      var cachedRev = localStorage.getItem('pk_rev_count');
+      if (cachedRev !== null) {
+        var rcEl = document.getElementById('pk-header-rev-count');
+        if (rcEl) rcEl.textContent = cachedRev;
+      }
+    } catch (e) {}
 
     if (userBtn && userDropdown) {
       userBtn.addEventListener('click', function (e) {
