@@ -217,7 +217,12 @@
       <div class="pf-purchase-options">
         {% assign first_selling_plan_id = '' %}
         {% assign selling_plan_count = 0 %}
-        {% assign discount_percent = 15 %}
+        {% assign discount_percent = 20 %}
+        {% if product.metafields.custom.subscription_discount != blank %}
+          {% assign discount_percent = product.metafields.custom.subscription_discount.value
+            | default: product.metafields.custom.subscription_discount
+          %}
+        {% endif %}
         {% for plan_group in product.selling_plan_groups %}
           {% for plan in plan_group.selling_plans %}
             {% assign selling_plan_count = selling_plan_count | plus: 1 %}
@@ -233,104 +238,127 @@
           {% endfor %}
         {% endfor %}
 
+        {% if first_selling_plan_id == '' %}
+          {% assign first_selling_plan_id = 'gid://shopify/SellingPlan/purrkins-30-days' %}
+        {% endif %}
+
+        {% assign unit_label = product.metafields.custom.unit_name.value
+          | default: product.metafields.custom.unit_name
+          | default: 'Pouch'
+        %}
+
         {% form 'product', product, class: 'pf-main-form' %}
-          {% if first_selling_plan_id != '' %}
-            <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
-          {% endif %}
+          <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
           <div class="pf-purchase-box">
             {% assign price = product.price %}
             {% assign discount_multiplier = 100.0 | minus: discount_percent | divided_by: 100.0 %}
-            {% assign discount_price = price | times: discount_multiplier %}
+            {% assign discount_price = price | times: discount_multiplier | round %}
 
-            {% if first_selling_plan_id != '' %}
-              <label class="pf-purchase-option active">
-                <div class="pf-po-content">
-                  <div class="pf-po-header">
-                    <div class="pf-po-title-area">
-                      <div class="pf-po-title-area-flex">
-                        <input type="radio" name="purchase_type" value="subscription" checked>
-                        <span class="pf-po-title">Monthly plan</span>
-                        <span class="pf-po-badge">Save {{ discount_percent }}%</span>
-                      </div>
-                      {% if selling_plan_count > 1 %}
-                        <div class="pf-po-plan-selector">
-                          <label
-                            for="pf-selling-plan-select"
-                            style="font-size: 12px; font-weight: 700; color: #005a36; display: block; margin-bottom: 4px;"
-                            >Delivery frequency:</label
-                          >
-                          <select
-                            id="pf-selling-plan-select"
-                            name="selling_plan"
-                            class="pf-subscription-plan-select"
-                            aria-label="Subscription Delivery Frequency"
-                          >
-                            {% for plan_group in product.selling_plan_groups %}
-                              {% for plan in plan_group.selling_plans %}
-                                <option
-                                  value="{{ plan.id }}"
-                                  {% if plan.id == first_selling_plan_id %}
-                                    selected
-                                  {% endif %}
-                                >
-                                  {{ plan.name }}
-                                </option>
-                              {% endfor %}
+            {% assign discount_price_formatted = discount_price
+              | money_without_trailing_zeros
+              | replace: 'Rs. ', '₹'
+              | replace: 'Rs.', '₹'
+            %}
+            {% unless discount_price_formatted contains '₹' %}
+              {% assign discount_price_formatted = '₹' | append: discount_price_formatted %}
+            {% endunless %}
+
+            {% assign regular_price_formatted = price
+              | money_without_trailing_zeros
+              | replace: 'Rs. ', '₹'
+              | replace: 'Rs.', '₹'
+            %}
+            {% unless regular_price_formatted contains '₹' %}
+              {% assign regular_price_formatted = '₹' | append: regular_price_formatted %}
+            {% endunless %}
+
+            <label class="pf-purchase-option active" data-type="subscription">
+              <div class="pf-po-content">
+                <div class="pf-po-header">
+                  <div class="pf-po-title-area">
+                    <div class="pf-po-title-area-flex">
+                      <input type="radio" name="purchase_type" value="subscription" checked>
+                      <span class="pf-po-title">Monthly plan</span>
+                      <span class="pf-po-badge">Save {{ discount_percent }}%</span>
+                    </div>
+                    {% if selling_plan_count > 1 %}
+                      <div class="pf-po-plan-selector">
+                        <label
+                          for="pf-selling-plan-select"
+                          style="font-size: 12px; font-weight: 700; color: #005a36; display: block; margin-bottom: 4px;"
+                          >Delivery frequency:</label
+                        >
+                        <select
+                          id="pf-selling-plan-select"
+                          name="selling_plan"
+                          class="pf-subscription-plan-select"
+                          aria-label="Subscription Delivery Frequency"
+                        >
+                          {% for plan_group in product.selling_plan_groups %}
+                            {% for plan in plan_group.selling_plans %}
+                              <option
+                                value="{{ plan.id }}"
+                                {% if plan.id == first_selling_plan_id %}
+                                  selected
+                                {% endif %}
+                              >
+                                {{ plan.name }}
+                              </option>
                             {% endfor %}
-                          </select>
-                        </div>
-                      {% else %}
-                        <input type="hidden" name="selling_plan" value="{{ first_selling_plan_id }}">
-                      {% endif %}
-                      <ul class="pf-po-features">
-                        <li>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="15"
-                            height="10"
-                            viewBox="0 0 15 10"
-                            fill="none"
-                          >
-                            <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
-                          </svg>
-                          Save {{ discount_percent }}% every order
-                        </li>
-                        <li>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="15"
-                            height="10"
-                            viewBox="0 0 15 10"
-                            fill="none"
-                          >
-                            <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
-                          </svg>
-                          Pause, edit and cancel anytime
-                        </li>
-                        <li>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="15"
-                            height="10"
-                            viewBox="0 0 15 10"
-                            fill="none"
-                          >
-                            <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
-                          </svg>
-                          Free delivery
-                        </li>
-                      </ul>
-                    </div>
-                    <div class="pf-po-price-area">
-                      <span class="pf-po-price">₹{{ discount_price | money_without_currency }}</span>
-                      <span class="pf-po-old-price">₹{{ price | money_without_currency }}</span>
-                    </div>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    {% else %}
+                      <input type="hidden" name="selling_plan" value="{{ first_selling_plan_id }}">
+                    {% endif %}
+                    <ul class="pf-po-features">
+                      <li>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="15"
+                          height="10"
+                          viewBox="0 0 15 10"
+                          fill="none"
+                        >
+                          <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
+                        </svg>
+                        Save {{ discount_percent }}% every order
+                      </li>
+                      <li>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="15"
+                          height="10"
+                          viewBox="0 0 15 10"
+                          fill="none"
+                        >
+                          <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
+                        </svg>
+                        Pause, edit and cancel anytime
+                      </li>
+                      <li>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="15"
+                          height="10"
+                          viewBox="0 0 15 10"
+                          fill="none"
+                        >
+                          <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
+                        </svg>
+                        Free delivery
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="pf-po-price-area">
+                    <span class="pf-po-price">{{ discount_price_formatted }}/{{ unit_label }}</span>
+                    <span class="pf-po-old-price">{{ regular_price_formatted }}/{{ unit_label }}</span>
                   </div>
                 </div>
-              </label>
-            {% endif %}
+              </div>
+            </label>
 
-            <label class="pf-purchase-option {% if first_selling_plan_id == '' %}active{% endif %}">
+            <label class="pf-purchase-option" data-type="onetime">
               <div class="pf-po-content">
                 <div class="pf-po-header">
                   <div class="pf-po-title-area">
@@ -339,19 +367,12 @@
                         type="radio"
                         name="purchase_type"
                         value="onetime"
-                        {% if first_selling_plan_id == '' %}
-                          checked
-                        {% endif %}
                       >
                       <span class="pf-po-title">One-time order</span>
                     </div>
-                    <p class="pf-po-desc">
-                      Try it first.<br>
-                      Move to a plan whenever you're ready.
-                    </p>
                   </div>
                   <div class="pf-po-price-area">
-                    <span class="pf-po-price">₹{{ price | money_without_currency }}</span>
+                    <span class="pf-po-price">{{ regular_price_formatted }}/{{ unit_label }}</span>
                   </div>
                 </div>
               </div>
@@ -379,7 +400,7 @@
                 {% endfor %}
               </select>
 
-              <select name="quantity" class="pf-qv-packs-select pf-qty-dropdown" style="display:none;">
+              <select name="quantity" class="pf-qv-packs-select pf-qty-dropdown">
                 <option value="1">1 Pack</option>
                 <option value="2">2 Packs</option>
                 <option value="3">3 Packs</option>
@@ -392,36 +413,8 @@
                 <option value="10">10 Packs</option>
               </select>
 
-              <div class="pf-qty-selector">
-                <button type="button" class="pf-qty-btn pf-qty-minus">
-                  <svg width="12" height="2" viewBox="0 0 12 2" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 1H11" stroke="#21252A" stroke-width="1.5" stroke-linecap="round"/>
-                  </svg>
-                </button>
-                <input
-                  type="number"
-                  class="pf-qty-input"
-                  value="1"
-                  min="1"
-                  step="1"
-                  readonly
-                >
-                <button type="button" class="pf-qty-btn pf-qty-plus">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 6H11" stroke="#21252A" stroke-width="1.5" stroke-linecap="round"/>
-                    <path d="M6 1V11" stroke="#21252A" stroke-width="1.5" stroke-linecap="round"/>
-                  </svg>
-                </button>
-              </div>
-
               <button type="submit" name="add" class="btn-add-to-cart pf-add-to-cart-btn">
-                <span class="pf-button-price-display">
-                  {%- if first_selling_plan_id != '' -%}
-                    ₹{{ discount_price | money_without_currency }}
-                  {%- else -%}
-                    ₹{{ price | money_without_currency }}
-                  {%- endif -%}
-                </span>
+                <span class="pf-button-price-display">{{ discount_price_formatted }}</span>
                 | Add to Cart
               </button>
             </div>
@@ -562,49 +555,7 @@
   .pf-view-more-btn {
     cursor: pointer;
   }
-  /* Quantity Selector */
-  .pf-qty-selector {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 140px;
-    height: 48px;
-    background: #fff;
-    border: 2px solid #21252a;
-    border-radius: 30px;
-    padding: 0 16px;
-    margin-right: 12px;
-  }
-  .pf-qty-btn {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-  }
-  .pf-qty-input {
-    width: 40px;
-    text-align: center;
-    border: none;
-    background: transparent;
-    font-family: var(--purrkins-heading-font);
-    font-size: 18px;
-    font-weight: 700;
-    color: #21252a;
-    -moz-appearance: textfield;
-  }
-  .pf-qty-input::-webkit-outer-spin-button,
-  .pf-qty-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  .pf-qty-input:focus {
-    outline: none;
-  }
+
   button.pf-qv-fav.is-saved svg path {
     fill: #ffe330 !important;
     stroke: #ffe330 !important;
@@ -738,8 +689,7 @@
               const total = basePrice * qty;
 
               if (priceDisplay) {
-                  // Formatting for display with ₹ symbol and 2 decimal digits
-                  priceDisplay.textContent = '₹' + total.toFixed(2);
+                  priceDisplay.textContent = '₹' + (total % 1 === 0 ? total.toFixed(0) : total.toFixed(2));
               }
 
               if (isRadio && selectedRadio) {
@@ -775,6 +725,18 @@
                   }
               }
           }
+      });
+
+      // Click card to select purchase option
+      document.querySelectorAll('.pf-purchase-box .pf-purchase-option').forEach(option => {
+          option.addEventListener('click', function(e) {
+              if (e.target.tagName && (e.target.tagName.toLowerCase() === 'select' || e.target.tagName.toLowerCase() === 'option')) return;
+              const radio = this.querySelector('input[name="purchase_type"]');
+              if (radio && !radio.checked) {
+                  radio.checked = true;
+                  radio.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+          });
       });
 
       // Swiper Init
@@ -815,35 +777,6 @@
       if (subContainer) {
           const observer = new MutationObserver(syncSubscriptionWidget);
           observer.observe(subContainer, { childList: true, subtree: true });
-      }
-
-      // Qty Selector Logic
-      const qtySelector = document.querySelector('.pf-qty-selector');
-      if (qtySelector) {
-          const minusBtn = qtySelector.querySelector('.pf-qty-minus');
-          const plusBtn = qtySelector.querySelector('.pf-qty-plus');
-          const input = qtySelector.querySelector('.pf-qty-input');
-          const nativeSelect = document.querySelector('.pf-qty-dropdown');
-
-          const updateQuantity = (val) => {
-              input.value = val;
-              if (nativeSelect) {
-                  nativeSelect.value = val;
-                  nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
-              }
-          };
-
-          minusBtn.addEventListener('click', () => {
-              let val = parseInt(input.value) || 1;
-              if (val > 1) {
-                  updateQuantity(val - 1);
-              }
-          });
-
-          plusBtn.addEventListener('click', () => {
-              let val = parseInt(input.value) || 1;
-              updateQuantity(val + 1);
-          });
       }
 
       // Add to cart AJAX Intercept
