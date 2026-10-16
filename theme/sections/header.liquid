@@ -271,22 +271,39 @@
             </svg>
           </a>
           {% if shop.customer_accounts_enabled and page.handle != 'thank-you' %}
-            <a
-              href="{% if customer %}/apps/purrkins/dashboard{% else %}/apps/purrkins/login{% endif %}"
-              aria-label="User Account"
-            >
-              <svg
-                class="header-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="21"
-                height="21"
-                viewBox="0 0 21 21"
-                fill="none"
+            <div id="purrkins-header-user-wrap" style="position: relative; display: flex; align-items: center;">
+              <a
+                href="{% if customer %}/apps/purrkins/dashboard{% else %}/apps/purrkins/login{% endif %}"
+                id="purrkins-header-user-btn"
+                aria-label="User Account"
+                style="display: flex; align-items: center; justify-content: center; cursor: pointer;"
               >
-                <path d="M10.5016 10.4992C12.2413 10.4992 13.6516 9.08892 13.6516 7.34922C13.6516 5.60952 12.2413 4.19922 10.5016 4.19922C8.76187 4.19922 7.35156 5.60952 7.35156 7.34922C7.35156 9.08892 8.76187 10.4992 10.5016 10.4992Z" stroke="#21252A" stroke-width="1.5"/>
-                <path d="M4.19922 17.5004C4.5968 16.1373 5.42578 14.9398 6.56172 14.0879C7.69766 13.2359 9.07929 12.7754 10.4992 12.7754C11.9191 12.7754 13.3008 13.2359 14.4367 14.0879C15.5727 14.9398 16.4016 16.1373 16.7992 17.5004" stroke="#21252A" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
-            </a>
+                <svg
+                  class="header-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="21"
+                  height="21"
+                  viewBox="0 0 21 21"
+                  fill="none"
+                >
+                  <path d="M10.5016 10.4992C12.2413 10.4992 13.6516 9.08892 13.6516 7.34922C13.6516 5.60952 12.2413 4.19922 10.5016 4.19922C8.76187 4.19922 7.35156 5.60952 7.35156 7.34922C7.35156 9.08892 8.76187 10.4992 10.5016 10.4992Z" stroke="#21252A" stroke-width="1.5"/>
+                  <path d="M4.19922 17.5004C4.5968 16.1373 5.42578 14.9398 6.56172 14.0879C7.69766 13.2359 9.07929 12.7754 10.4992 12.7754C11.9191 12.7754 13.3008 13.2359 14.4367 14.0879C15.5727 14.9398 16.4016 16.1373 16.7992 17.5004" stroke="#21252A" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </a>
+
+              <!-- User Icon Click Popup (Screenshot 1) -->
+              <div
+                id="purrkins-user-dropdown"
+                style="display: none; position: absolute; top: calc(100% + 14px); right: -10px; background: #fff; border: 2px solid #595961; border-radius: 18px; padding: 14px 0; min-width: 175px; text-align: left; box-shadow: 0 10px 30px rgba(0,0,0,0.12); z-index: 99999999;"
+              >
+                <a href="/apps/purrkins/dashboard#overview" class="pk-nav-item" style="display: block; padding: 8px 22px; color: #121217; text-decoration: none; font-size: 14px; font-weight: 800;">Profile</a>
+                <div style="border-bottom: 1px solid #eaeaea; margin: 6px 18px 8px 18px;"></div>
+                <a href="/apps/purrkins/dashboard#subscriptions" class="pk-nav-item" style="display: block; padding: 8px 22px; color: #121217; text-decoration: none; font-size: 14px; font-weight: 800;">Subscriptions (<span id="pk-header-sub-count">0</span>)</a>
+                <a href="/apps/purrkins/dashboard#reviews" class="pk-nav-item" style="display: block; padding: 8px 22px; color: #121217; text-decoration: none; font-size: 14px; font-weight: 800;">My Reviews (<span id="pk-header-rev-count">0</span>)</a>
+                <a href="/apps/purrkins/dashboard#wishlist" class="pk-nav-item" style="display: block; padding: 8px 22px; color: #121217; text-decoration: none; font-size: 14px; font-weight: 800;">Wishlist</a>
+                <button type="button" id="pk-header-logout-btn" style="display: block; width: 100%; text-align: left; padding: 8px 22px; color: #121217; text-decoration: none; font-size: 14px; font-weight: 800; background: none; border: none; cursor: pointer;">Log out</button>
+              </div>
+            </div>
           {% endif %}
           <button
             class="header-cart-link"
@@ -422,10 +439,69 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    var userBtn = document.getElementById('purrkins-header-user-btn');
+    var userDropdown = document.getElementById('purrkins-user-dropdown');
+    var logoutBtn = document.getElementById('pk-header-logout-btn');
+
+    function checkLoggedIn() {
+      var token = localStorage.getItem('pk_session');
+      var cookieMatch = document.cookie.match(/pk_session=([^;]+)/);
+      return !!(token || cookieMatch);
+    }
+
+    if (userBtn && userDropdown) {
+      userBtn.addEventListener('click', function (e) {
+        if (checkLoggedIn()) {
+          e.preventDefault();
+          e.stopPropagation();
+          var isOpen = userDropdown.style.display === 'block';
+          userDropdown.style.display = isOpen ? 'none' : 'block';
+        } else {
+          window.location.href = '/apps/purrkins/login';
+        }
+      });
+
+      document.addEventListener('click', function (e) {
+        if (userDropdown && !userDropdown.contains(e.target) && e.target !== userBtn && !userBtn.contains(e.target)) {
+          userDropdown.style.display = 'none';
+        }
+      });
+
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          localStorage.removeItem('pk_session');
+          localStorage.removeItem('pk_user_name');
+          localStorage.removeItem('pk_user_email');
+          localStorage.removeItem('pk_checkout_info');
+          document.cookie = 'pk_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          document.cookie = 'pk_session=; path=/apps/purrkins; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          window.location.href = '/apps/purrkins/login';
+        });
+      }
+
+      userDropdown.querySelectorAll('a.pk-nav-item').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+          var href = link.getAttribute('href');
+          var hashIdx = href.indexOf('#');
+          if (hashIdx !== -1 && window.location.pathname.indexOf('/apps/purrkins/dashboard') !== -1) {
+            var tabId = href.substring(hashIdx + 1);
+            if (typeof window.switchDashboardTab === 'function') {
+              e.preventDefault();
+              window.switchDashboardTab(tabId);
+              userDropdown.style.display = 'none';
+            }
+          }
+        });
+      });
+    }
+
     if (localStorage.getItem('pk_session')) {
       var links = document.querySelectorAll('a[href="/apps/purrkins/login"], a[href="/account"]');
       links.forEach(function (l) {
-        l.href = '/apps/purrkins/dashboard';
+        if (l.id !== 'purrkins-header-user-btn') {
+          l.href = '/apps/purrkins/dashboard';
+        }
       });
     }
   });
