@@ -62,8 +62,15 @@ class CartDrawerComponent extends Component {
   }
 
   #syncSubscriptionUI = () => {
-    const activeTab = /** @type {HTMLElement | null} */ (this.querySelector('.cart-drawer-tab.active'));
-    const isSub = activeTab ? activeTab.dataset.tab === 'subscribe' : false;
+    let activeTab = /** @type {HTMLElement | null} */ (this.querySelector('.cart-drawer-tab.active'));
+    const hasSubItem = Boolean(this.querySelector('.cart-items__table-row[data-subscription-type="subscribe"]'));
+    if (!activeTab && hasSubItem) {
+      activeTab = /** @type {HTMLElement | null} */ (this.querySelector('.cart-drawer-tab[data-tab="subscribe"]'));
+      if (activeTab) {
+        this.querySelectorAll('.cart-drawer-tab').forEach(b => b.classList.toggle('active', b === activeTab));
+      }
+    }
+    const isSub = activeTab ? activeTab.dataset.tab === 'subscribe' : hasSubItem;
     document.body.dataset.cartTab = isSub ? 'subscribe' : 'one-time';
 
     const subPrices = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-item-subscription-price, .cart-item-price-sub'));
@@ -201,6 +208,7 @@ class CartDrawerComponent extends Component {
    */
   #handleDrawerOpen = () => {
     this.#updateStickyState();
+    this.#syncSubscriptionUI();
 
     const closeBtn = /** @type {HTMLElement | null} */ (this.querySelector('.theme-drawer__close-button'));
     if (closeBtn && !closeBtn.dataset.nativeBound) {
@@ -238,7 +246,10 @@ class CartDrawerComponent extends Component {
 
     event.promise
       ?.then(({ detail }) => {
-        const settle = () => requestAnimationFrame(() => this.#updateStickyState());
+        const settle = () => requestAnimationFrame(() => {
+          this.#updateStickyState();
+          this.#syncSubscriptionUI();
+        });
 
         if (!shouldAutoOpen || detail?.didError) {
           settle();
@@ -249,6 +260,7 @@ class CartDrawerComponent extends Component {
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               this.#themeDrawer?.open();
+              this.#syncSubscriptionUI();
               console.log('[PURRKINS CART] DRAWER OPEN SUCCESS', {
                 isOpen: !!this.#themeDrawer?.isOpen,
                 drawerCount: document.querySelectorAll('cart-drawer-component').length,

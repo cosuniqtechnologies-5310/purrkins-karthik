@@ -146,11 +146,22 @@
               {% assign is_item_sub = false %}
               {% if item.selling_plan_allocation %}
                 {% assign is_item_sub = true %}
-              {% elsif item.properties._subscription == 'true' or item.properties.subscription == 'true' %}
+              {% elsif item.properties._subscription == 'true' or item.properties.subscription == 'true' or item.properties.Frequency != blank %}
                 {% assign is_item_sub = true %}
               {% elsif cart.attributes._subscription == 'true' %}
                 {% assign is_item_sub = true %}
               {% endif %}
+              {% assign discount_pct = 15 %}
+              {% if item.properties._subscription_discount != blank %}
+                {% assign parsed_pct = item.properties._subscription_discount | remove: '%' | times: 1 %}
+                {% if parsed_pct > 0 %}
+                  {% assign discount_pct = parsed_pct %}
+                {% endif %}
+              {% endif %}
+              {% assign item_sub_unit_saving = item.final_price | times: discount_pct | divided_by: 100 %}
+              {% assign item_sub_unit_price = item.final_price | minus: item_sub_unit_saving %}
+              {% assign item_line_sub_saving = item.final_line_price | times: discount_pct | divided_by: 100 %}
+              {% assign item_line_sub_price = item.final_line_price | minus: item_line_sub_saving %}
               {% assign first_selling_plan_id = '' %}
               {% for group in item.product.selling_plan_groups %}
                 {% for plan in group.selling_plans %}
@@ -336,14 +347,10 @@
                   </div>
 
                   <div class="cart-items__unit-price-wrapper">
-                    {% liquid
-                      assign item_line_sub_saving = item.final_line_price | times: 15 | divided_by: 100
-                      assign item_line_sub_price = item.final_line_price | minus: item_line_sub_saving
-                    %}
                     <div
                       class="cart-item-price-box"
-                      data-regular-price="{{ item.final_line_price }}"
-                      data-sub-price="{{ item_line_sub_price }}"
+                      data-regular-price="{{ item.final_price }}"
+                      data-sub-price="{{ item_sub_unit_price }}"
                     >
                       <span
                         class="cart-item-regular-price"
@@ -356,11 +363,11 @@
                             class="compare-at-price"
                             style="color: #8E9298; font-size: 14px; text-decoration: line-through; margin-bottom: 2px; display: block;"
                           >
-                            {{- item.variant.compare_at_price | times: item.quantity | money -}}
+                            {{- item.variant.compare_at_price | money -}}
                           </s>
                         {% endif %}
                         <span style="font-size: 18px; font-weight: 700; color: #16130F; display: block;">
-                          {{- item.final_line_price | money -}}
+                          {{- item.final_price | money -}}
                         </span>
                       </span>
 
@@ -369,16 +376,16 @@
                         {% unless is_item_sub %}
                           style="display: none;"
                         {% endunless %}
-                        style="display: inline-flex; flex-direction: column; align-items: flex-end; text-align: right;"
+                        style="display: inline-flex; flex-direction: column; align-items: flex-start; text-align: left;"
                       >
                         <s
                           class="compare-at-price"
                           style="color: #8E9298; font-size: 14px; text-decoration: line-through; margin-bottom: 2px; display: block;"
                         >
-                          {{- item.original_line_price | money -}}
+                          {{- item.original_price | money -}}
                         </s>
                         <span style="font-size: 18px; font-weight: 800; color: #005a36; display: block;">
-                          {{- item.selling_plan_allocation.price | default: item_line_sub_price | money -}}
+                          {{- item.selling_plan_allocation.price | default: item_sub_unit_price | money -}}
                         </span>
                       </span>
                     </div>

@@ -266,6 +266,11 @@
     {% if sub_item == nil %}
       {% assign sub_item = item %}
     {% endif %}
+  {% elsif item.properties._subscription == 'true' or item.properties.subscription == 'true' or item.properties.Frequency != blank %}
+    {% assign has_sub_item = true %}
+    {% if sub_item == nil %}
+      {% assign sub_item = item %}
+    {% endif %}
   {% endif %}
   {% assign item_saving = item.variant.price | minus: item.final_price | times: item.quantity %}
   {% if item_saving > 0 %}
