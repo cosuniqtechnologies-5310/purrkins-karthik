@@ -309,6 +309,36 @@ figure.woocommerce-product-gallery__wrapper.pf-desktop-gallery {
   display: block;
 }
 
+.pf-po-plan-selector {
+  display: none;
+  margin-top: 14px;
+}
+
+.pf-purchase-option.active .pf-po-plan-selector {
+  display: block;
+}
+
+.pf-subscription-plan-select {
+  width: 100%;
+  max-width: 280px;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--teal-700, #005a36);
+  border: 1.5px solid var(--teal-600, #47857C);
+  border-radius: 8px;
+  background-color: #fff;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.pf-subscription-plan-select:focus {
+  border-color: #005a36;
+  box-shadow: 0 0 0 2px rgba(71, 133, 124, 0.25);
+}
+
 .pf-po-features li {
   display: flex;
   align-items: center;

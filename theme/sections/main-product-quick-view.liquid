@@ -182,8 +182,66 @@
 
     <!-- Add to cart -->
     <div class="pf-qv-addtocart-wrapper">
+      {% assign first_selling_plan_id = '' %}
+      {% assign selling_plan_count = 0 %}
+      {% assign discount_percent = 15 %}
+      {% for plan_group in product.selling_plan_groups %}
+        {% for plan in plan_group.selling_plans %}
+          {% assign selling_plan_count = selling_plan_count | plus: 1 %}
+          {% if first_selling_plan_id == '' %}
+            {% assign first_selling_plan_id = plan.id %}
+            {% if plan.price_adjustments.size > 0 %}
+              {% assign adj = plan.price_adjustments.first %}
+              {% if adj.value_type == 'percentage' and adj.value > 0 %}
+                {% assign discount_percent = adj.value %}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+
+      {% assign price = product.price %}
+      {% assign discount_multiplier = 100.0 | minus: discount_percent | divided_by: 100.0 %}
+      {% assign discount_price = price | times: discount_multiplier | round %}
+
       {% form 'product', product %}
         <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+        {% if first_selling_plan_id != '' %}
+          <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
+
+          <div class="pf-qv-purchase-options">
+            <label class="pf-qv-option active" data-type="subscription">
+              <input type="radio" name="purchase_type" value="subscription" checked style="accent-color: #21252A; cursor: pointer;">
+              <span class="pf-qv-option-title">Subscribe & Save</span>
+              <span class="pf-qv-discount-badge">Save {{ discount_percent }}%</span>
+              <span class="pf-qv-option-price">{{ discount_price | money_without_trailing_zeros | replace: 'Rs. ', '₹' | replace: 'Rs.', '₹' }}</span>
+            </label>
+
+            {% if selling_plan_count > 1 %}
+              <div class="pf-qv-frequency-wrapper">
+                <label for="pf-qv-frequency-{{ product.id }}" class="pf-qv-freq-label">Frequency:</label>
+                <select id="pf-qv-frequency-{{ product.id }}" name="selling_plan" class="pf-qv-frequency-select">
+                  {% for plan_group in product.selling_plan_groups %}
+                    {% for plan in plan_group.selling_plans %}
+                      <option value="{{ plan.id }}" {% if plan.id == first_selling_plan_id %}selected{% endif %}>
+                        {{ plan.name }}
+                      </option>
+                    {% endfor %}
+                  {% endfor %}
+                </select>
+              </div>
+            {% else %}
+              <input type="hidden" name="selling_plan" value="{{ first_selling_plan_id }}">
+            {% endif %}
+
+            <label class="pf-qv-option" data-type="onetime">
+              <input type="radio" name="purchase_type" value="onetime" style="accent-color: #21252A; cursor: pointer;">
+              <span class="pf-qv-option-title">One-time purchase</span>
+              <span class="pf-qv-option-price">{{ price | money_without_trailing_zeros | replace: 'Rs. ', '₹' | replace: 'Rs.', '₹' }}</span>
+            </label>
+          </div>
+        {% endif %}
+
         <div class="pf-qv-addtocart">
           <div class="pf-qty-selector">
             <button type="button" class="pf-qty-btn pf-qty-minus" aria-label="Decrease quantity">
@@ -207,15 +265,25 @@
               </svg>
             </button>
           </div>
+          {% assign active_price = price %}
+          {% if first_selling_plan_id != '' %}
+            {% assign active_price = discount_price %}
+          {% endif %}
           <button
             type="submit"
             class="btn-add-to-cart pf-add-to-cart-btn"
+            {% if first_selling_plan_id != '' %}data-first-plan="{{ first_selling_plan_id }}"{% endif %}
             {% unless product.available %}
               disabled
             {% endunless %}
           >
-            <span class="pf-qv-price-display" data-base-price="{{ product.price }}">
-              {{- product.price | money_without_trailing_zeros | replace: 'Rs. ', '₹' | replace: 'Rs.', '₹' -}}
+            <span
+              class="pf-qv-price-display"
+              data-base-price="{{ price }}"
+              data-discount-price="{{ discount_price }}"
+              data-active-price="{{ active_price }}"
+            >
+              {{- active_price | money_without_trailing_zeros | replace: 'Rs. ', '₹' | replace: 'Rs.', '₹' -}}
             </span>
             | <span class="pf-qv-add-text">{% if product.available %}Add to Cart{% else %}Sold Out{% endif %}</span>
           </button>
@@ -844,6 +912,79 @@
     .pf-bowl-ingredient h2 {
       font-size: 24px;
     }
+  }
+
+  /* Quick View Purchase Options */
+  .pf-qv-purchase-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+  .pf-qv-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1.5px solid #e1e2e3;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .pf-qv-option.active {
+    border-color: #21252A;
+    background: #fafafb;
+  }
+  .pf-qv-option-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #21252A;
+    flex: 1;
+  }
+  .pf-qv-discount-badge {
+    background: #FFE330;
+    color: #21252A;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+  }
+  .pf-qv-option-price {
+    font-size: 15px;
+    font-weight: 800;
+    color: #21252A;
+  }
+  .pf-qv-frequency-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 28px;
+    margin-top: -2px;
+    margin-bottom: 6px;
+  }
+  .pf-qv-freq-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #21252A;
+  }
+  .pf-qv-frequency-select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1.5px solid #21252A;
+    font-size: 13px;
+    font-weight: 600;
+    color: #21252A;
+    background: #fff;
+  }
+
+  div#pc-preview-text {
+    color: var(--color-text-primary, #121217) !important;
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
   }
 </style>
 

@@ -291,7 +291,14 @@
                       {%- endif -%}
 
                       {%- if item.selling_plan_allocation -%}
-                        <p>{{ item.selling_plan_allocation.selling_plan.name }}</p>
+                        <div class="cart-item__selling-plan-badge" style="display:inline-flex; align-items:center; gap:6px; background:#eaf6f0; color:#005a36; font-size:12px; font-weight:700; padding:4px 10px; border-radius:12px; margin-top:6px;">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                          </svg>
+                          <span>{{ item.selling_plan_allocation.selling_plan.name }}</span>
+                        </div>
                       {%- endif -%}
 
                       {%- if item.line_level_discount_allocations.size > 0 -%}

@@ -83,12 +83,12 @@ class CartDrawerComponent extends Component {
       const planId = row.dataset.firstSellingPlanId;
       const currentType = row.dataset.subscriptionType;
 
-      if (planId) {
-        if (tab === 'subscribe' && currentType !== 'subscribe') {
+      if (tab === 'subscribe' && currentType !== 'subscribe') {
+        if (planId) {
           updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: planId });
-        } else if (tab === 'one-time' && currentType === 'subscribe') {
-          updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: "" });
         }
+      } else if (tab === 'one-time' && currentType === 'subscribe') {
+        updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: "" });
       }
     });
 
@@ -266,3 +266,85 @@ class CartDrawerComponent extends Component {
 if (!customElements.get('cart-drawer-component')) {
   customElements.define('cart-drawer-component', CartDrawerComponent);
 }
+
+/**
+ * Global helper to update selling plan frequency for all subscription items in the cart
+ * @param {string} planId
+ * @param {HTMLSelectElement} [selectEl]
+ */
+// @ts-ignore
+window.purrkinsChangeCartSellingPlan = function(planId, selectEl) {
+  if (!planId) return;
+  /** @type {any} */
+  const comp = document.querySelector('cart-items-component');
+  const rows = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.cart-items__table-row[data-key][data-subscription-type="subscribe"]'));
+  if (!rows || rows.length === 0) return;
+
+  /** @type {Array<{line: number, key: string, quantity: number, selling_plan: string}>} */
+  const updatesToProcess = [];
+  rows.forEach((row, index) => {
+    const key = row.dataset.key;
+    const qty = parseInt(row.dataset.currentQuantity || '1', 10);
+    if (key) {
+      updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: planId });
+    }
+  });
+
+  if (updatesToProcess.length === 0) return;
+  if (selectEl) selectEl.disabled = true;
+
+  if (updatesToProcess.length === 1 && comp && typeof comp.updateQuantity === 'function') {
+    const update = updatesToProcess[0];
+    if (update) {
+      comp.updateQuantity({
+        line: update.line,
+        quantity: update.quantity,
+        selling_plan: update.selling_plan,
+        action: 'change'
+      });
+    }
+    return;
+  }
+
+  const lastUpdate = updatesToProcess.pop();
+  if (!lastUpdate) return;
+
+  const updateNext = (/** @type {number} */ index) => {
+    if (index >= updatesToProcess.length) {
+      if (comp && typeof comp.updateQuantity === 'function') {
+        comp.updateQuantity({
+          line: lastUpdate.line,
+          quantity: lastUpdate.quantity,
+          selling_plan: lastUpdate.selling_plan,
+          action: 'change'
+        });
+      } else {
+        window.location.reload();
+      }
+      return;
+    }
+
+    const u = updatesToProcess[index];
+    if (!u) {
+      updateNext(index + 1);
+      return;
+    }
+
+    fetch('/cart/change.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: u.key,
+        quantity: u.quantity,
+        selling_plan: u.selling_plan
+      })
+    })
+    .then(() => updateNext(index + 1))
+    .catch((err) => {
+      console.error('Error changing subscription plan:', err);
+      if (selectEl) selectEl.disabled = false;
+    });
+  };
+
+  updateNext(0);
+};

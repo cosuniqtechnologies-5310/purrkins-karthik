@@ -258,10 +258,14 @@
 </div>
 
 {% assign has_sub_item = false %}
+{% assign sub_item = nil %}
 {% assign total_sub_saving = 0 %}
 {% for item in cart.items %}
   {% if item.selling_plan_allocation %}
     {% assign has_sub_item = true %}
+    {% if sub_item == nil %}
+      {% assign sub_item = item %}
+    {% endif %}
   {% endif %}
   {% assign item_saving = item.variant.price | minus: item.final_price | times: item.quantity %}
   {% if item_saving > 0 %}
@@ -274,38 +278,29 @@
     {% if total_sub_saving > 0 %}
       <div class="cart-drawer-subscription-savings">You're saving {{ total_sub_saving | money }} on this order</div>
     {% endif %}
-    <div class="cart-drawer-subscription-plan">
-      <span class="plan-label">Delivers every</span>
-      <select
-        class="plan-select"
-        onchange="
-          var planId = this.value;
-          var comp = this.closest('cart-items-component');
-          if (comp && comp.updateMultiple) {
-            var updates = {};
-            {% for item in cart.items %}
-              {% if item.selling_plan_allocation %}
-                updates['{{ item.key }}'] = { quantity: {{ item.quantity }}, selling_plan: planId };
-              {% endif %}
+    {% if sub_item != nil and sub_item.product.selling_plan_groups.size > 0 %}
+      <div class="cart-drawer-subscription-plan">
+        <span class="plan-label">Delivers every</span>
+        <select
+          class="plan-select"
+          aria-label="Delivery frequency"
+          onchange="if (window.purrkinsChangeCartSellingPlan) { window.purrkinsChangeCartSellingPlan(this.value, this); } else { window.location.reload(); }"
+        >
+          {% for group in sub_item.product.selling_plan_groups %}
+            {% for plan in group.selling_plans %}
+              <option
+                value="{{ plan.id }}"
+                {% if plan.id == sub_item.selling_plan_allocation.selling_plan.id %}
+                  selected
+                {% endif %}
+              >
+                {{ plan.options[0].value | default: plan.name }}
+              </option>
             {% endfor %}
-            comp.updateMultiple(updates);
-          }
-        "
-      >
-        {% for group in sub_item.product.selling_plan_groups %}
-          {% for plan in group.selling_plans %}
-            <option
-              value="{{ plan.id }}"
-              {% if plan.id == sub_item.selling_plan_allocation.selling_plan.id %}
-                selected
-              {% endif %}
-            >
-              {{ plan.options[0].value | default: plan.name }}
-            </option>
           {% endfor %}
-        {% endfor %}
-      </select>
-    </div>
+        </select>
+      </div>
+    {% endif %}
     <div class="cart-drawer-subscription-note">Pause, skip or cancel anytime · Free delivery on every order</div>
   </div>
 {% endif %}

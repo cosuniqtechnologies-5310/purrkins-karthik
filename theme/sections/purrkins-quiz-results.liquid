@@ -232,6 +232,23 @@
 }
 </style>
 
+<script>
+  document.addEventListener('submit', function(e) {
+    if (e.target && e.target.classList.contains('quiz-rec-form')) {
+      e.preventDefault();
+      e.stopPropagation();
+      const form = e.target;
+      const btn = form.querySelector('.quiz-rec-btn');
+      const formData = new FormData(form);
+      if (window.purrkinsAddToCart) {
+        window.purrkinsAddToCart(null, btn, formData);
+      } else {
+        form.submit();
+      }
+    }
+  });
+</script>
+
 {% schema %}
 {
   "name": "Quiz Results Profile",

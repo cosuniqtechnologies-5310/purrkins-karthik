@@ -216,12 +216,21 @@
       <!-- Purchase Box -->
       <div class="pf-purchase-options">
         {% assign first_selling_plan_id = '' %}
+        {% assign selling_plan_count = 0 %}
+        {% assign discount_percent = 15 %}
         {% for plan_group in product.selling_plan_groups %}
           {% for plan in plan_group.selling_plans %}
-            {% assign first_selling_plan_id = plan.id %}
-            {% break %}
+            {% assign selling_plan_count = selling_plan_count | plus: 1 %}
+            {% if first_selling_plan_id == '' %}
+              {% assign first_selling_plan_id = plan.id %}
+              {% if plan.price_adjustments.size > 0 %}
+                {% assign adj = plan.price_adjustments.first %}
+                {% if adj.value_type == 'percentage' and adj.value > 0 %}
+                  {% assign discount_percent = adj.value %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
           {% endfor %}
-          {% if first_selling_plan_id != '' %}{% break %}{% endif %}
         {% endfor %}
 
         {% form 'product', product, class: 'pf-main-form' %}
@@ -230,7 +239,8 @@
           {% endif %}
           <div class="pf-purchase-box">
             {% assign price = product.price %}
-            {% assign discount_price = price | times: 0.85 %}
+            {% assign discount_multiplier = 100.0 | minus: discount_percent | divided_by: 100.0 %}
+            {% assign discount_price = price | times: discount_multiplier %}
 
             {% if first_selling_plan_id != '' %}
               <label class="pf-purchase-option active">
@@ -240,8 +250,38 @@
                       <div class="pf-po-title-area-flex">
                         <input type="radio" name="purchase_type" value="subscription" checked>
                         <span class="pf-po-title">Monthly plan</span>
-                        <span class="pf-po-badge">Save 15%</span>
+                        <span class="pf-po-badge">Save {{ discount_percent }}%</span>
                       </div>
+                      {% if selling_plan_count > 1 %}
+                        <div class="pf-po-plan-selector">
+                          <label
+                            for="pf-selling-plan-select"
+                            style="font-size: 12px; font-weight: 700; color: #005a36; display: block; margin-bottom: 4px;"
+                            >Delivery frequency:</label
+                          >
+                          <select
+                            id="pf-selling-plan-select"
+                            name="selling_plan"
+                            class="pf-subscription-plan-select"
+                            aria-label="Subscription Delivery Frequency"
+                          >
+                            {% for plan_group in product.selling_plan_groups %}
+                              {% for plan in plan_group.selling_plans %}
+                                <option
+                                  value="{{ plan.id }}"
+                                  {% if plan.id == first_selling_plan_id %}
+                                    selected
+                                  {% endif %}
+                                >
+                                  {{ plan.name }}
+                                </option>
+                              {% endfor %}
+                            {% endfor %}
+                          </select>
+                        </div>
+                      {% else %}
+                        <input type="hidden" name="selling_plan" value="{{ first_selling_plan_id }}">
+                      {% endif %}
                       <ul class="pf-po-features">
                         <li>
                           <svg
@@ -253,7 +293,7 @@
                           >
                             <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
                           </svg>
-                          Save 15% every order
+                          Save {{ discount_percent }}% every order
                         </li>
                         <li>
                           <svg
@@ -375,8 +415,14 @@
               </div>
 
               <button type="submit" name="add" class="btn-add-to-cart pf-add-to-cart-btn">
-                <span class="pf-button-price-display">₹{{ discount_price | money_without_currency }}</span> | Add to
-                Cart
+                <span class="pf-button-price-display">
+                  {%- if first_selling_plan_id != '' -%}
+                    ₹{{ discount_price | money_without_currency }}
+                  {%- else -%}
+                    ₹{{ price | money_without_currency }}
+                  {%- endif -%}
+                </span>
+                | Add to Cart
               </button>
             </div>
           </div>
@@ -563,6 +609,12 @@
     fill: #ffe330 !important;
     stroke: #ffe330 !important;
   }
+  div#pc-preview-text {
+    color: var(--color-text-primary, #121217) !important;
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+  }
 </style>
 
 <script>
@@ -694,6 +746,12 @@
                   purchaseBox.querySelectorAll('.pf-purchase-option').forEach(el => el.classList.remove('active'));
                   selectedRadio.closest('.pf-purchase-option').classList.add('active');
 
+                  // Enable or disable selling plan inputs based on chosen purchase type
+                  const sellingPlanInputs = purchaseBox.querySelectorAll('[name="selling_plan"], [name="data-first-plan"]');
+                  sellingPlanInputs.forEach(input => {
+                      input.disabled = (plan !== 'subscription');
+                  });
+
                   // Sync with subscription app widget manually when clicked
                   const appContainer = document.querySelector('.subscriptions_app_embed_block');
                   if (appContainer) {
@@ -707,6 +765,13 @@
                           const oneTime = appContainer.querySelector('input[data-radio-type="one_time_purchase"]');
                           if (oneTime && !oneTime.checked) oneTime.click();
                       }
+                  }
+              }
+
+              if (e.target && e.target.classList.contains('pf-subscription-plan-select')) {
+                  const firstPlanHidden = purchaseBox.querySelector('input[name="data-first-plan"]');
+                  if (firstPlanHidden) {
+                      firstPlanHidden.value = e.target.value;
                   }
               }
           }

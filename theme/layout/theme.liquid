@@ -88,8 +88,16 @@
           });
 
           const fallback_plan = formData.get('data-first-plan');
+          const purchase_type = formData.get('purchase_type');
+          const explicit_selling_plan = formData.get('selling_plan');
 
-          if (existingRow) {
+          if (purchase_type === 'onetime') {
+            selling_plan = null;
+          } else if (purchase_type === 'subscription') {
+            selling_plan = explicit_selling_plan || fallback_plan || (existingRow ? existingRow.dataset.firstSellingPlanId : null);
+          } else if (explicit_selling_plan) {
+            selling_plan = explicit_selling_plan;
+          } else if (existingRow) {
             if (existingRow.dataset.subscriptionType === 'subscribe' && existingRow.dataset.firstSellingPlanId) {
               selling_plan = existingRow.dataset.firstSellingPlanId;
             } else {
