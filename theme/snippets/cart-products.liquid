@@ -291,8 +291,21 @@
                       {%- endif -%}
 
                       {%- if item.selling_plan_allocation -%}
-                        <div class="cart-item__selling-plan-badge" style="display:inline-flex; align-items:center; gap:6px; background:#eaf6f0; color:#005a36; font-size:12px; font-weight:700; padding:4px 10px; border-radius:12px; margin-top:6px;">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <div
+                          class="cart-item__selling-plan-badge"
+                          style="display:inline-flex; align-items:center; gap:6px; background:#eaf6f0; color:#005a36; font-size:12px; font-weight:700; padding:4px 10px; border-radius:12px; margin-top:6px;"
+                        >
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                          >
                             <polyline points="23 4 23 10 17 10"></polyline>
                             <polyline points="1 20 1 14 7 14"></polyline>
                             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
@@ -316,20 +329,49 @@
 
                   <div class="cart-items__unit-price-wrapper">
                     {% liquid
-                      assign item_sub_saving = item.final_price | times: 15 | divided_by: 100
-                      assign item_sub_price = item.final_price | minus: item_sub_saving
+                      assign item_line_sub_saving = item.final_line_price | times: 15 | divided_by: 100
+                      assign item_line_sub_price = item.final_line_price | minus: item_line_sub_saving
                     %}
-                    <div class="cart-item-price-box" data-regular-price="{{ item.final_price }}" data-sub-price="{{ item_sub_price }}">
-                      <span class="cart-item-regular-price" {% if item.selling_plan_allocation %}style="display: none;"{% endif %}>
-                        {% if item.variant.compare_at_price > item.original_price %}
-                          <s class="compare-at-price" style="color: #8E9298; font-size: 14px; text-decoration: line-through; margin-bottom: 2px;">{{ item.variant.compare_at_price | money }}</s>
+                    <div
+                      class="cart-item-price-box"
+                      data-regular-price="{{ item.final_line_price }}"
+                      data-sub-price="{{ item_line_sub_price }}"
+                    >
+                      <span
+                        class="cart-item-regular-price"
+                        {% if item.selling_plan_allocation %}
+                          style="display: none;"
                         {% endif %}
-                        <span style="font-size: 20px; font-weight: 600; color: #16130F;">{{ item.original_price | money }}</span>
+                      >
+                        {% if item.variant.compare_at_price > item.original_price %}
+                          <s
+                            class="compare-at-price"
+                            style="color: #8E9298; font-size: 14px; text-decoration: line-through; margin-bottom: 2px; display: block;"
+                          >
+                            {{- item.variant.compare_at_price | times: item.quantity | money -}}
+                          </s>
+                        {% endif %}
+                        <span style="font-size: 18px; font-weight: 700; color: #16130F; display: block;">
+                          {{- item.final_line_price | money -}}
+                        </span>
                       </span>
 
-                      <span class="cart-item-subscription-price" {% unless item.selling_plan_allocation %}style="display: none;"{% endunless %} style="display: inline-flex; flex-direction: column; align-items: flex-end; text-align: right;">
-                        <s class="compare-at-price" style="color: #8E9298; font-size: 14px; text-decoration: line-through; margin-bottom: 2px;">{{ item.original_price | money }}</s>
-                        <span style="font-size: 20px; font-weight: 700; color: #16130F;">{{ item.selling_plan_allocation.price | default: item_sub_price | money }}</span>
+                      <span
+                        class="cart-item-subscription-price"
+                        {% unless item.selling_plan_allocation %}
+                          style="display: none;"
+                        {% endunless %}
+                        style="display: inline-flex; flex-direction: column; align-items: flex-end; text-align: right;"
+                      >
+                        <s
+                          class="compare-at-price"
+                          style="color: #8E9298; font-size: 14px; text-decoration: line-through; margin-bottom: 2px; display: block;"
+                        >
+                          {{- item.original_line_price | money -}}
+                        </s>
+                        <span style="font-size: 18px; font-weight: 700; color: #16130F; display: block;">
+                          {{- item.selling_plan_allocation.price | default: item_line_sub_price | money -}}
+                        </span>
                       </span>
                     </div>
                   </div>
@@ -346,29 +388,68 @@
                   <div class="cart-items__quantity-controls">
                     {%- if context == 'drawer' -%}
                       <div class="cart-drawer-pack-row">
-                        <select
-                          class="cart-drawer-pack-select"
-                          aria-label="{{ 'accessibility.quantity' | t }}"
-                          onchange="
-                            var line = {{ item.index | plus: 1 }};
-                            var qty = parseInt(this.value);
-                            var comp = this.closest('cart-items-component');
-                            if (comp && comp.updateQuantity) { comp.updateQuantity({line: line, quantity: qty, action: 'change'}); }
-                          "
-                        >
-                          {% for i in (1..5) %}
-                            <option value="{{ i }}" {% if item.quantity == i %}selected{% endif %}>
-                              {{ i }} {% if i == 1 %}Pack{% else %}Packs{% endif %}
-                            </option>
-                          {% endfor %}
-                        </select>
+                        <div class="cart-drawer-qty-pill" role="group" aria-label="{{ 'accessibility.quantity' | t }}">
+                          <button
+                            class="qty-btn qty-minus"
+                            type="button"
+                            aria-label="{{ 'accessibility.decrease_quantity' | t }}"
+                            onclick="
+                              var line = {{ item.index | plus: 1 }};
+                              var currentQty = {{ item.quantity }};
+                              var newQty = currentQty - 1;
+                              var comp = this.closest('cart-items-component');
+                              if (comp && comp.updateQuantity) {
+                                comp.updateQuantity({
+                                  line: line,
+                                  quantity: newQty,
+                                  action: newQty === 0 ? 'clear' : 'change'
+                                });
+                              }
+                            "
+                          >
+                            <span class="qty-symbol minus-symbol" aria-hidden="true">—</span>
+                          </button>
+                          <span class="qty-number" aria-live="polite">{{ item.quantity }}</span>
+                          <button
+                            class="qty-btn qty-plus"
+                            type="button"
+                            aria-label="{{ 'accessibility.increase_quantity' | t }}"
+                            onclick="
+                              var line = {{ item.index | plus: 1 }};
+                              var currentQty = {{ item.quantity }};
+                              var newQty = currentQty + 1;
+                              var comp = this.closest('cart-items-component');
+                              if (comp && comp.updateQuantity) {
+                                comp.updateQuantity({
+                                  line: line,
+                                  quantity: newQty,
+                                  action: 'change'
+                                });
+                              }
+                            "
+                          >
+                            <span class="qty-symbol plus-symbol" aria-hidden="true">+</span>
+                          </button>
+                        </div>
                         <button
                           class="cart-drawer-remove-btn"
                           type="button"
                           aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
-                          on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
+                          onclick="
+                            var line = {{ item.index | plus: 1 }};
+                            var comp = this.closest('cart-items-component');
+                            if (comp && comp.updateQuantity) {
+                              comp.updateQuantity({
+                                line: line,
+                                quantity: 0,
+                                action: 'clear'
+                              });
+                            }
+                          "
                           {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
-                          {% if can_remove == false %}hidden{% endif %}
+                          {% if can_remove == false %}
+                            hidden
+                          {% endif %}
                         >
                           Remove
                         </button>
@@ -393,7 +474,9 @@
                         aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
                         on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
                         {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
-                        {% if can_remove == false %}hidden{% endif %}
+                        {% if can_remove == false %}
+                          hidden
+                        {% endif %}
                       >
                         {{- 'icon-delete.svg' | inline_asset_content -}}
                         <span class="visually-hidden">{{ 'accessibility.remove' | t }}</span>
@@ -473,30 +556,84 @@
     width: 100%;
   }
 
-  /* Drawer pack row: select + remove side by side */
+  /* Drawer pack row: pill with +/- and remove underneath */
   .cart-drawer-pack-row {
     display: flex;
-    align-items: center;
-    gap: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
     margin-top: 8px;
   }
 
-  .cart-drawer-pack-select {
-    appearance: none;
-    padding: 5px 28px 5px 12px;
-    border-radius: 999px;
-    border: 1.5px solid #121217;
-    background-color: transparent;
-    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23121217' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    font-size: 13px;
-    font-weight: 600;
-    font-family: inherit;
-    color: #121217;
+  .cart-drawer-qty-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 94px;
+    height: 32px;
+    padding: 0 4px;
+    border: 1.5px solid #16130f;
+    border-radius: 9999px;
+    background-color: #fff;
+    box-sizing: border-box;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  }
+
+  .cart-drawer-qty-pill .qty-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    width: 28px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
+    color: #16130f;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1;
+    user-select: none;
     outline: none;
-    min-width: 90px;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+  }
+
+  .cart-drawer-qty-pill .qty-btn:active {
+    opacity: 0.5;
+    transform: scale(0.88);
+  }
+
+  .cart-drawer-qty-pill .qty-symbol {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    color: #16130f;
+    pointer-events: none;
+  }
+
+  .cart-drawer-qty-pill .qty-symbol.minus-symbol {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+  }
+
+  .cart-drawer-qty-pill .qty-symbol.plus-symbol {
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .cart-drawer-qty-pill .qty-number {
+    font-size: 15px;
+    font-weight: 700;
+    color: #16130f;
+    font-family: inherit;
+    text-align: center;
+    min-width: 22px;
+    line-height: 1;
+    user-select: none;
   }
 
   .cart-drawer-remove-btn {
@@ -504,14 +641,17 @@
     border: none;
     padding: 0;
     font-size: 13px;
-    color: #888;
+    color: #8e9298;
     text-decoration: underline;
     cursor: pointer;
     font-family: inherit;
+    font-weight: 400;
+    line-height: 1.2;
+    transition: color 0.15s ease;
   }
 
   .cart-drawer-remove-btn:hover {
-    color: #333;
+    color: #16130f;
   }
 
   .cart-drawer-subscription-info {
@@ -538,7 +678,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 12px 18px;
-    border: 1.5px solid #21252A;
+    border: 1.5px solid #21252a;
     border-radius: 16px;
     font-size: 14px;
     margin-bottom: 10px;
