@@ -143,6 +143,14 @@
 
           <tbody role="rowgroup">
             {% for item in cart.items %}
+              {% assign is_item_sub = false %}
+              {% if item.selling_plan_allocation %}
+                {% assign is_item_sub = true %}
+              {% elsif item.properties._subscription == 'true' or item.properties.subscription == 'true' %}
+                {% assign is_item_sub = true %}
+              {% elsif cart.attributes._subscription == 'true' %}
+                {% assign is_item_sub = true %}
+              {% endif %}
               {% assign first_selling_plan_id = '' %}
               {% for group in item.product.selling_plan_groups %}
                 {% for plan in group.selling_plans %}
@@ -158,7 +166,7 @@
                 ref="cartItemRows[]"
                 data-parent-key="{{ item.parent_relationship.parent.key }}"
                 data-key="{{ item.key }}"
-                data-subscription-type="{% if item.selling_plan_allocation %}subscribe{% else %}one-time{% endif %}"
+                data-subscription-type="{% if is_item_sub %}subscribe{% else %}one-time{% endif %}"
                 data-first-selling-plan-id="{{ first_selling_plan_id }}"
                 data-current-quantity="{{ item.quantity }}"
               >
@@ -339,7 +347,7 @@
                     >
                       <span
                         class="cart-item-regular-price"
-                        {% if item.selling_plan_allocation %}
+                        {% if is_item_sub %}
                           style="display: none;"
                         {% endif %}
                       >
@@ -358,7 +366,7 @@
 
                       <span
                         class="cart-item-subscription-price"
-                        {% unless item.selling_plan_allocation %}
+                        {% unless is_item_sub %}
                           style="display: none;"
                         {% endunless %}
                         style="display: inline-flex; flex-direction: column; align-items: flex-end; text-align: right;"
@@ -369,7 +377,7 @@
                         >
                           {{- item.original_line_price | money -}}
                         </s>
-                        <span style="font-size: 18px; font-weight: 700; color: #16130F; display: block;">
+                        <span style="font-size: 18px; font-weight: 800; color: #005a36; display: block;">
                           {{- item.selling_plan_allocation.price | default: item_line_sub_price | money -}}
                         </span>
                       </span>
@@ -517,7 +525,28 @@
                   role="cell"
                   headers="productTotal"
                 >
-                  <text-component value="{{ price | strip_html }}">{{ price }}</text-component>
+                  <span
+                    class="cart-item-price-reg"
+                    {% if is_item_sub %}
+                      style="display: none;"
+                    {% endif %}
+                  >
+                    <text-component value="{{ price | strip_html }}">{{ price }}</text-component>
+                  </span>
+                  <span
+                    class="cart-item-price-sub"
+                    {% unless is_item_sub %}
+                      style="display: none;"
+                    {% endunless %}
+                    style="display: inline-flex; flex-direction: column; align-items: flex-end; text-align: right;"
+                  >
+                    <s style="color: #8E9298; font-size: 13px; text-decoration: line-through;">
+                      {{- item.original_line_price | money -}}
+                    </s>
+                    <span style="font-weight: 800; color: #005a36; font-size: 16px;">
+                      {{- item.selling_plan_allocation.price | default: item_line_sub_price | money -}}
+                    </span>
+                  </span>
                   {%- if item.unit_price_measurement -%}
                     <div class="cart-items__price-unit cart-secondary-typography">
                       {% render 'unit-price', price: unit_price, measurement: item.unit_price_measurement %}

@@ -51,6 +51,7 @@ class CartDrawerComponent extends Component {
     if (this.#themeDrawer?.hasAttribute('open')) {
       this.#handleDrawerOpen();
     }
+    this.#syncSubscriptionUI();
   }
 
   disconnectedCallback() {
@@ -59,6 +60,24 @@ class CartDrawerComponent extends Component {
     this.#themeDrawer?.removeEventListener(DrawerOpenEvent.eventName, this.#handleDrawerOpen);
     this.removeEventListener('click', this.#handleTabClick);
   }
+
+  #syncSubscriptionUI = () => {
+    const activeTab = /** @type {HTMLElement | null} */ (this.querySelector('.cart-drawer-tab.active'));
+    const isSub = activeTab ? activeTab.dataset.tab === 'subscribe' : false;
+    document.body.dataset.cartTab = isSub ? 'subscribe' : 'one-time';
+
+    const subPrices = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-item-subscription-price, .cart-item-price-sub'));
+    const regPrices = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-item-regular-price, .cart-item-price-reg'));
+    const subInfo = /** @type {HTMLElement | null} */ (this.querySelector('.cart-drawer-subscription-info'));
+    const checkoutReg = /** @type {HTMLElement | null} */ (this.querySelector('.checkout-regular-price'));
+    const checkoutSub = /** @type {HTMLElement | null} */ (this.querySelector('.checkout-sub-price'));
+
+    subPrices.forEach(el => el.style.display = isSub ? 'inline-flex' : 'none');
+    regPrices.forEach(el => el.style.display = isSub ? 'none' : 'inline-flex');
+    if (subInfo) subInfo.style.display = isSub ? 'flex' : 'none';
+    if (checkoutReg) checkoutReg.style.display = isSub ? 'none' : 'inline';
+    if (checkoutSub) checkoutSub.style.display = isSub ? 'inline' : 'none';
+  };
 
   #handleTabClick = (/** @type {Event} */ event) => {
     const target = /** @type {HTMLElement} */ (event.target);
@@ -74,23 +93,10 @@ class CartDrawerComponent extends Component {
       b.classList.toggle('active', b.dataset.tab === tab);
     });
 
-    // 2. Set dataset on body for CSS styling
-    document.body.dataset.cartTab = tab;
+    // 2. Sync subscription UI elements
+    this.#syncSubscriptionUI();
 
-    // 3. Immediately toggle subscription UI elements
-    const subPrices = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-item-subscription-price'));
-    const regPrices = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-item-regular-price'));
-    const subInfo = /** @type {HTMLElement | null} */ (this.querySelector('.cart-drawer-subscription-info'));
-    const checkoutReg = /** @type {HTMLElement | null} */ (this.querySelector('.checkout-regular-price'));
-    const checkoutSub = /** @type {HTMLElement | null} */ (this.querySelector('.checkout-sub-price'));
-
-    subPrices.forEach(el => el.style.display = isSub ? 'inline-flex' : 'none');
-    regPrices.forEach(el => el.style.display = isSub ? 'none' : 'inline-flex');
-    if (subInfo) subInfo.style.display = isSub ? 'flex' : 'none';
-    if (checkoutReg) checkoutReg.style.display = isSub ? 'none' : 'inline';
-    if (checkoutSub) checkoutSub.style.display = isSub ? 'inline' : 'none';
-
-    // 4. Persist subscription status in cart attributes
+    // 3. Persist subscription status in cart attributes
     const daysSelect = /** @type {HTMLSelectElement | null} */ (this.querySelector('#cart-drawer-delivery-days-select'));
     const chosenDays = daysSelect?.value || '30 days';
 
