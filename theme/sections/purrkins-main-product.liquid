@@ -243,10 +243,11 @@
       <div class="pf-purchase-options">
         {% assign first_selling_plan_id = '' %}
         {% assign selling_plan_count = 0 %}
-        {% assign discount_percent = 20 %}
+        {% assign discount_percent = 15 %}
         {% if product.metafields.custom.subscription_discount != blank %}
           {% assign discount_percent = product.metafields.custom.subscription_discount.value
             | default: product.metafields.custom.subscription_discount
+            | times: 1
           %}
         {% endif %}
         {% for plan_group in product.selling_plan_groups %}
@@ -322,8 +323,19 @@
                         >
                           {% for plan_group in product.selling_plan_groups %}
                             {% for plan in plan_group.selling_plans %}
+                              {% assign plan_disc = discount_percent %}
+                              {% if plan.price_adjustments.size > 0 %}
+                                {% assign p_adj = plan.price_adjustments.first %}
+                                {% if p_adj.value_type == 'percentage' and p_adj.value > 0 %}
+                                  {% assign plan_disc = p_adj.value %}
+                                {% endif %}
+                              {% endif %}
+                              {% assign plan_mult = 100.0 | minus: plan_disc | divided_by: 100.0 %}
+                              {% assign plan_sub_price = price | times: plan_mult | round %}
                               <option
                                 value="{{ plan.id }}"
+                                data-discount="{{ plan_disc }}"
+                                data-sub-price="{{ plan_sub_price }}"
                                 {% if plan.id == first_selling_plan_id %}
                                   selected
                                 {% endif %}
@@ -338,7 +350,7 @@
                       <input type="hidden" name="selling_plan" value="{{ first_selling_plan_id }}">
                     {% endif %}
                     <ul class="pf-po-features">
-                      <li>
+                      <li class="pf-po-feature-save">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="15"
@@ -348,7 +360,7 @@
                         >
                           <path d="M1.01855 4.83421L4.41963 8.23487C4.8175 8.6327 5.46254 8.63268 5.86039 8.23483L13.0757 1.01953" stroke="#121217" stroke-width="2.0376" stroke-linecap="round"/>
                         </svg>
-                        Save {{ discount_percent }}% every order
+                        <span>Save {{ discount_percent }}% every order</span>
                       </li>
                       <li>
                         <svg
@@ -426,18 +438,28 @@
                 {% endfor %}
               </select>
 
-              <select name="quantity" class="pf-qv-packs-select pf-qty-dropdown">
-                <option value="1">1 Pack</option>
-                <option value="2">2 Packs</option>
-                <option value="3">3 Packs</option>
-                <option value="4">4 Packs</option>
-                <option value="5">5 Packs</option>
-                <option value="6">6 Packs</option>
-                <option value="7">7 Packs</option>
-                <option value="8">8 Packs</option>
-                <option value="9">9 Packs</option>
-                <option value="10">10 Packs</option>
-              </select>
+              <div class="pf-qty-selector">
+                <button type="button" class="pf-qty-btn pf-qty-minus" aria-label="Decrease quantity">
+                  <svg width="12" height="2" viewBox="0 0 12 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 1H11" stroke="#21252A" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </button>
+                <input
+                  type="number"
+                  class="pf-qty-input"
+                  name="quantity"
+                  value="1"
+                  min="1"
+                  step="1"
+                  readonly
+                >
+                <button type="button" class="pf-qty-btn pf-qty-plus" aria-label="Increase quantity">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 6H11" stroke="#21252A" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M6 1V11" stroke="#21252A" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
 
               <button type="submit" name="add" class="btn-add-to-cart pf-add-to-cart-btn">
                 <span class="pf-button-price-display">{{ discount_price_formatted }}</span>
@@ -689,65 +711,134 @@
           });
       });
 
-      // Pricing Logic
+      // Helper: Update pricing display on Add to Cart button and purchase cards
+      function updatePricing(purchaseBox) {
+          if (!purchaseBox) purchaseBox = document.querySelector('.pf-purchase-box');
+          if (!purchaseBox) return;
+
+          const container = purchaseBox.querySelector('.pf-qv-addtocart');
+          if (!container) return;
+
+          const qtyInput = container.querySelector('.pf-qty-input') || container.querySelector('.pf-qty-dropdown');
+          const priceDisplay = container.querySelector('.pf-button-price-display');
+
+          const regPrice = parseFloat(container.getAttribute('data-reg-price')) / 100 || 0;
+          const subPrice = parseFloat(container.getAttribute('data-sub-price')) / 100 || 0;
+
+          const qty = qtyInput ? (parseInt(qtyInput.value, 10) || 1) : 1;
+          const selectedRadio = purchaseBox.querySelector('input[name="purchase_type"]:checked');
+          const plan = selectedRadio ? selectedRadio.value : 'subscription';
+
+          const basePrice = plan === 'subscription' ? subPrice : regPrice;
+          const total = basePrice * qty;
+
+          if (priceDisplay) {
+              priceDisplay.textContent = '₹' + (total % 1 === 0 ? total.toFixed(0) : total.toFixed(2));
+          }
+      }
+
+      // Quantity selector +/- click handlers
+      document.addEventListener('click', function(e) {
+          const btn = e.target.closest('.pf-qty-btn');
+          if (!btn) return;
+
+          const selector = btn.closest('.pf-qty-selector');
+          if (!selector) return;
+
+          const input = selector.querySelector('.pf-qty-input');
+          if (!input) return;
+
+          let val = parseInt(input.value, 10) || 1;
+          if (btn.classList.contains('pf-qty-minus')) {
+              if (val > 1) val--;
+          } else if (btn.classList.contains('pf-qty-plus')) {
+              val++;
+          }
+          input.value = val;
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+
+          const purchaseBox = selector.closest('.pf-purchase-box');
+          if (purchaseBox) {
+              updatePricing(purchaseBox);
+          }
+      });
+
+      // Pricing & Plan Selection Change Logic
       document.addEventListener('change', function(e) {
           const isRadio = e.target.name === 'purchase_type';
-          const isSelect = e.target.classList.contains('pf-qty-dropdown');
+          const isQty = e.target.classList.contains('pf-qty-input') || e.target.classList.contains('pf-qty-dropdown');
+          const isPlanSelect = e.target.classList.contains('pf-subscription-plan-select');
 
-          if (isRadio || isSelect) {
-              const purchaseBox = e.target.closest('.pf-purchase-box');
-              if (!purchaseBox) return;
+          const purchaseBox = e.target.closest('.pf-purchase-box');
+          if (!purchaseBox) return;
 
-              const container = purchaseBox.querySelector('.pf-qv-addtocart');
-              if (!container) return;
+          if (isPlanSelect) {
+              const selectedOption = e.target.options[e.target.selectedIndex];
+              if (selectedOption) {
+                  const discount = selectedOption.getAttribute('data-discount');
+                  const subPriceCents = selectedOption.getAttribute('data-sub-price');
 
-              const qtyDropdown = container.querySelector('.pf-qty-dropdown');
-              const priceDisplay = container.querySelector('.pf-button-price-display');
+                  if (discount) {
+                      const badge = purchaseBox.querySelector('.pf-po-badge');
+                      if (badge) badge.textContent = `Save ${discount}%`;
 
-              const regPrice = parseFloat(container.getAttribute('data-reg-price')) / 100 || 0;
-              const subPrice = parseFloat(container.getAttribute('data-sub-price')) / 100 || 0;
-
-              const qty = qtyDropdown ? (parseInt(qtyDropdown.value) || 1) : 1;
-              const selectedRadio = purchaseBox.querySelector('input[name="purchase_type"]:checked');
-              const plan = selectedRadio ? selectedRadio.value : 'subscription';
-
-              const basePrice = plan === 'subscription' ? subPrice : regPrice;
-              const total = basePrice * qty;
-
-              if (priceDisplay) {
-                  priceDisplay.textContent = '₹' + (total % 1 === 0 ? total.toFixed(0) : total.toFixed(2));
-              }
-
-              if (isRadio && selectedRadio) {
-                  purchaseBox.querySelectorAll('.pf-purchase-option').forEach(el => el.classList.remove('active'));
-                  selectedRadio.closest('.pf-purchase-option').classList.add('active');
-
-                  // Enable or disable selling plan inputs based on chosen purchase type
-                  const sellingPlanInputs = purchaseBox.querySelectorAll('[name="selling_plan"], [name="data-first-plan"]');
-                  sellingPlanInputs.forEach(input => {
-                      input.disabled = (plan !== 'subscription');
-                  });
-
-                  // Sync with subscription app widget manually when clicked
-                  const appContainer = document.querySelector('.subscriptions_app_embed_block');
-                  if (appContainer) {
-                      if (plan === 'subscription') {
-                          const subGroup = appContainer.querySelector('input[data-radio-type="selling_plan_group"]');
-                          if (subGroup && !subGroup.checked) subGroup.click();
-
-                          const subPlan = appContainer.querySelector('input[data-radio-type="selling_plan"]');
-                          if (subPlan && !subPlan.checked) subPlan.click();
-                      } else {
-                          const oneTime = appContainer.querySelector('input[data-radio-type="one_time_purchase"]');
-                          if (oneTime && !oneTime.checked) oneTime.click();
+                      const featureSave = purchaseBox.querySelector('.pf-po-feature-save span');
+                      if (featureSave) {
+                          featureSave.textContent = `Save ${discount}% every order`;
                       }
                   }
-              }
 
-              if (e.target && e.target.classList.contains('pf-subscription-plan-select')) {
+                  if (subPriceCents) {
+                      const container = purchaseBox.querySelector('.pf-qv-addtocart');
+                      if (container) {
+                          container.setAttribute('data-sub-price', subPriceCents);
+                          const subPrice = parseFloat(subPriceCents) / 100;
+                          const poPrice = purchaseBox.querySelector('.pf-purchase-option[data-type="subscription"] .pf-po-price');
+                          if (poPrice) {
+                              const unit = poPrice.textContent.split('/')[1] || 'Pouch';
+                              poPrice.textContent = `₹${subPrice % 1 === 0 ? subPrice.toFixed(0) : subPrice.toFixed(2)}/${unit}`;
+                          }
+                      }
+                  }
+
                   const firstPlanHidden = purchaseBox.querySelector('input[name="data-first-plan"]');
                   if (firstPlanHidden) {
                       firstPlanHidden.value = e.target.value;
+                  }
+              }
+          }
+
+          if (isRadio || isQty || isPlanSelect) {
+              updatePricing(purchaseBox);
+          }
+
+          if (isRadio) {
+              const selectedRadio = purchaseBox.querySelector('input[name="purchase_type"]:checked');
+              const plan = selectedRadio ? selectedRadio.value : 'subscription';
+
+              purchaseBox.querySelectorAll('.pf-purchase-option').forEach(el => el.classList.remove('active'));
+              if (selectedRadio) {
+                  selectedRadio.closest('.pf-purchase-option').classList.add('active');
+              }
+
+              // Enable or disable selling plan inputs based on chosen purchase type
+              const sellingPlanInputs = purchaseBox.querySelectorAll('[name="selling_plan"], [name="data-first-plan"]');
+              sellingPlanInputs.forEach(input => {
+                  input.disabled = (plan !== 'subscription');
+              });
+
+              // Sync with subscription app widget manually when clicked
+              const appContainer = document.querySelector('.subscriptions_app_embed_block');
+              if (appContainer) {
+                  if (plan === 'subscription') {
+                      const subGroup = appContainer.querySelector('input[data-radio-type="selling_plan_group"]');
+                      if (subGroup && !subGroup.checked) subGroup.click();
+
+                      const subPlan = appContainer.querySelector('input[data-radio-type="selling_plan"]');
+                      if (subPlan && !subPlan.checked) subPlan.click();
+                  } else {
+                      const oneTime = appContainer.querySelector('input[data-radio-type="one_time_purchase"]');
+                      if (oneTime && !oneTime.checked) oneTime.click();
                   }
               }
           }
@@ -756,7 +847,7 @@
       // Click card to select purchase option
       document.querySelectorAll('.pf-purchase-box .pf-purchase-option').forEach(option => {
           option.addEventListener('click', function(e) {
-              if (e.target.tagName && (e.target.tagName.toLowerCase() === 'select' || e.target.tagName.toLowerCase() === 'option')) return;
+              if (e.target.closest('.pf-qty-selector') || e.target.closest('.btn-add-to-cart') || e.target.tagName.toLowerCase() === 'select' || e.target.tagName.toLowerCase() === 'option' || e.target.tagName.toLowerCase() === 'button' || e.target.tagName.toLowerCase() === 'input') return;
               const radio = this.querySelector('input[name="purchase_type"]');
               if (radio && !radio.checked) {
                   radio.checked = true;
@@ -764,6 +855,46 @@
               }
           });
       });
+
+      // Dynamic sync with app subscription plans & discount
+      fetch('/apps/purrkins/subscription-plans')
+          .then(res => res.json())
+          .then(data => {
+              if (data && data.success && data.discountPercent) {
+                  const discount = data.discountPercent;
+                  const purchaseBox = document.querySelector('.pf-purchase-box');
+                  if (!purchaseBox) return;
+
+                  // Update badge
+                  const badge = purchaseBox.querySelector('.pf-po-badge');
+                  if (badge) badge.textContent = `Save ${discount}%`;
+
+                  // Update feature text
+                  const featureSave = purchaseBox.querySelector('.pf-po-feature-save span');
+                  if (featureSave) featureSave.textContent = `Save ${discount}% every order`;
+
+                  // Update sub price
+                  const container = purchaseBox.querySelector('.pf-qv-addtocart');
+                  if (container) {
+                      const regPrice = parseFloat(container.getAttribute('data-reg-price')) / 100 || 0;
+                      if (regPrice > 0) {
+                          const subPrice = regPrice * (100 - discount) / 100;
+                          container.setAttribute('data-sub-price', Math.round(subPrice * 100));
+
+                          const poPrice = purchaseBox.querySelector('.pf-purchase-option[data-type="subscription"] .pf-po-price');
+                          if (poPrice) {
+                              const unit = poPrice.textContent.split('/')[1] || 'Pouch';
+                              poPrice.textContent = `₹${subPrice % 1 === 0 ? subPrice.toFixed(0) : subPrice.toFixed(2)}/${unit}`;
+                          }
+                          updatePricing(purchaseBox);
+                      }
+                  }
+              }
+          })
+          .catch(() => {});
+
+      // Initial price display sync
+      updatePricing();
 
       // Swiper Init
       if (typeof Swiper !== 'undefined') {
