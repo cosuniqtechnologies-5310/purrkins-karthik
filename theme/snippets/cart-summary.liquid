@@ -273,34 +273,40 @@
   {% endif %}
 {% endfor %}
 
-{% if has_sub_item and section_id == 'cart-drawer-section' %}
-  <div class="cart-drawer-subscription-info" style="margin-bottom: 20px;">
-    {% if total_sub_saving > 0 %}
-      <div class="cart-drawer-subscription-savings">You're saving {{ total_sub_saving | money }} on this order</div>
-    {% endif %}
-    {% if sub_item != nil and sub_item.product.selling_plan_groups.size > 0 %}
-      <div class="cart-drawer-subscription-plan">
-        <span class="plan-label">Delivers every</span>
-        <select
-          class="plan-select"
-          aria-label="Delivery frequency"
-          onchange="if (window.purrkinsChangeCartSellingPlan) { window.purrkinsChangeCartSellingPlan(this.value, this); } else { window.location.reload(); }"
-        >
-          {% for group in sub_item.product.selling_plan_groups %}
-            {% for plan in group.selling_plans %}
-              <option
-                value="{{ plan.id }}"
-                {% if plan.id == sub_item.selling_plan_allocation.selling_plan.id %}
-                  selected
-                {% endif %}
-              >
-                {{ plan.options[0].value | default: plan.name }}
-              </option>
-            {% endfor %}
-          {% endfor %}
-        </select>
-      </div>
-    {% endif %}
+{% if cart.attributes._subscription == 'true' %}
+  {% assign has_sub_item = true %}
+{% endif %}
+
+{% assign fallback_sub_saving = cart.total_price | times: 15 | divided_by: 100 %}
+{% if total_sub_saving == 0 %}
+  {% assign display_sub_saving = fallback_sub_saving %}
+{% else %}
+  {% assign display_sub_saving = total_sub_saving %}
+{% endif %}
+{% assign sub_checkout_total = cart.total_price | minus: display_sub_saving %}
+
+{% if section_id == 'cart-drawer-section' %}
+  <div class="cart-drawer-subscription-info" style="margin-bottom: 16px; width: 100%; {% unless has_sub_item %}display: none;{% endunless %}">
+    <div class="cart-drawer-subscription-savings" data-saving="{{ display_sub_saving }}">
+      You're saving <span class="sub-savings-amount">{{ display_sub_saving | money }}</span> on this order
+    </div>
+
+    <div class="cart-drawer-subscription-plan">
+      <span class="plan-label">Delivers every</span>
+      <select
+        class="plan-select"
+        id="cart-drawer-delivery-days-select"
+        aria-label="Delivery frequency"
+        onchange="if (window.purrkinsChangeDeliveryFrequency) { window.purrkinsChangeDeliveryFrequency(this.value, this); }"
+      >
+        {% assign selected_days = cart.attributes._delivery_frequency | default: '30 days' %}
+        <option value="15 days" {% if selected_days == '15 days' %}selected{% endif %}>15 days</option>
+        <option value="30 days" {% if selected_days == '30 days' %}selected{% endif %}>30 days</option>
+        <option value="45 days" {% if selected_days == '45 days' %}selected{% endif %}>45 days</option>
+        <option value="60 days" {% if selected_days == '60 days' %}selected{% endif %}>60 days</option>
+      </select>
+    </div>
+
     <div class="cart-drawer-subscription-note">Pause, skip or cancel anytime · Free delivery on every order</div>
   </div>
 {% endif %}
@@ -363,8 +369,11 @@
         value="{{ cart.total_price | money | strip_html }}"
         class="cart__checkout-price"
         data-cart-subtotal
+        data-regular-total="{{ cart.total_price }}"
+        data-sub-total="{{ sub_checkout_total }}"
       >
-        {{- cart.total_price | money -}}
+        <span class="checkout-regular-price" {% if has_sub_item %}style="display: none;"{% endif %}>{{- cart.total_price | money -}}</span>
+        <span class="checkout-sub-price" {% unless has_sub_item %}style="display: none;"{% endunless %}>{{- sub_checkout_total | money -}}</span>
       </text-component>
       <span class="cart__checkout-separator">|</span>
       <span>{{ 'content.checkout' | t }}</span>

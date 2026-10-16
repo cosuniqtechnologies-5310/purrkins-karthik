@@ -66,6 +66,45 @@ class CartDrawerComponent extends Component {
     if (!btn) return;
 
     const tab = btn.dataset.tab;
+    const isSub = tab === 'subscribe';
+
+    // 1. Toggle tab buttons visually
+    const tabs = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-drawer-tab'));
+    tabs.forEach(b => {
+      b.classList.toggle('active', b.dataset.tab === tab);
+    });
+
+    // 2. Set dataset on body for CSS styling
+    document.body.dataset.cartTab = tab;
+
+    // 3. Immediately toggle subscription UI elements
+    const subPrices = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-item-subscription-price'));
+    const regPrices = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-item-regular-price'));
+    const subInfo = /** @type {HTMLElement | null} */ (this.querySelector('.cart-drawer-subscription-info'));
+    const checkoutReg = /** @type {HTMLElement | null} */ (this.querySelector('.checkout-regular-price'));
+    const checkoutSub = /** @type {HTMLElement | null} */ (this.querySelector('.checkout-sub-price'));
+
+    subPrices.forEach(el => el.style.display = isSub ? 'inline-flex' : 'none');
+    regPrices.forEach(el => el.style.display = isSub ? 'none' : 'inline-flex');
+    if (subInfo) subInfo.style.display = isSub ? 'flex' : 'none';
+    if (checkoutReg) checkoutReg.style.display = isSub ? 'none' : 'inline';
+    if (checkoutSub) checkoutSub.style.display = isSub ? 'inline' : 'none';
+
+    // 4. Persist subscription status in cart attributes
+    const daysSelect = /** @type {HTMLSelectElement | null} */ (this.querySelector('#cart-drawer-delivery-days-select'));
+    const chosenDays = daysSelect?.value || '30 days';
+
+    fetch('/cart/update.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        attributes: {
+          _subscription: isSub ? 'true' : '',
+          _delivery_frequency: isSub ? chosenDays : '',
+          _subscription_discount: isSub ? '15%' : ''
+        }
+      })
+    }).catch(console.error);
 
     /** @type {any} */
     const comp = this.querySelector('cart-items-component');
@@ -83,26 +122,18 @@ class CartDrawerComponent extends Component {
       const planId = row.dataset.firstSellingPlanId;
       const currentType = row.dataset.subscriptionType;
 
-      if (tab === 'subscribe' && currentType !== 'subscribe') {
+      if (isSub && currentType !== 'subscribe') {
         if (planId) {
           updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: planId });
         }
-      } else if (tab === 'one-time' && currentType === 'subscribe') {
+      } else if (!isSub && currentType === 'subscribe') {
         updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: "" });
       }
     });
 
-    const tabs = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-drawer-tab'));
-    tabs.forEach(b => {
-      b.classList.toggle('active', b.dataset.tab === tab);
-    });
-    
-    document.body.dataset.cartTab = tab;
-
     if (updatesToProcess.length === 0) return;
 
     if (updatesToProcess.length === 1) {
-      // If there's only one update, just use the native method
       const update = updatesToProcess[0];
       if (!update) return;
       comp.updateQuantity({
@@ -114,8 +145,6 @@ class CartDrawerComponent extends Component {
       return;
     }
 
-    // For multiple updates, we must use /cart/change.js because /cart/update.js doesn't support selling_plan
-    // We must update them SEQUENTIALLY to avoid Shopify Cart API race conditions.
     const lastUpdate = updatesToProcess.pop();
     if (!lastUpdate) return;
     
@@ -124,7 +153,6 @@ class CartDrawerComponent extends Component {
     
     const updateNext = (/** @type {number} */ index) => {
       if (index >= updatesToProcess.length) {
-        // All parallel updates finished, now trigger the final one via the theme's updateQuantity to morph the DOM
         comp.updateQuantity({
           line: lastUpdate.line,
           quantity: lastUpdate.quantity,
@@ -266,6 +294,27 @@ class CartDrawerComponent extends Component {
 if (!customElements.get('cart-drawer-component')) {
   customElements.define('cart-drawer-component', CartDrawerComponent);
 }
+
+/**
+ * Global helper to update delivery frequency (15 days, 30 days, 45 days, 60 days)
+ * @param {string} frequency
+ * @param {HTMLSelectElement} [selectEl]
+ */
+// @ts-ignore
+window.purrkinsChangeDeliveryFrequency = function(frequency, selectEl) {
+  if (!frequency) return;
+  fetch('/cart/update.js', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      attributes: {
+        _delivery_frequency: frequency,
+        _subscription: 'true',
+        _subscription_discount: '15%'
+      }
+    })
+  }).catch(console.error);
+};
 
 /**
  * Global helper to update selling plan frequency for all subscription items in the cart

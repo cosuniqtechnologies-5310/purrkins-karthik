@@ -98,6 +98,9 @@
               {% assign has_subscription = true %}
             {% endif %}
           {% endfor %}
+          {% if cart.attributes._subscription == 'true' %}
+            {% assign has_subscription = true %}
+          {% endif %}
           <div class="cart-drawer-tabs">
             <button class="cart-drawer-tab {% if has_subscription == false %}active{% endif %}" data-tab="one-time">
               One-time
@@ -389,13 +392,37 @@
     line-height: 1.5;
   }
 
-  /* Filter items based on active tab */
-  body[data-cart-tab='one-time'] .cart-items__table-row[data-subscription-type='subscribe'] {
+  /* Mode-based display toggle: never hide items! */
+  body[data-cart-tab='subscribe'] .cart-item-regular-price {
     display: none !important;
   }
-
-  body[data-cart-tab='subscribe'] .cart-items__table-row[data-subscription-type='one-time'] {
+  body[data-cart-tab='subscribe'] .cart-item-subscription-price {
+    display: inline-flex !important;
+  }
+  body[data-cart-tab='subscribe'] .cart-drawer-subscription-info {
+    display: flex !important;
+  }
+  body[data-cart-tab='subscribe'] .checkout-regular-price {
     display: none !important;
+  }
+  body[data-cart-tab='subscribe'] .checkout-sub-price {
+    display: inline !important;
+  }
+
+  body[data-cart-tab='one-time'] .cart-item-subscription-price {
+    display: none !important;
+  }
+  body[data-cart-tab='one-time'] .cart-item-regular-price {
+    display: inline-flex !important;
+  }
+  body[data-cart-tab='one-time'] .cart-drawer-subscription-info {
+    display: none !important;
+  }
+  body[data-cart-tab='one-time'] .checkout-sub-price {
+    display: none !important;
+  }
+  body[data-cart-tab='one-time'] .checkout-regular-price {
+    display: inline !important;
   }
 
   @media screen and (prefers-reduced-motion: no-preference) {
