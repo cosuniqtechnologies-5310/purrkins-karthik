@@ -265,17 +265,15 @@
           {% endfor %}
         {% endfor %}
 
-        {% if first_selling_plan_id == '' %}
-          {% assign first_selling_plan_id = 'gid://shopify/SellingPlan/purrkins-30-days' %}
-        {% endif %}
-
         {% assign unit_label = product.metafields.custom.unit_name.value
           | default: product.metafields.custom.unit_name
           | default: 'Pouch'
         %}
 
         {% form 'product', product, class: 'pf-main-form' %}
-          <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
+          {% if first_selling_plan_id != '' %}
+            <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
+          {% endif %}
           <div class="pf-purchase-box">
             {% assign price = product.price %}
             {% assign discount_multiplier = 100.0 | minus: discount_percent | divided_by: 100.0 %}
@@ -346,9 +344,13 @@
                           {% endfor %}
                         </select>
                       </div>
-                    {% else %}
+                    {% elsif selling_plan_count == 1 %}
                       <input type="hidden" name="selling_plan" value="{{ first_selling_plan_id }}">
                     {% endif %}
+                    <input type="hidden" name="properties[_subscription]" value="true" class="pf-sub-prop">
+                    <input type="hidden" name="properties[_subscription_discount]" value="{{ discount_percent }}%" class="pf-sub-prop">
+                    <input type="hidden" name="properties[Frequency]" value="Delivered every 30 days" class="pf-sub-prop">
+                    <input type="hidden" name="properties[_delivery_frequency]" value="30 days" class="pf-sub-prop">
                     <ul class="pf-po-features">
                       <li class="pf-po-feature-save">
                         <svg
@@ -821,8 +823,8 @@
                   selectedRadio.closest('.pf-purchase-option').classList.add('active');
               }
 
-              // Enable or disable selling plan inputs based on chosen purchase type
-              const sellingPlanInputs = purchaseBox.querySelectorAll('[name="selling_plan"], [name="data-first-plan"]');
+              // Enable or disable selling plan inputs and subscription properties based on chosen purchase type
+              const sellingPlanInputs = purchaseBox.querySelectorAll('[name="selling_plan"], [name="data-first-plan"], .pf-sub-prop');
               sellingPlanInputs.forEach(input => {
                   input.disabled = (plan !== 'subscription');
               });

@@ -94,7 +94,8 @@
           if (purchase_type === 'onetime') {
             selling_plan = null;
           } else if (purchase_type === 'subscription') {
-            selling_plan = explicit_selling_plan || fallback_plan || (existingRow ? existingRow.dataset.firstSellingPlanId : null);
+            selling_plan =
+              explicit_selling_plan || fallback_plan || (existingRow ? existingRow.dataset.firstSellingPlanId : null);
           } else if (explicit_selling_plan) {
             selling_plan = explicit_selling_plan;
           } else if (existingRow) {
@@ -118,15 +119,70 @@
               properties[propName] = value;
             }
           }
+
+          const isSub = purchase_type === 'subscription' || formData.get('_subscription') === 'true';
+          if (isSub) {
+            properties['_subscription'] = 'true';
+            properties['_subscription_discount'] = properties['_subscription_discount'] || '15%';
+            properties['Frequency'] = properties['Frequency'] || 'Delivered every 30 days';
+            properties['_delivery_frequency'] = properties['_delivery_frequency'] || '30 days';
+
+            // Also keep cart attributes in sync
+            fetch((window.Shopify && window.Shopify.routes ? window.Shopify.routes.root : '/') + 'cart/update.js', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                attributes: {
+                  _subscription: 'true',
+                  _delivery_frequency: '30 days',
+                  _subscription_discount: '15%',
+                },
+              }),
+            }).catch(() => {});
+          }
+
+          // Parse selling_plan strictly as numeric integer for Shopify API
+          let numericSellingPlan = null;
+          if (selling_plan) {
+            const raw = String(selling_plan).trim();
+            const match = raw.match(/\/SellingPlan\/(\d+)$/) || raw.match(/^(\d+)$/);
+            if (match && match[1]) {
+              const parsed = parseInt(match[1], 10);
+              if (!isNaN(parsed) && parsed > 1000) {
+                numericSellingPlan = parsed;
+              }
+            }
+          }
+
           const item = { id, quantity };
           if (Object.keys(properties).length > 0) {
             item.properties = properties;
           }
-          if (selling_plan) {
-            item.selling_plan = selling_plan;
+          if (numericSellingPlan) {
+            item.selling_plan = numericSellingPlan;
           }
           items = [item];
         }
+
+        // Sanitize any items to ensure selling_plan is strictly an integer or removed
+        items = (items || []).map((it) => {
+          const clean = { ...it };
+          if (clean.selling_plan !== undefined && clean.selling_plan !== null) {
+            const raw = String(clean.selling_plan).trim();
+            const match = raw.match(/\/SellingPlan\/(\d+)$/) || raw.match(/^(\d+)$/);
+            if (match && match[1]) {
+              const parsed = parseInt(match[1], 10);
+              if (!isNaN(parsed) && parsed > 1000) {
+                clean.selling_plan = parsed;
+              } else {
+                delete clean.selling_plan;
+              }
+            } else {
+              delete clean.selling_plan;
+            }
+          }
+          return clean;
+        });
 
         console.log('[PURRKINS CART] ADD START', { items });
 
@@ -176,8 +232,28 @@
         try {
           const rootUrl = window.Shopify && window.Shopify.routes ? window.Shopify.routes.root : '/';
           const fetchUrl = rootUrl + 'cart/add.js';
-          const res = await fetch(fetchUrl, payload);
-          const data = await res.json().catch(() => null);
+          let res = await fetch(fetchUrl, payload);
+          let data = await res.json().catch(() => null);
+
+          // Graceful fallback: If Shopify rejects with selling plan error, retry without selling_plan
+          if (!res.ok && items.some((it) => it.selling_plan)) {
+            console.warn('[PURRKINS CART] Add with selling_plan failed, retrying without selling_plan', data);
+            const fallbackItems = items.map((it) => {
+              const fb = { ...it };
+              delete fb.selling_plan;
+              return fb;
+            });
+            const fallbackPayload = {
+              ...payload,
+              body: JSON.stringify({
+                items: fallbackItems,
+                sections: cartItemComponentsSectionIds.join(','),
+                sections_url: rootUrl,
+              }),
+            };
+            res = await fetch(fetchUrl, fallbackPayload);
+            data = await res.json().catch(() => null);
+          }
 
           if (!res.ok) {
             throw new Error(data?.description || data?.message || 'Error adding to cart');
