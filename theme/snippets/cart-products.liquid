@@ -146,7 +146,10 @@
               {% assign is_item_sub = false %}
               {% if item.selling_plan_allocation %}
                 {% assign is_item_sub = true %}
-              {% elsif item.properties._subscription == 'true' or item.properties.subscription == 'true' or item.properties.Frequency != blank %}
+              {% elsif item.properties._subscription == 'true'
+                or item.properties.subscription == 'true'
+                or item.properties.Frequency != blank
+              %}
                 {% assign is_item_sub = true %}
               {% elsif cart.attributes._subscription == 'true' %}
                 {% assign is_item_sub = true %}
@@ -346,50 +349,52 @@
                     {%- endif -%}
                   </div>
 
-                  <div class="cart-items__unit-price-wrapper">
-                    <div
-                      class="cart-item-price-box"
-                      data-regular-price="{{ item.final_price }}"
-                      data-sub-price="{{ item_sub_unit_price }}"
-                    >
-                      <span
-                        class="cart-item-regular-price"
-                        {% if is_item_sub %}
-                          style="display: none;"
-                        {% endif %}
+                  {%- unless context == 'drawer' -%}
+                    <div class="cart-items__unit-price-wrapper">
+                      <div
+                        class="cart-item-price-box"
+                        data-regular-price="{{ item.final_price }}"
+                        data-sub-price="{{ item_sub_unit_price }}"
                       >
-                        {% if item.variant.compare_at_price > item.original_price %}
+                        <span
+                          class="cart-item-regular-price"
+                          {% if is_item_sub %}
+                            style="display: none;"
+                          {% endif %}
+                        >
+                          {% if item.variant.compare_at_price > item.original_price %}
+                            <s
+                              class="compare-at-price"
+                              style="color: #8E9298; font-size: 14px; text-decoration: line-through; margin-bottom: 2px; display: block;"
+                            >
+                              {{- item.variant.compare_at_price | money -}}
+                            </s>
+                          {% endif %}
+                          <span style="font-size: 18px; font-weight: 700; color: #16130F; display: block;">
+                            {{- item.final_price | money -}}
+                          </span>
+                        </span>
+
+                        <span
+                          class="cart-item-subscription-price"
+                          {% unless is_item_sub %}
+                            style="display: none;"
+                          {% endunless %}
+                          style="display: inline-flex; flex-direction: column; align-items: flex-start; text-align: left;"
+                        >
                           <s
                             class="compare-at-price"
                             style="color: #8E9298; font-size: 14px; text-decoration: line-through; margin-bottom: 2px; display: block;"
                           >
-                            {{- item.variant.compare_at_price | money -}}
+                            {{- item.original_price | money -}}
                           </s>
-                        {% endif %}
-                        <span style="font-size: 18px; font-weight: 700; color: #16130F; display: block;">
-                          {{- item.final_price | money -}}
+                          <span style="font-size: 18px; font-weight: 800; color: #005a36; display: block;">
+                            {{- item.selling_plan_allocation.price | default: item_sub_unit_price | money -}}
+                          </span>
                         </span>
-                      </span>
-
-                      <span
-                        class="cart-item-subscription-price"
-                        {% unless is_item_sub %}
-                          style="display: none;"
-                        {% endunless %}
-                        style="display: inline-flex; flex-direction: column; align-items: flex-start; text-align: left;"
-                      >
-                        <s
-                          class="compare-at-price"
-                          style="color: #8E9298; font-size: 14px; text-decoration: line-through; margin-bottom: 2px; display: block;"
-                        >
-                          {{- item.original_price | money -}}
-                        </s>
-                        <span style="font-size: 18px; font-weight: 800; color: #005a36; display: block;">
-                          {{- item.selling_plan_allocation.price | default: item_sub_unit_price | money -}}
-                        </span>
-                      </span>
+                      </div>
                     </div>
-                  </div>
+                  {%- endunless -%}
                 </td>
                 <td
                   class="cart-items__quantity"
@@ -422,7 +427,16 @@
                               }
                             "
                           >
-                            <span class="qty-symbol minus-symbol" aria-hidden="true">—</span>
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 12 12"
+                              fill="none"
+                              aria-hidden="true"
+                              style="pointer-events: none;"
+                            >
+                              <line x1="2" y1="6" x2="10" y2="6" stroke="#16130f" stroke-width="1.8" stroke-linecap="round"/>
+                            </svg>
                           </button>
                           <span class="qty-number" aria-live="polite">{{ item.quantity }}</span>
                           <button
@@ -443,7 +457,17 @@
                               }
                             "
                           >
-                            <span class="qty-symbol plus-symbol" aria-hidden="true">+</span>
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 12 12"
+                              fill="none"
+                              aria-hidden="true"
+                              style="pointer-events: none;"
+                            >
+                              <line x1="6" y1="2" x2="6" y2="10" stroke="#16130f" stroke-width="1.8" stroke-linecap="round"/>
+                              <line x1="2" y1="6" x2="10" y2="6" stroke="#16130f" stroke-width="1.8" stroke-linecap="round"/>
+                            </svg>
                           </button>
                         </div>
                         <button
@@ -538,7 +562,13 @@
                       style="display: none;"
                     {% endif %}
                   >
-                    <text-component value="{{ price | strip_html }}">{{ price }}</text-component>
+                    <text-component
+                      value="{{ price | strip_html }}"
+                      class="cart-drawer-price-regular"
+                      style="font-size: 18px; font-weight: 700; color: #16130f; line-height: 1.25; display: block;"
+                    >
+                      {{- price -}}
+                    </text-component>
                   </span>
                   <span
                     class="cart-item-price-sub"
@@ -547,10 +577,16 @@
                     {% endunless %}
                     style="display: inline-flex; flex-direction: column; align-items: flex-end; text-align: right;"
                   >
-                    <s style="color: #8E9298; font-size: 13px; text-decoration: line-through;">
+                    <s
+                      class="cart-drawer-sub-compare-price"
+                      style="color: #8E9298; font-size: 13px; text-decoration: line-through; margin-bottom: 2px; display: block; line-height: 1.2; font-weight: 400;"
+                    >
                       {{- item.original_line_price | money -}}
                     </s>
-                    <span style="font-weight: 800; color: #005a36; font-size: 16px;">
+                    <span
+                      class="cart-drawer-sub-final-price"
+                      style="font-weight: 700; color: #16130f; font-size: 18px; display: block; line-height: 1.25;"
+                    >
                       {{- item.selling_plan_allocation.price | default: item_line_sub_price | money -}}
                     </span>
                   </span>
@@ -598,21 +634,21 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
-    margin-top: 8px;
+    margin-top: 6px;
   }
 
   .cart-drawer-qty-pill {
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
-    width: 94px;
+    width: 88px;
     height: 32px;
     padding: 0 4px;
-    border: 1.5px solid #16130f;
+    border: 1.2px solid #16130f;
     border-radius: 9999px;
     background-color: #fff;
     box-sizing: border-box;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    box-shadow: none;
   }
 
   .cart-drawer-qty-pill .qty-btn {
@@ -620,7 +656,7 @@
     border: none;
     padding: 0;
     margin: 0;
-    width: 28px;
+    width: 26px;
     height: 100%;
     display: flex;
     align-items: center;
@@ -628,9 +664,6 @@
     cursor: pointer;
     color: #16130f;
     font-family: inherit;
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 1;
     user-select: none;
     outline: none;
     transition: transform 0.1s ease, opacity 0.1s ease;
@@ -638,36 +671,16 @@
 
   .cart-drawer-qty-pill .qty-btn:active {
     opacity: 0.5;
-    transform: scale(0.88);
-  }
-
-  .cart-drawer-qty-pill .qty-symbol {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-    color: #16130f;
-    pointer-events: none;
-  }
-
-  .cart-drawer-qty-pill .qty-symbol.minus-symbol {
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: -0.5px;
-  }
-
-  .cart-drawer-qty-pill .qty-symbol.plus-symbol {
-    font-size: 16px;
-    font-weight: 500;
+    transform: scale(0.9);
   }
 
   .cart-drawer-qty-pill .qty-number {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     color: #16130f;
     font-family: inherit;
     text-align: center;
-    min-width: 22px;
+    min-width: 20px;
     line-height: 1;
     user-select: none;
   }
@@ -676,7 +689,7 @@
     background: none;
     border: none;
     padding: 0;
-    font-size: 13px;
+    font-size: 12.5px;
     color: #8e9298;
     text-decoration: underline;
     cursor: pointer;
