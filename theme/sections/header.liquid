@@ -546,6 +546,7 @@
         link.addEventListener('click', function (e) {
           var href = link.getAttribute('href');
           var hashIdx = href.indexOf('#');
+          var token = localStorage.getItem('pk_session');
           if (hashIdx !== -1 && window.location.pathname.indexOf('/apps/purrkins/dashboard') !== -1) {
             var tabId = href.substring(hashIdx + 1);
             if (typeof window.switchDashboardTab === 'function') {
@@ -553,16 +554,27 @@
               window.switchDashboardTab(tabId);
               userDropdown.style.display = 'none';
             }
+          } else if (token) {
+            e.preventDefault();
+            var targetUrl = '/apps/purrkins/dashboard?session=' + encodeURIComponent(token);
+            if (hashIdx !== -1) {
+              targetUrl += href.substring(hashIdx);
+            }
+            if (typeof window.pkShowLoader === 'function') {
+              window.pkShowLoader();
+            }
+            window.location.href = targetUrl;
           }
         });
       });
     }
 
-    if (localStorage.getItem('pk_session')) {
+    var pkToken = localStorage.getItem('pk_session');
+    if (pkToken) {
       var links = document.querySelectorAll('a[href="/apps/purrkins/login"], a[href="/account"]');
       links.forEach(function (l) {
         if (l.id !== 'purrkins-header-user-btn') {
-          l.href = '/apps/purrkins/dashboard';
+          l.href = '/apps/purrkins/dashboard?session=' + encodeURIComponent(pkToken);
         }
       });
     }
