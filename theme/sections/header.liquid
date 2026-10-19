@@ -284,7 +284,7 @@
               <path d="M16.9992 17L13.2461 13.2468" stroke="#21252A" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </a>
-          {% if shop.customer_accounts_enabled and page.handle != 'thank-you' %}
+          {% if shop.customer_accounts_enabled %}
             <div
               id="purrkins-header-user-wrap"
               data-customer="{% if customer %}true{% else %}false{% endif %}"

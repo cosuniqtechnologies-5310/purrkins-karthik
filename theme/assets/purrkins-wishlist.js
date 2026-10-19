@@ -1,15 +1,62 @@
 // @ts-nocheck
 document.addEventListener('DOMContentLoaded', () => {
+  const SESSION_KEY = 'pk_session_wishlist';
+
+  // Helper to read session wishlist (supports localStorage with sessionStorage fallback)
+  function getSessionWishlist() {
+    try {
+      const raw = localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // Helper to save session wishlist
+  function saveSessionWishlist(items) {
+    try {
+      const str = JSON.stringify(items);
+      localStorage.setItem(SESSION_KEY, str);
+      sessionStorage.setItem(SESSION_KEY, str);
+    } catch (e) {}
+  }
+
+  // Helper to clear session wishlist
+  function clearSessionWishlist() {
+    try {
+      localStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem(SESSION_KEY);
+    } catch (e) {}
+  }
+
+  // Helper to check if customer is logged in
+  function getCustomerSessionToken() {
+    return localStorage.getItem('pk_session') || (document.cookie.match(/pk_session=([^;]+)/) || [])[1] || null;
+  }
+
+  function isCustomerLoggedIn() {
+    const wrap = document.getElementById('purrkins-header-user-wrap');
+    const isCustomer = wrap && wrap.getAttribute('data-customer') === 'true';
+    const hasShopifyCustomer = window.purrkinsCustomerId != null;
+    const hasToken = !!getCustomerSessionToken();
+    return isCustomer || hasShopifyCustomer || hasToken;
+  }
+
   window['purrkinsWishlist'] = [];
 
   const updateWishlistButtons = function (container = document) {
-    const list = window['purrkinsWishlist'];
-    if (!list) return;
+    const list = window['purrkinsWishlist'] || [];
     container.querySelectorAll('.pf-qv-fav').forEach((btn) => {
       const productId = btn.getAttribute('data-product-id');
-      const productGid = productId && productId.includes('gid://shopify/Product/') ? productId : `gid://shopify/Product/${productId}`;
+      if (!productId) return;
+      const productGid = productId.includes('gid://shopify/Product/')
+        ? productId
+        : `gid://shopify/Product/${productId}`;
       const path = btn.querySelector('path');
-      if (productId && list.includes(productGid)) {
+      const isSaved = list.includes(productGid) || list.includes(productId) || list.includes(String(productId));
+
+      if (isSaved) {
         btn.classList.add('is-saved');
         if (path) {
           path.setAttribute('fill', '#FFE330');
@@ -27,19 +74,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window['purrkinsUpdateWishlistButtons'] = updateWishlistButtons;
 
-  // Initialize wishlist state on page load
-  const pk_token = localStorage.getItem('pk_session');
-  if (pk_token) {
-    fetch('/apps/purrkins/wishlist?session=' + pk_token)
+  // Initialize wishlist state
+  function initWishlist() {
+    const sessionWishlist = getSessionWishlist();
+    const loggedIn = isCustomerLoggedIn();
+    const token = getCustomerSessionToken();
+
+    if (!loggedIn) {
+      // 1. GUEST MODE: Wishlist is entirely session-based
+      window['purrkinsWishlist'] = sessionWishlist;
+      updateWishlistButtons(document);
+      return;
+    }
+
+    // 2. CUSTOMER MODE: User is logged in
+    let url = '/apps/purrkins/wishlist';
+    if (token) {
+      url += '?session=' + encodeURIComponent(token);
+    }
+
+    // If there are session-based items saved before customer login, pass them to customer storage!
+    if (sessionWishlist.length > 0) {
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'merge',
+          product_ids: sessionWishlist,
+        }),
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          clearSessionWishlist();
+          if (data && data.success && Array.isArray(data.wishlist)) {
+            window['purrkinsWishlist'] = data.wishlist;
+            updateWishlistButtons(document);
+          } else {
+            fetchCustomerWishlist(url);
+          }
+        })
+        .catch((err) => {
+          console.error('Error merging session wishlist into customer storage:', err);
+          fetchCustomerWishlist(url);
+        });
+    } else {
+      fetchCustomerWishlist(url);
+    }
+  }
+
+  function fetchCustomerWishlist(url) {
+    fetch(url)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && data.success && data.wishlist) {
+        if (data && data.success && Array.isArray(data.wishlist)) {
           window['purrkinsWishlist'] = data.wishlist;
           updateWishlistButtons(document);
         }
       })
-      .catch((err) => console.error('Error fetching wishlist state:', err));
+      .catch((err) => console.error('Error fetching customer wishlist:', err));
   }
+
+  initWishlist();
 
   // Listen for clicks on the wishlist button globally
   document.body.addEventListener('click', (e) => {
@@ -53,34 +151,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const productId = btn.getAttribute('data-product-id');
     if (!productId) return;
 
-    const productGid = productId.includes('gid://shopify/Product/') ? productId : `gid://shopify/Product/${productId}`;
+    const productGid = productId.includes('gid://shopify/Product/')
+      ? productId
+      : `gid://shopify/Product/${productId}`;
 
     // Toggle visual state immediately (optimistic UI)
-    const svg = btn.querySelector('svg');
     const path = btn.querySelector('path');
     const isSaved = btn.classList.toggle('is-saved');
 
-    const wishlist = window['purrkinsWishlist'];
+    if (path) {
+      path.setAttribute('fill', isSaved ? '#FFE330' : 'none');
+      path.setAttribute('stroke', isSaved ? '#FFE330' : '#21252A');
+    }
 
+    // Sync in-memory wishlist
+    let wishlist = window['purrkinsWishlist'] || [];
     if (isSaved) {
-      if (path) {
-        path.setAttribute('fill', '#FFE330');
-        path.setAttribute('stroke', '#FFE330');
-      }
-      if (wishlist && !wishlist.includes(productGid)) {
+      if (!wishlist.includes(productGid)) {
         wishlist.push(productGid);
       }
     } else {
-      if (path) {
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke', '#21252A');
-      }
-      if (wishlist) {
-        window['purrkinsWishlist'] = wishlist.filter((id) => id !== productGid);
-      }
+      wishlist = wishlist.filter((id) => id !== productGid && id !== productId && id !== String(productId));
     }
+    window['purrkinsWishlist'] = wishlist;
 
-    // Sync other buttons on page for the same product
+    // Sync all matching buttons on the page for this product
     document.querySelectorAll(`.pf-qv-fav[data-product-id="${productId}"]`).forEach((otherBtn) => {
       if (otherBtn !== btn) {
         otherBtn.classList.toggle('is-saved', isSaved);
@@ -92,11 +187,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Call the app proxy endpoint
+    const loggedIn = isCustomerLoggedIn();
+
+    if (!loggedIn) {
+      // Guest: Persist to session storage
+      let sessionWl = getSessionWishlist();
+      if (isSaved) {
+        if (!sessionWl.includes(productGid)) {
+          sessionWl.push(productGid);
+        }
+      } else {
+        sessionWl = sessionWl.filter((id) => id !== productGid && id !== productId && id !== String(productId));
+      }
+      saveSessionWishlist(sessionWl);
+      return;
+    }
+
+    // Customer: Sync directly to backend customer storage
     let url = '/apps/purrkins/wishlist';
-    const currentToken = localStorage.getItem('pk_session');
+    const currentToken = getCustomerSessionToken();
     if (currentToken) {
-      url += '?session=' + currentToken;
+      url += '?session=' + encodeURIComponent(currentToken);
     }
 
     fetch(url, {
@@ -111,37 +222,24 @@ document.addEventListener('DOMContentLoaded', () => {
       }),
     })
       .then((response) => {
-        if (response.status === 401) {
-          window.location.href =
-            '/apps/purrkins/login?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
-          return Promise.reject('Unauthorized');
-        }
         if (!response.ok) throw new Error('Network response was not ok');
         return response.json();
       })
       .then((data) => {
-        console.log('Wishlist updated:', data);
+        if (data && Array.isArray(data.wishlist)) {
+          window['purrkinsWishlist'] = data.wishlist;
+        }
       })
       .catch((error) => {
-        if (error === 'Unauthorized') return;
-        console.error('Error updating wishlist:', error);
-        // Revert visual state on error
-        btn.classList.toggle('is-saved');
-        const revertedSaved = btn.classList.contains('is-saved');
-        if (path) {
-          path.setAttribute('fill', revertedSaved ? '#FFE330' : 'none');
-          path.setAttribute('stroke', revertedSaved ? '#FFE330' : '#21252A');
+        console.error('Error updating customer wishlist on server:', error);
+        // Fallback: save to session storage so the user's action is never lost
+        let sessionWl = getSessionWishlist();
+        if (isSaved && !sessionWl.includes(productGid)) {
+          sessionWl.push(productGid);
+        } else if (!isSaved) {
+          sessionWl = sessionWl.filter((id) => id !== productGid);
         }
-        const currentWl = window['purrkinsWishlist'];
-        if (revertedSaved) {
-          if (currentWl && !currentWl.includes(productGid)) {
-            currentWl.push(productGid);
-          }
-        } else {
-          if (currentWl) {
-            window['purrkinsWishlist'] = currentWl.filter((id) => id !== productGid);
-          }
-        }
+        saveSessionWishlist(sessionWl);
       });
   });
 });

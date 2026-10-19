@@ -500,6 +500,9 @@
       {% render 'quick-add-modal' %}
     {% endif %}
 
+    <script>
+      window.purrkinsCustomerId = {% if customer %}{{ customer.id | json }}{% else %}null{% endif %};
+    </script>
     <script src="{{ 'purrkins-wishlist.js' | asset_url }}" defer="defer"></script>
 
     <script>

@@ -65,12 +65,20 @@
                         {% endfor %}
                         {% if first_selling_plan_id != '' %}{% break %}{% endif %}
                       {% endfor %}
+                      {% assign rec_price = prod.price | money_without_trailing_zeros | replace: 'Rs. ', '₹' | replace: 'Rs.', '₹' %}
+                      {% if rec_price contains '₹' %}
+                        {% assign rec_price = rec_price | replace: '₹ ', '₹' | replace: '₹', '₹ ' %}
+                      {% elsif rec_price contains '$' or rec_price contains '€' or rec_price contains '£' %}
+                        {% comment %}keep as is{% endcomment %}
+                      {% else %}
+                        {% assign rec_price = '₹ ' | append: rec_price %}
+                      {% endif %}
                       <form method="post" action="/cart/add" class="quiz-rec-form">
                         <input type="hidden" name="id" value="{{ prod.variants.first.id }}">
                         {% if first_selling_plan_id != '' %}
                           <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
                         {% endif %}
-                        <button type="submit" class="quiz-rec-btn" {% if first_selling_plan_id != '' %}data-first-plan="{{ first_selling_plan_id }}"{% endif %}>Add to Cart</button>
+                        <button type="submit" class="quiz-rec-btn" {% if first_selling_plan_id != '' %}data-first-plan="{{ first_selling_plan_id }}"{% endif %}><span class="quiz-rec-btn-price">{{ rec_price }}</span> | Add to Cart</button>
                       </form>
                     </div>
                   </div>
@@ -213,12 +221,20 @@
   font-weight: 600;
   cursor: pointer;
   width: auto;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
   transition: opacity 0.2s;
 }
 
 .quiz-rec-btn:hover {
   opacity: 0.9;
+}
+
+.quiz-rec-btn-price {
+  font-weight: 700;
 }
 
 @media (max-width: 768px) {
