@@ -2561,7 +2561,13 @@ span.woocommerce-Price-amount.amount {
 
   .pf-bowl-full-ingredients p,
   .pf-bowl-text-content p {
-    margin: 0;
+    margin: 0 0 14px 0;
+    line-height: 1.7;
+  }
+
+  .pf-bowl-full-ingredients p:last-child,
+  .pf-bowl-text-content p:last-child {
+    margin-bottom: 0;
   }
 }
 

@@ -503,10 +503,18 @@
               </div>
             </div>
 
-            <!-- Feeding Guide Tab -->
+            <!-- Feeding Guide / Description Tab -->
             <div class="pf-bowl-tab-content" id="bowl-feeding-tab">
-              <div class="pf-bowl-text-content">
-                {{ product.description }}
+              <div class="pf-description-wrapper" id="pf-description-wrapper">
+                <div class="pf-bowl-text-content pf-description-content" id="pf-description-content">
+                  {{ product.description }}
+                </div>
+                <button type="button" class="pf-read-more-btn" id="pf-read-more-btn" style="display: none;" aria-expanded="false">
+                  <span class="pf-read-more-text">Read More</span>
+                  <svg class="pf-read-more-icon" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
               </div>
             </div>
 
@@ -537,41 +545,165 @@
   .pf-product-tabs-wrap {
     width: 100%;
   }
+  /* Lightbox & Header Hiding */
+  html.pf-lightbox-open,
+  body.pf-lightbox-open {
+    overflow: hidden !important;
+  }
+  html.pf-lightbox-open #header-group,
+  body.pf-lightbox-open #header-group,
+  html.pf-lightbox-open .shopify-section-group-header-group,
+  body.pf-lightbox-open .shopify-section-group-header-group,
+  html.pf-lightbox-open .site-header,
+  body.pf-lightbox-open .site-header {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+  }
   .pf-lightbox {
     display: none;
     position: fixed;
-    z-index: 9999;
+    z-index: 2147483647 !important;
     left: 0;
     top: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
-    background-color: rgba(0, 0, 0, 0.9);
+    background-color: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(4px);
   }
   .pf-lightbox-content {
     margin: auto;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 80%;
+    width: 85%;
     height: 100%;
     max-width: 900px;
+    position: relative;
+    z-index: 2147483647;
   }
   .pf-lightbox-content img {
     max-width: 100%;
-    max-height: 90vh;
+    max-height: 88vh;
     object-fit: contain;
-    border-radius: 8px;
+    border-radius: 12px;
   }
   .pf-lightbox-close {
     position: absolute;
-    top: 15px;
-    right: 35px;
-    color: #f1f1f1;
-    font-size: 40px;
-    font-weight: bold;
+    top: 24px;
+    right: 32px;
+    color: #ffffff;
+    font-size: 38px;
+    font-weight: 300;
+    line-height: 1;
     cursor: pointer;
-    z-index: 10000;
+    z-index: 2147483647;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    user-select: none;
+  }
+  .pf-lightbox-close:hover {
+    transform: scale(1.15);
+    opacity: 0.85;
+  }
+
+  /* Description & Tabs Typography & Spacing */
+  .pf-bowl-tab-content {
+    padding-top: 10px;
+  }
+  .pf-bowl-text-content,
+  .pf-bowl-full-ingredients {
+    color: #303030;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.75 !important;
+    letter-spacing: -0.15px;
+  }
+  .pf-bowl-text-content p,
+  .pf-bowl-full-ingredients p {
+    margin: 0 0 16px 0 !important;
+    line-height: 1.75 !important;
+    color: #303030;
+    font-size: 16px;
+  }
+  .pf-bowl-text-content p:last-child,
+  .pf-bowl-full-ingredients p:last-child {
+    margin-bottom: 0 !important;
+  }
+  .pf-bowl-text-content strong,
+  .pf-bowl-text-content b {
+    color: #121217;
+    font-weight: 800;
+    font-size: 16.5px;
+    line-height: 1.5;
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+
+  /* Read More / Read Less Styles */
+  .pf-description-wrapper {
+    position: relative;
+    width: 100%;
+  }
+  .pf-description-content {
+    position: relative;
+    transition: max-height 0.35s ease;
+  }
+  .pf-description-content.is-clamped {
+    max-height: 175px;
+    overflow: hidden;
+  }
+  .pf-description-content.is-clamped::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.96) 100%);
+    pointer-events: none;
+  }
+  .pf-read-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    padding: 8px 0 2px;
+    color: #121217;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    margin-top: 6px;
+    transition: color 0.2s ease;
+    font-family: inherit;
+  }
+  .pf-read-more-btn:hover {
+    color: #008060;
+  }
+  .pf-read-more-icon {
+    transition: transform 0.25s ease;
+  }
+  .pf-read-more-btn.is-expanded .pf-read-more-icon {
+    transform: rotate(180deg);
+  }
+
+  @media (max-width: 767px) {
+    .pf-bowl-text-content,
+    .pf-bowl-text-content p,
+    .pf-bowl-full-ingredients,
+    .pf-bowl-full-ingredients p {
+      font-size: 15px !important;
+      line-height: 1.7 !important;
+      margin-bottom: 14px !important;
+    }
+    .pf-description-content.is-clamped {
+      max-height: 160px;
+    }
   }
   .pf-lightbox-prev,
   .pf-lightbox-next {
@@ -641,13 +773,29 @@
           }
       };
 
+      function openLightbox(index) {
+          updateLightboxImage(index);
+          if (lightbox) {
+              lightbox.style.display = 'flex';
+          }
+          document.body.classList.add('pf-lightbox-open');
+          document.documentElement.classList.add('pf-lightbox-open');
+      }
+
+      function closeLightboxModal() {
+          if (lightbox) {
+              lightbox.style.display = 'none';
+          }
+          document.body.classList.remove('pf-lightbox-open');
+          document.documentElement.classList.remove('pf-lightbox-open');
+      }
+
       // Open lightbox from main images
       document.querySelectorAll('.pf-main-image-container').forEach(container => {
           container.addEventListener('click', function(e) {
               if (e.target.closest('.pf-qv-fav')) return; // Ignore click on fav button
               const index = parseInt(this.getAttribute('data-index')) || 0;
-              updateLightboxImage(index);
-              if (lightbox) lightbox.style.display = 'flex';
+              openLightbox(index);
           });
       });
 
@@ -655,16 +803,14 @@
       document.querySelectorAll('.pf-thumb-item').forEach(thumb => {
           thumb.addEventListener('click', function() {
               const index = parseInt(this.getAttribute('data-index')) || 0;
-              updateLightboxImage(index);
-
               // Update the main image on the page
               const mainPageImg = document.querySelector('.pf-desktop-gallery .pf-main-image-container img');
               const mainPageContainer = document.querySelector('.pf-desktop-gallery .pf-main-image-container');
-              if(mainPageImg) mainPageImg.src = galleryUrls[currentImageIndex];
-              if(mainPageContainer) mainPageContainer.setAttribute('data-index', currentImageIndex);
+              if(mainPageImg && galleryUrls[index]) mainPageImg.src = galleryUrls[index];
+              if(mainPageContainer) mainPageContainer.setAttribute('data-index', index);
 
               // Open lightbox
-              if (lightbox) lightbox.style.display = 'flex';
+              openLightbox(index);
           });
       });
 
@@ -674,17 +820,22 @@
               e.preventDefault();
               // Start at the 4th image (index 3) or 0
               const startIndex = galleryUrls.length > 3 ? 3 : 0;
-              updateLightboxImage(startIndex);
-              if (lightbox) lightbox.style.display = 'flex';
+              openLightbox(startIndex);
           });
       });
 
       if (closeLightbox && lightbox) {
-          closeLightbox.addEventListener('click', () => { lightbox.style.display = 'none'; });
+          closeLightbox.addEventListener('click', closeLightboxModal);
           lightbox.addEventListener('click', (e) => {
-              if (e.target === lightbox) lightbox.style.display = 'none';
+              if (e.target === lightbox) closeLightboxModal();
           });
       }
+
+      document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && lightbox && lightbox.style.display === 'flex') {
+              closeLightboxModal();
+          }
+      });
 
       if (prevBtn) {
           prevBtn.addEventListener('click', () => {
@@ -699,6 +850,50 @@
           });
       }
 
+      // Description Read More Logic
+      function initDescriptionReadMore() {
+          const descContent = document.getElementById('pf-description-content');
+          const readMoreBtn = document.getElementById('pf-read-more-btn');
+          if (!descContent || !readMoreBtn) return;
+          const textSpan = readMoreBtn.querySelector('.pf-read-more-text');
+
+          if (descContent.scrollHeight > 195) {
+              if (!descContent.classList.contains('is-expanded')) {
+                  descContent.classList.add('is-clamped');
+                  readMoreBtn.style.display = 'inline-flex';
+              }
+          } else if (descContent.offsetHeight > 0) {
+              descContent.classList.remove('is-clamped');
+              readMoreBtn.style.display = 'none';
+          }
+
+          readMoreBtn.onclick = function() {
+              const isClamped = descContent.classList.contains('is-clamped');
+              if (isClamped) {
+                  descContent.classList.remove('is-clamped');
+                  descContent.classList.add('is-expanded');
+                  readMoreBtn.classList.add('is-expanded');
+                  readMoreBtn.setAttribute('aria-expanded', 'true');
+                  if (textSpan) textSpan.textContent = 'Read Less';
+              } else {
+                  descContent.classList.add('is-clamped');
+                  descContent.classList.remove('is-expanded');
+                  readMoreBtn.classList.remove('is-expanded');
+                  readMoreBtn.setAttribute('aria-expanded', 'false');
+                  if (textSpan) textSpan.textContent = 'Read More';
+                  const tabsWrap = document.querySelector('.pf-bowl-tabs');
+                  if (tabsWrap) {
+                      const rect = tabsWrap.getBoundingClientRect();
+                      if (rect.top < 80) {
+                          window.scrollTo({ top: window.scrollY + rect.top - 120, behavior: 'smooth' });
+                      }
+                  }
+              }
+          };
+      }
+
+      setTimeout(initDescriptionReadMore, 120);
+
       // Tabs Logic
       const tabBtns = document.querySelectorAll('.pf-custom-tabs .pf-bowl-tab');
       const tabPanes = document.querySelectorAll('.pf-custom-tabs .pf-bowl-tab-content');
@@ -709,7 +904,12 @@
               tabPanes.forEach(p => p.classList.remove('active'));
               btn.classList.add('active');
               const target = document.getElementById(btn.dataset.target);
-              if (target) target.classList.add('active');
+              if (target) {
+                  target.classList.add('active');
+                  if (btn.dataset.target === 'bowl-feeding-tab') {
+                      setTimeout(initDescriptionReadMore, 30);
+                  }
+              }
           });
       });
 

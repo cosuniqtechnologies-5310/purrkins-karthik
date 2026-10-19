@@ -240,3 +240,16 @@ main[data-template="collection"] .comp-table-inner {
 .shopify-section-group-header-group {
   overflow: visible !important;
 }
+
+html.pf-lightbox-open #header-group,
+body.pf-lightbox-open #header-group,
+html.pf-lightbox-open .shopify-section-group-header-group,
+body.pf-lightbox-open .shopify-section-group-header-group,
+html.pf-lightbox-open .site-header,
+body.pf-lightbox-open .site-header {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
