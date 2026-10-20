@@ -260,20 +260,40 @@
 {% assign has_sub_item = false %}
 {% assign sub_item = nil %}
 {% assign total_sub_saving = 0 %}
-{% for item in cart.items %}
-  {% if item.selling_plan_allocation %}
-    {% assign has_sub_item = true %}
-    {% if sub_item == nil %}
-      {% assign sub_item = item %}
-    {% endif %}
-  {% elsif item.properties._subscription == 'true' or item.properties.subscription == 'true' or item.properties.Frequency != blank %}
-    {% assign has_sub_item = true %}
-    {% if sub_item == nil %}
-      {% assign sub_item = item %}
-    {% endif %}
+
+{% assign default_discount_pct = 15 %}
+{% if cart.attributes._subscription_discount != blank %}
+  {% assign parsed_attr_pct = cart.attributes._subscription_discount | remove: '%' | times: 1 %}
+  {% if parsed_attr_pct > 0 %}
+    {% assign default_discount_pct = parsed_attr_pct %}
   {% endif %}
-  {% assign item_saving = item.variant.price | minus: item.final_price | times: item.quantity %}
-  {% if item_saving > 0 %}
+{% endif %}
+
+{% for item in cart.items %}
+  {% assign is_curr_sub = false %}
+  {% if item.selling_plan_allocation %}
+    {% assign is_curr_sub = true %}
+  {% elsif item.properties._subscription == 'true' or item.properties.subscription == 'true' or item.properties.Frequency != blank %}
+    {% assign is_curr_sub = true %}
+  {% elsif cart.attributes._subscription == 'true' %}
+    {% assign is_curr_sub = true %}
+  {% endif %}
+
+  {% if is_curr_sub %}
+    {% assign has_sub_item = true %}
+    {% if sub_item == nil %}
+      {% assign sub_item = item %}
+    {% endif %}
+
+    {% assign item_discount_pct = default_discount_pct %}
+    {% if item.properties._subscription_discount != blank %}
+      {% assign parsed_item_pct = item.properties._subscription_discount | remove: '%' | times: 1 %}
+      {% if parsed_item_pct > 0 %}
+        {% assign item_discount_pct = parsed_item_pct %}
+      {% endif %}
+    {% endif %}
+
+    {% assign item_saving = item.final_line_price | times: item_discount_pct | divided_by: 100 %}
     {% assign total_sub_saving = total_sub_saving | plus: item_saving %}
   {% endif %}
 {% endfor %}
@@ -282,7 +302,7 @@
   {% assign has_sub_item = true %}
 {% endif %}
 
-{% assign fallback_sub_saving = cart.total_price | times: 15 | divided_by: 100 %}
+{% assign fallback_sub_saving = cart.total_price | times: default_discount_pct | divided_by: 100 %}
 {% if total_sub_saving == 0 %}
   {% assign display_sub_saving = fallback_sub_saving %}
 {% else %}
@@ -296,20 +316,25 @@
       You're saving <span class="sub-savings-amount">{{ display_sub_saving | money }}</span> on this order
     </div>
 
-    <div class="cart-drawer-subscription-plan">
+    <div class="cart-drawer-subscription-plan" id="cart-drawer-subscription-plan-card">
       <span class="plan-label">Delivers every</span>
-      <select
-        class="plan-select"
-        id="cart-drawer-delivery-days-select"
-        aria-label="Delivery frequency"
-        onchange="if (window.purrkinsChangeDeliveryFrequency) { window.purrkinsChangeDeliveryFrequency(this.value, this); }"
-      >
-        {% assign selected_days = cart.attributes._delivery_frequency | default: '30 days' %}
-        <option value="15 days" {% if selected_days == '15 days' %}selected{% endif %}>15 days</option>
-        <option value="30 days" {% if selected_days == '30 days' %}selected{% endif %}>30 days</option>
-        <option value="45 days" {% if selected_days == '45 days' %}selected{% endif %}>45 days</option>
-        <option value="60 days" {% if selected_days == '60 days' %}selected{% endif %}>60 days</option>
-      </select>
+      <div class="plan-select-wrapper">
+        <select
+          class="plan-select"
+          id="cart-drawer-delivery-days-select"
+          aria-label="Delivery frequency"
+          onchange="if (window.purrkinsChangeDeliveryFrequency) { window.purrkinsChangeDeliveryFrequency(this.value, this); }"
+        >
+          {% assign selected_days = cart.attributes._delivery_frequency | default: '30 days' %}
+          <option value="15 days" {% if selected_days == '15 days' %}selected{% endif %}>15 days</option>
+          <option value="30 days" {% if selected_days == '30 days' %}selected{% endif %}>30 days</option>
+          <option value="45 days" {% if selected_days == '45 days' %}selected{% endif %}>45 days</option>
+          <option value="60 days" {% if selected_days == '60 days' %}selected{% endif %}>60 days</option>
+        </select>
+        <svg class="plan-select-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
     </div>
 
     <div class="cart-drawer-subscription-note">Pause, skip or cancel anytime · Free delivery on every order</div>

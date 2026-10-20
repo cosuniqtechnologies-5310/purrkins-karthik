@@ -122,10 +122,14 @@
 
           const isSub = purchase_type === 'subscription' || formData.get('_subscription') === 'true';
           if (isSub) {
+            const currentDrawerSelect = document.getElementById('cart-drawer-delivery-days-select');
+            const activeFreq = window.purrkinsSelectedFrequency || (currentDrawerSelect ? currentDrawerSelect.value : null) || '30 days';
+            const activeDiscount = (window.purrkinsBackendDiscount ? (window.purrkinsBackendDiscount + '%') : null) || properties['_subscription_discount'] || '15%';
+
             properties['_subscription'] = 'true';
-            properties['_subscription_discount'] = properties['_subscription_discount'] || '15%';
-            properties['Frequency'] = properties['Frequency'] || 'Delivered every 30 days';
-            properties['_delivery_frequency'] = properties['_delivery_frequency'] || '30 days';
+            properties['_subscription_discount'] = properties['_subscription_discount'] || activeDiscount;
+            properties['Frequency'] = properties['Frequency'] || `Delivered every ${activeFreq}`;
+            properties['_delivery_frequency'] = properties['_delivery_frequency'] || activeFreq;
 
             // Also keep cart attributes in sync
             fetch((window.Shopify && window.Shopify.routes ? window.Shopify.routes.root : '/') + 'cart/update.js', {
@@ -134,8 +138,8 @@
               body: JSON.stringify({
                 attributes: {
                   _subscription: 'true',
-                  _delivery_frequency: '30 days',
-                  _subscription_discount: '15%',
+                  _delivery_frequency: activeFreq,
+                  _subscription_discount: activeDiscount,
                 },
               }),
             }).catch(() => {});

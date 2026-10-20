@@ -315,6 +315,7 @@ export class CartItemsComponent extends createViewEventElement(Component) {
    * @param {number} config.quantity - The quantity.
    * @param {string} config.action - The action.
    * @param {number|string} [config.selling_plan] - The selling plan ID.
+   * @param {Record<string, any>} [config.properties] - Line item custom properties.
    */
   updateQuantity(config) {
     const isRemove = config.quantity === 0 || config.action === 'clear';
@@ -344,6 +345,9 @@ export class CartItemsComponent extends createViewEventElement(Component) {
     };
     if (selling_plan !== undefined) {
       bodyData.selling_plan = selling_plan;
+    }
+    if (config.properties !== undefined) {
+      bodyData.properties = config.properties;
     }
     const body = JSON.stringify(bodyData);
     

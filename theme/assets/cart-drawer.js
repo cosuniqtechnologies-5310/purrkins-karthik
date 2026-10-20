@@ -2,6 +2,9 @@ import { Component } from '@theme/component';
 import { StandardEvents } from '@shopify/events';
 import { DrawerOpenEvent } from '@theme/theme-drawer';
 
+/** @type {any} */
+const _win = typeof window !== 'undefined' ? window : {};
+
 /**
  * A custom element that manages cart drawer behavior within a `<theme-drawer>`.
  *
@@ -52,6 +55,9 @@ class CartDrawerComponent extends Component {
       this.#handleDrawerOpen();
     }
     this.#syncSubscriptionUI();
+    if (typeof _win.purrkinsSyncSubscriptionPlans === 'function') {
+      _win.purrkinsSyncSubscriptionPlans();
+    }
   }
 
   disconnectedCallback() {
@@ -107,6 +113,8 @@ class CartDrawerComponent extends Component {
     const daysSelect = /** @type {HTMLSelectElement | null} */ (this.querySelector('#cart-drawer-delivery-days-select'));
     const chosenDays = daysSelect?.value || '30 days';
 
+    const discount = (_win.purrkinsBackendDiscount || 15) + '%';
+
     fetch('/cart/update.js', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -114,7 +122,7 @@ class CartDrawerComponent extends Component {
         attributes: {
           _subscription: isSub ? 'true' : '',
           _delivery_frequency: isSub ? chosenDays : '',
-          _subscription_discount: isSub ? '15%' : ''
+          _subscription_discount: isSub ? discount : ''
         }
       })
     }).catch(console.error);
@@ -125,10 +133,22 @@ class CartDrawerComponent extends Component {
 
     const rows = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-items__table-row[data-key]'));
     
-    /** @type {Array<{line: number, key: string, quantity: number, selling_plan: string}>} */
+    /** @type {Array<{line: number, key: string, quantity: number, selling_plan: string, properties: Record<string, string>}>} */
     const updatesToProcess = [];
 
-    rows.forEach((row, index) => {
+    const subProps = isSub ? {
+      _subscription: 'true',
+      _delivery_frequency: chosenDays,
+      Frequency: `Delivered every ${chosenDays}`,
+      _subscription_discount: discount
+    } : {
+      _subscription: '',
+      _delivery_frequency: '',
+      Frequency: '',
+      _subscription_discount: ''
+    };
+
+    rows.forEach((/** @type {any} */ row, /** @type {number} */ index) => {
       const key = row.dataset.key;
       if (!key) return;
       const qty = parseInt(row.dataset.currentQuantity || '1', 10);
@@ -136,11 +156,9 @@ class CartDrawerComponent extends Component {
       const currentType = row.dataset.subscriptionType;
 
       if (isSub && currentType !== 'subscribe') {
-        if (planId) {
-          updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: planId });
-        }
+        updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: planId || '', properties: subProps });
       } else if (!isSub && currentType === 'subscribe') {
-        updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: "" });
+        updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: '', properties: subProps });
       }
     });
 
@@ -153,6 +171,7 @@ class CartDrawerComponent extends Component {
         line: update.line,
         quantity: update.quantity,
         selling_plan: update.selling_plan,
+        properties: update.properties,
         action: 'change'
       });
       return;
@@ -170,6 +189,7 @@ class CartDrawerComponent extends Component {
           line: lastUpdate.line,
           quantity: lastUpdate.quantity,
           selling_plan: lastUpdate.selling_plan,
+          properties: lastUpdate.properties,
           action: 'change'
         });
         return;
@@ -190,7 +210,8 @@ class CartDrawerComponent extends Component {
         body: JSON.stringify({
           id: update.key,
           quantity: update.quantity,
-          selling_plan: update.selling_plan
+          selling_plan: update.selling_plan,
+          properties: update.properties
         })
       })
       .then(() => updateNext(index + 1))
@@ -314,24 +335,210 @@ if (!customElements.get('cart-drawer-component')) {
 }
 
 /**
+ * Dynamic sync with app subscription plans & discount
+ */
+_win.purrkinsSyncSubscriptionPlans = function() {
+  fetch('/apps/purrkins/subscription-plans')
+    .then((/** @type {any} */ res) => res.json())
+    .then((/** @type {any} */ data) => {
+      if (data && data.success) {
+        if (Array.isArray(data.plans) && data.plans.length > 0) {
+          _win.purrkinsBackendPlans = data.plans;
+        }
+        if (data.discountPercent) {
+          _win.purrkinsBackendDiscount = data.discountPercent;
+        }
+
+        // Sync dropdown options in the cart drawer
+        const selectEl = /** @type {HTMLSelectElement | null} */ (document.getElementById('cart-drawer-delivery-days-select'));
+        if (selectEl && _win.purrkinsBackendPlans && _win.purrkinsBackendPlans.length > 0) {
+          const currentVal = selectEl.value || _win.purrkinsSelectedFrequency || '30 days';
+          selectEl.innerHTML = '';
+          _win.purrkinsBackendPlans.forEach((/** @type {any} */ plan) => {
+            const opt = document.createElement('option');
+            const val = plan.label || `${plan.intervalCount} days`;
+            opt.value = val;
+            opt.textContent = val;
+            if (val === currentVal || (plan.intervalCount && currentVal.startsWith(String(plan.intervalCount)))) {
+              opt.selected = true;
+            }
+            selectEl.appendChild(opt);
+          });
+          if (!selectEl.value && selectEl.options.length > 0) {
+            selectEl.selectedIndex = 0;
+          }
+        }
+
+        // Sync subscribe tab label
+        const subTab = document.querySelector('.cart-drawer-tab[data-tab="subscribe"]');
+        if (subTab && _win.purrkinsBackendDiscount) {
+          subTab.textContent = `Subscribe - save ${_win.purrkinsBackendDiscount}%`;
+        }
+      }
+    })
+    .catch((/** @type {any} */ err) => {
+      console.warn('[PURRKINS CART] Subscription plans sync notice:', err);
+    });
+};
+
+// Initial sync
+if (typeof _win.purrkinsSyncSubscriptionPlans === 'function') {
+  _win.purrkinsSyncSubscriptionPlans();
+}
+
+/**
  * Global helper to update delivery frequency (15 days, 30 days, 45 days, 60 days)
+ * Saves to cart attributes and in the background to EVERY product in the cart drawer.
  * @param {string} frequency
  * @param {HTMLSelectElement} [selectEl]
  */
-// @ts-ignore
-window.purrkinsChangeDeliveryFrequency = function(frequency, selectEl) {
+_win.purrkinsChangeDeliveryFrequency = async function(frequency, selectEl) {
   if (!frequency) return;
-  fetch('/cart/update.js', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      attributes: {
-        _delivery_frequency: frequency,
-        _subscription: 'true',
-        _subscription_discount: '15%'
+  const card = document.getElementById('cart-drawer-subscription-plan-card');
+  if (card) card.classList.add('is-saving');
+  if (selectEl) selectEl.disabled = true;
+
+  try {
+    const days = parseInt(frequency, 10) || 30;
+    _win.purrkinsSelectedFrequency = frequency;
+
+    // 1. Ensure backend plans are available
+    let backendPlans = _win.purrkinsBackendPlans;
+    let discountPercent = _win.purrkinsBackendDiscount || 15;
+
+    if (!backendPlans || backendPlans.length === 0) {
+      try {
+        const res = await fetch('/apps/purrkins/subscription-plans');
+        const data = await res.json();
+        if (data && data.success) {
+          _win.purrkinsBackendPlans = data.plans || [];
+          _win.purrkinsBackendDiscount = data.discountPercent || 15;
+          backendPlans = _win.purrkinsBackendPlans;
+          discountPercent = _win.purrkinsBackendDiscount || 15;
+        }
+      } catch (e) {
+        console.warn('[PURRKINS CART] Plan fetch fallback:', e);
       }
-    })
-  }).catch(console.error);
+    }
+
+    // Find specific plan discount and sellingPlanId if configured per plan
+    let matchingSellingPlanId = null;
+    if (backendPlans && backendPlans.length > 0) {
+      const matchingPlan = backendPlans.find((/** @type {any} */ p) => p.intervalCount === days || String(p.label).includes(String(days)));
+      if (matchingPlan) {
+        if (typeof matchingPlan.discountPercent === 'number') {
+          discountPercent = matchingPlan.discountPercent;
+        }
+        if (matchingPlan.sellingPlanId) matchingSellingPlanId = matchingPlan.sellingPlanId;
+      }
+    }
+
+    // 2. Save cart attributes in background
+    await fetch('/cart/update.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        attributes: {
+          _delivery_frequency: frequency,
+          _subscription: 'true',
+          _subscription_discount: `${discountPercent}%`
+        }
+      })
+    });
+
+    // 3. Fetch current cart line items to update every product
+    const cartRes = await fetch('/cart.js');
+    /** @type {any} */
+    const cart = await cartRes.json();
+
+    if (!cart.items || cart.items.length === 0) {
+      if (card) card.classList.remove('is-saving');
+      if (selectEl) selectEl.disabled = false;
+      return;
+    }
+
+    /** @type {any} */
+    const comp = document.querySelector('cart-items-component');
+
+    // Build updates for every product in the cart
+    const itemsToUpdate = (cart.items || []).map((/** @type {any} */ item, /** @type {number} */ index) => {
+      const existingProps = Object.assign({}, item.properties || {});
+      existingProps['_subscription'] = 'true';
+      existingProps['_delivery_frequency'] = frequency;
+      existingProps['Frequency'] = `Delivered every ${frequency}`;
+      existingProps['_subscription_discount'] = `${discountPercent}%`;
+
+      let planToApply = item.selling_plan_allocation?.selling_plan?.id;
+      if (matchingSellingPlanId) {
+        const match = String(matchingSellingPlanId).match(/\/SellingPlan\/(\d+)$/) || String(matchingSellingPlanId).match(/^(\d+)$/);
+        if (match && match[1]) {
+          planToApply = parseInt(match[1], 10);
+        }
+      }
+
+      return {
+        line: index + 1,
+        key: item.key,
+        quantity: item.quantity,
+        properties: existingProps,
+        selling_plan: planToApply
+      };
+    });
+
+    // Update items 0 to n-2 sequentially via /cart/change.js
+    for (let i = 0; i < itemsToUpdate.length - 1; i++) {
+      const u = itemsToUpdate[i];
+      if (!u) continue;
+      /** @type {Record<string, any>} */
+      const changeBody = {
+        id: u.key,
+        quantity: u.quantity,
+        properties: u.properties
+      };
+      if (u.selling_plan) changeBody.selling_plan = u.selling_plan;
+
+      await fetch('/cart/change.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(changeBody)
+      });
+    }
+
+    // Update the last item using comp.updateQuantity so section re-renders seamlessly
+    const lastItem = itemsToUpdate[itemsToUpdate.length - 1];
+    if (!lastItem) return;
+
+    if (comp && typeof comp.updateQuantity === 'function') {
+      comp.updateQuantity({
+        line: lastItem.line,
+        quantity: lastItem.quantity,
+        properties: lastItem.properties,
+        selling_plan: lastItem.selling_plan,
+        action: 'change'
+      });
+    } else {
+      /** @type {Record<string, any>} */
+      const lastBody = {
+        id: lastItem.key,
+        quantity: lastItem.quantity,
+        properties: lastItem.properties,
+        sections: 'cart-drawer-section',
+        sections_url: window.location.pathname
+      };
+      if (lastItem.selling_plan) lastBody.selling_plan = lastItem.selling_plan;
+      await fetch('/cart/change.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(lastBody)
+      });
+      window.location.reload();
+    }
+  } catch (err) {
+    console.error('[PURRKINS CART] Error saving frequency to products:', err);
+  } finally {
+    if (card) card.classList.remove('is-saving');
+    if (selectEl) selectEl.disabled = false;
+  }
 };
 
 /**
@@ -339,8 +546,7 @@ window.purrkinsChangeDeliveryFrequency = function(frequency, selectEl) {
  * @param {string} planId
  * @param {HTMLSelectElement} [selectEl]
  */
-// @ts-ignore
-window.purrkinsChangeCartSellingPlan = function(planId, selectEl) {
+_win.purrkinsChangeCartSellingPlan = function(planId, selectEl) {
   if (!planId) return;
   /** @type {any} */
   const comp = document.querySelector('cart-items-component');
@@ -349,7 +555,7 @@ window.purrkinsChangeCartSellingPlan = function(planId, selectEl) {
 
   /** @type {Array<{line: number, key: string, quantity: number, selling_plan: string}>} */
   const updatesToProcess = [];
-  rows.forEach((row, index) => {
+  rows.forEach((/** @type {any} */ row, /** @type {number} */ index) => {
     const key = row.dataset.key;
     const qty = parseInt(row.dataset.currentQuantity || '1', 10);
     if (key) {
