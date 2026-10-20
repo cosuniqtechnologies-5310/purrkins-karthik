@@ -38,6 +38,34 @@
   line-height: 1.5;
   margin-top: 16px;
 }
+.footer-social-icons {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 28px;
+}
+.footer-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-slate-900, #21252A);
+  text-decoration: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.footer-social-link:hover {
+  opacity: 0.7;
+  transform: translateY(-2px);
+}
+.footer-social-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  fill: currentColor;
+}
+.footer-social-link--youtube .footer-social-icon {
+  width: 27px;
+  height: 24px;
+}
 .footer-col-right {
   flex: 2;
   display: flex;
@@ -129,6 +157,7 @@
 }
 @media (max-width: 767px) {
   .footer-col-right { flex-direction: column; }
+  .footer-social-icons { margin-top: 24px; gap: 20px; }
   .footer-bottom { flex-direction: column; align-items: flex-start;     margin-top: 8px;}
   .footer-illustration-img {
     max-width: 362px;
@@ -155,6 +184,54 @@
                     {{ section.settings.footer_description }}
                 </p>
                 {% endif %}
+
+                {%- liquid
+                  assign instagram_link = section.settings.instagram_link | default: settings.social_instagram_link
+                  assign linkedin_link = section.settings.linkedin_link | default: settings.social_linkedin_link
+                  assign facebook_link = section.settings.facebook_link | default: settings.social_facebook_link
+                  assign youtube_link = section.settings.youtube_link | default: settings.social_youtube_link
+
+                  if instagram_link == blank and linkedin_link == blank and facebook_link == blank and youtube_link == blank
+                    assign instagram_link = 'https://www.instagram.com/purrkins'
+                    assign linkedin_link = 'https://www.linkedin.com/company/purrkins'
+                    assign facebook_link = 'https://www.facebook.com/purrkins'
+                    assign youtube_link = 'https://www.youtube.com/@purrkins'
+                  endif
+                -%}
+
+                <div class="footer-social-icons">
+                    {% if instagram_link != blank %}
+                    <a href="{{ instagram_link }}" class="footer-social-link footer-social-link--instagram" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+                        <svg class="footer-social-icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20">
+                            {% render 'icon', icon: 'instagram' %}
+                        </svg>
+                    </a>
+                    {% endif %}
+
+                    {% if linkedin_link != blank %}
+                    <a href="{{ linkedin_link }}" class="footer-social-link footer-social-link--linkedin" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
+                        <svg class="footer-social-icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20">
+                            {% render 'icon', icon: 'linkedin' %}
+                        </svg>
+                    </a>
+                    {% endif %}
+
+                    {% if facebook_link != blank %}
+                    <a href="{{ facebook_link }}" class="footer-social-link footer-social-link--facebook" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+                        <svg class="footer-social-icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20">
+                            {% render 'icon', icon: 'facebook' %}
+                        </svg>
+                    </a>
+                    {% endif %}
+
+                    {% if youtube_link != blank %}
+                    <a href="{{ youtube_link }}" class="footer-social-link footer-social-link--youtube" aria-label="YouTube" target="_blank" rel="noopener noreferrer">
+                        <svg class="footer-social-icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20">
+                            {% render 'icon', icon: 'youtube' %}
+                        </svg>
+                    </a>
+                    {% endif %}
+                </div>
             </div>
             
             <div class="footer-col-right">
@@ -222,6 +299,30 @@
       "id": "footer_description",
       "label": "Footer Description",
       "default": "Kitten-first nutrition, made in India. Built by a family that's cared about pet food for three decades."
+    },
+    {
+      "type": "header",
+      "content": "Social Media Links"
+    },
+    {
+      "type": "url",
+      "id": "instagram_link",
+      "label": "Instagram Link"
+    },
+    {
+      "type": "url",
+      "id": "linkedin_link",
+      "label": "LinkedIn Link"
+    },
+    {
+      "type": "url",
+      "id": "facebook_link",
+      "label": "Facebook Link"
+    },
+    {
+      "type": "url",
+      "id": "youtube_link",
+      "label": "YouTube Link"
     },
     {
       "type": "image_picker",
