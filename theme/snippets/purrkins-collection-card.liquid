@@ -1,7 +1,61 @@
-{% assign collection_to_use = current_collection | default: product.collections.first %}
-{% assign card_bg_color = collection_to_use.metafields.custom.card_bg_color | default: '#f9f9f9' %}
-{% assign card_main_color = collection_to_use.metafields.custom.card_primary_color | default: '#333' %}
+{% assign collection_to_use = current_collection %}
+{% if collection_to_use == blank or collection_to_use.handle == 'all' or collection_to_use.handle == 'frontpage' %}
+  {% for coll in product.collections %}
+    {% if coll.handle != 'all' and coll.handle != 'frontpage' %}
+      {% assign collection_to_use = coll %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+  {% if collection_to_use == blank %}
+    {% assign collection_to_use = product.collections.first %}
+  {% endif %}
+{% endif %}
+
+{% assign card_bg_color = collection_to_use.metafields.custom.card_bg_color.value | default: collection_to_use.metafields.custom.card_bg_color %}
+{% assign card_main_color = collection_to_use.metafields.custom.card_primary_color.value | default: collection_to_use.metafields.custom.card_primary_color %}
 {% assign badge_text = collection_to_use.title %}
+
+{% assign p_handle = product.handle | downcase %}
+{% assign p_title = product.title | downcase %}
+{% assign c_handle = collection_to_use.handle | downcase %}
+
+{% if badge_text == blank or badge_text == 'All' or badge_text == 'All Products' %}
+  {% if c_handle contains 'wet' or p_handle contains 'wet' or p_title contains 'broth' or p_title contains 'chicken' or p_title contains 'mackerel' or p_title contains 'kitty' %}
+    {% assign badge_text = 'Wet Fresh Food' %}
+  {% elsif c_handle contains 'dry' or p_handle contains 'dry' or p_title contains 'dry' %}
+    {% assign badge_text = 'Dry Food' %}
+  {% elsif c_handle contains 'treat' or p_handle contains 'treat' or p_title contains 'jerky' %}
+    {% assign badge_text = 'Treats' %}
+  {% elsif c_handle contains 'wellness' or p_handle contains 'wellness' %}
+    {% assign badge_text = 'Wellness' %}
+  {% elsif c_handle contains 'combo' or p_title contains 'combo' %}
+    {% assign badge_text = 'Combos' %}
+  {% else %}
+    {% assign badge_text = product.type | default: 'Purrkins' %}
+  {% endif %}
+{% endif %}
+
+{% if card_bg_color == blank or card_bg_color == '#f9f9f9' or card_bg_color == '#fff' or card_bg_color == '#ffffff' %}
+  {% if badge_text == 'Wet Fresh Food' or c_handle contains 'wet' or p_title contains 'broth' or p_title contains 'kitty' %}
+    {% assign card_bg_color = '#E5F4F2' %}
+    {% assign card_main_color = '#1D645E' %}
+  {% elsif badge_text == 'Dry Food' or c_handle contains 'dry' %}
+    {% assign card_bg_color = '#F0F6E6' %}
+    {% assign card_main_color = '#4A6B22' %}
+  {% elsif badge_text == 'Treats' or c_handle contains 'treat' or p_title contains 'jerky' %}
+    {% assign card_bg_color = '#FDEFE2' %}
+    {% assign card_main_color = '#A85923' %}
+  {% elsif badge_text == 'Wellness' or c_handle contains 'wellness' %}
+    {% assign card_bg_color = '#EBF4FA' %}
+    {% assign card_main_color = '#285A82' %}
+  {% elsif badge_text == 'Combos' or c_handle contains 'combo' %}
+    {% assign card_bg_color = '#F5EEFA' %}
+    {% assign card_main_color = '#6C3483' %}
+  {% else %}
+    {% assign card_bg_color = '#E5F4F2' %}
+    {% assign card_main_color = '#1D645E' %}
+  {% endif %}
+{% endif %}
 
 <div class="pf-collection-card-wrap">
     <div class="pf-product-card" style="background-color: {{ card_bg_color }};">
@@ -36,7 +90,7 @@
             </span>
         </div>
         <div class="pf-product-excerpt">
-            {{ product.metafields.custom.short_description | default: 'Real broth for daily hydration' }}
+            {{ product.metafields.custom.short_description.value | default: product.metafields.custom.short_description | default: 'Real broth for daily hydration' }}
         </div>
         
         <div class="pf-fbt-action">
@@ -74,7 +128,11 @@
 
         const formData = new FormData(form);
         if (window.purrkinsAddToCart) {
-            window.purrkinsAddToCart(null, btn, formData);
+            Promise.resolve(window.purrkinsAddToCart(null, btn, formData)).then(() => {
+              if (window.location.pathname.endsWith('/cart') || window.location.pathname.endsWith('/cart/')) {
+                window.location.reload();
+              }
+            });
         } else {
             console.error('purrkinsAddToCart is not defined');
         }

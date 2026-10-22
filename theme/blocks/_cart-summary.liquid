@@ -1,5 +1,3 @@
-
-
 {% assign block_settings = block.settings %}
 {% liquid
   assign custom_color = false
@@ -38,6 +36,30 @@
 </div>
 
 {% stylesheet %}
+  .cart-page .cart-summary {
+    background: #E7F5FF !important;
+    border: none !important;
+    border-radius: 20px !important;
+    box-shadow: none !important;
+    padding: 28px 24px !important;
+    box-sizing: border-box !important;
+  }
+
+  @media screen and (min-width: 750px) {
+    .cart-page .cart-summary {
+      position: sticky !important;
+      top: 100px !important;
+      align-self: start !important;
+      height: fit-content !important;
+    }
+  }
+
+  .cart-page .cart-summary__inner {
+    padding: 0 !important;
+    width: 100% !important;
+    align-items: stretch !important;
+  }
+
   .cart-summary__inner {
     display: flex;
     flex-direction: column;

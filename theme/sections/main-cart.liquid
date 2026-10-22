@@ -68,6 +68,13 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 0 var(--padding-5xl);
+    max-width: 1336px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100% !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    box-sizing: border-box !important;
   }
 
   .cart-page--empty {
@@ -105,20 +112,28 @@
   @media screen and (min-width: 750px) {
     .cart-page {
       grid-template-columns: 1fr min(50vw, var(--sidebar-width));
-      grid-template-rows: min-content min-content 1fr;
+      grid-template-rows: auto 1fr;
+    }
+
+    .cart-page__title {
+      grid-column: 1 / -1;
+      grid-row: 1;
+    }
+
+    .cart-page__items {
+      grid-column: 1;
+      grid-row: 2;
     }
 
     .cart-page__summary {
-      display: grid;
-      height: 100%;
+      display: block;
+      height: fit-content;
       grid-column: 2;
-      grid-row: 1 / -1;
-      align-self: stretch;
-      grid-template-rows: subgrid;
+      grid-row: 2;
+      align-self: start;
       padding-top: 0;
-
-      /* needed to support blurred effect from hero section */
-      position: relative;
+      position: sticky;
+      top: 100px;
     }
 
     .section--page-width .cart-page:has(.cart-summary--extend) {

@@ -883,6 +883,11 @@
       // Initialize first slide as active
       updateSlider();
 
+      window.pkByobGoToStep = function (step) {
+        currentStep = Math.max(0, Math.min(step, slides.length - 1));
+        updateSlider();
+      };
+
       const checkSlideComplete = (slide) => {
         const textInputs = Array.from(slide.querySelectorAll('input[type="text"], input[type="number"], textarea'));
         const allTextFilled = textInputs.every((input) => input.value.trim() !== '');
@@ -1017,7 +1022,7 @@
         submitBtn.textContent = 'Submitting...';
         submitBtn.disabled = true;
 
-        let currentCustomerId = "{{ customer.id }}";
+        let currentCustomerId = '{{ customer.id }}';
         if (!currentCustomerId) {
           try {
             const t = localStorage.getItem('pk_session');
@@ -1027,14 +1032,20 @@
               while (base64.length % 4) {
                 base64 += '=';
               }
-              let jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-                  return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-              }).join(''));
+              let jsonPayload = decodeURIComponent(
+                window
+                  .atob(base64)
+                  .split('')
+                  .map(function (c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                  })
+                  .join('')
+              );
               const payload = JSON.parse(jsonPayload);
-              currentCustomerId = payload.customerId || "";
+              currentCustomerId = payload.customerId || '';
             }
-          } catch(e) {
-            console.error("JWT parse error", e);
+          } catch (e) {
+            console.error('JWT parse error', e);
           }
         }
 
@@ -1043,13 +1054,13 @@
           tag: 'byob-quiz-completed',
           quiz_data: quizData,
         };
-        
+
         localStorage.setItem('recent_quiz_data', JSON.stringify(quizData));
 
         if (!payload.customerId) {
           submitBtn.textContent = 'Submit';
           submitBtn.disabled = false;
-          
+
           const loginModal = document.getElementById('byob-login-modal');
           if (loginModal) {
             loginModal.style.display = 'flex';
@@ -1073,7 +1084,14 @@
           .then(function (data) {
             console.log('[BYOB Quiz] Response:', data);
             if (data && data.success) {
-              window.location.href = '/pages/thank-you'; // Redirect only on success
+              if (
+                window.location.pathname.indexOf('dashboard') !== -1 ||
+                window.location.pathname.indexOf('account') !== -1
+              ) {
+                window.location.reload();
+              } else {
+                window.location.href = '/pages/thank-you'; // Redirect only on success
+              }
             } else {
               alert('Failed to save quiz: ' + (data.message || 'Unknown error'));
               submitBtn.textContent = 'Submit';
