@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // 1. GUEST MODE: Wishlist is entirely session-based
       window['purrkinsWishlist'] = sessionWishlist;
       updateWishlistButtons(document);
+      try { document.dispatchEvent(new CustomEvent('purrkins:wishlist:updated', { detail: { wishlist: sessionWishlist } })); } catch (e) {}
       return;
     }
 
@@ -112,6 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (data && data.success && Array.isArray(data.wishlist)) {
             window['purrkinsWishlist'] = data.wishlist;
             updateWishlistButtons(document);
+            try { document.dispatchEvent(new CustomEvent('purrkins:wishlist:updated', { detail: { wishlist: data.wishlist } })); } catch (e) {}
           } else {
             fetchCustomerWishlist(url);
           }
@@ -132,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data && data.success && Array.isArray(data.wishlist)) {
           window['purrkinsWishlist'] = data.wishlist;
           updateWishlistButtons(document);
+          try { document.dispatchEvent(new CustomEvent('purrkins:wishlist:updated', { detail: { wishlist: data.wishlist } })); } catch (e) {}
         }
       })
       .catch((err) => console.error('Error fetching customer wishlist:', err));
@@ -174,6 +177,9 @@ document.addEventListener('DOMContentLoaded', () => {
       wishlist = wishlist.filter((id) => id !== productGid && id !== productId && id !== String(productId));
     }
     window['purrkinsWishlist'] = wishlist;
+    try {
+      document.dispatchEvent(new CustomEvent('purrkins:wishlist:updated', { detail: { wishlist: wishlist } }));
+    } catch (e) {}
 
     // Sync all matching buttons on the page for this product
     document.querySelectorAll(`.pf-qv-fav[data-product-id="${productId}"]`).forEach((otherBtn) => {
