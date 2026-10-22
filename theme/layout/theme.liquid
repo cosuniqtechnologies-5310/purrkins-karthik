@@ -50,10 +50,12 @@
       let cartUpdateQueue = [];
 
       window.purrkinsAddToCart = function (itemsArr, button, formData = null) {
-        cartUpdateQueue.push({ itemsArr, button, formData });
-        if (!isUpdatingCart) {
-          processCartQueue();
-        }
+        return new Promise((resolve, reject) => {
+          cartUpdateQueue.push({ itemsArr, button, formData, resolve, reject });
+          if (!isUpdatingCart) {
+            processCartQueue();
+          }
+        });
       };
 
       async function processCartQueue() {
@@ -63,7 +65,8 @@
         }
 
         isUpdatingCart = true;
-        const { itemsArr, button, formData } = cartUpdateQueue.shift();
+        const task = cartUpdateQueue.shift();
+        const { itemsArr, button, formData, resolve, reject } = task;
 
         if (button) {
           button.dataset.originalText = button.innerHTML;
@@ -303,6 +306,13 @@
             },
           });
 
+          if (typeof resolve === 'function') {
+            resolve({
+              cart: cartData,
+              data: data,
+            });
+          }
+
           document.documentElement.dispatchEvent(new CustomEvent('cart:build', { bubbles: true }));
 
           if (button) {
@@ -317,6 +327,9 @@
             status: error?.status,
           });
           rejectPromise(error);
+          if (typeof reject === 'function') {
+            reject(error);
+          }
           if (button) {
             button.innerHTML = button.dataset.originalText || 'Add to Cart';
             button.disabled = false;
