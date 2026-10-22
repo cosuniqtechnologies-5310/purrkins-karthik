@@ -70,8 +70,9 @@ class CartDrawerComponent extends Component {
   #syncSubscriptionUI = () => {
     let activeTab = /** @type {HTMLElement | null} */ (this.querySelector('.cart-drawer-tab.active'));
     const hasSubItem = Boolean(this.querySelector('.cart-items__table-row[data-subscription-type="subscribe"]'));
-    if (!activeTab && hasSubItem) {
-      activeTab = /** @type {HTMLElement | null} */ (this.querySelector('.cart-drawer-tab[data-tab="subscribe"]'));
+    if (!activeTab) {
+      const defaultTab = hasSubItem ? 'subscribe' : 'one-time';
+      activeTab = /** @type {HTMLElement | null} */ (this.querySelector(`.cart-drawer-tab[data-tab="${defaultTab}"]`));
       if (activeTab) {
         this.querySelectorAll('.cart-drawer-tab').forEach(b => b.classList.toggle('active', b === activeTab));
       }
@@ -92,49 +93,47 @@ class CartDrawerComponent extends Component {
     if (checkoutSub) checkoutSub.style.display = isSub ? 'inline' : 'none';
   };
 
-  #handleTabClick = (/** @type {Event} */ event) => {
+  #handleTabClick = async (/** @type {Event} */ event) => {
     const target = /** @type {HTMLElement} */ (event.target);
     const btn = /** @type {HTMLElement | null} */ (target.closest('.cart-drawer-tab'));
-    if (!btn) return;
+    if (!btn || btn.classList.contains('active')) return;
 
     const tab = btn.dataset.tab;
     const isSub = tab === 'subscribe';
 
-    // 1. Toggle tab buttons visually
+    // 1. Toggle tab buttons visually immediately
     const tabs = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-drawer-tab'));
     tabs.forEach(b => {
       b.classList.toggle('active', b.dataset.tab === tab);
     });
 
-    // 2. Sync subscription UI elements
+    // 2. Sync subscription UI elements immediately
     this.#syncSubscriptionUI();
 
-    // 3. Persist subscription status in cart attributes
+    // 3. Persist subscription status in cart attributes and await it
     const daysSelect = /** @type {HTMLSelectElement | null} */ (this.querySelector('#cart-drawer-delivery-days-select'));
     const chosenDays = daysSelect?.value || '30 days';
-
     const discount = (_win.purrkinsBackendDiscount || 15) + '%';
 
-    fetch('/cart/update.js', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        attributes: {
-          _subscription: isSub ? 'true' : '',
-          _delivery_frequency: isSub ? chosenDays : '',
-          _subscription_discount: isSub ? discount : ''
-        }
-      })
-    }).catch(console.error);
+    try {
+      await fetch('/cart/update.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          attributes: {
+            _subscription: isSub ? 'true' : 'false',
+            _delivery_frequency: isSub ? chosenDays : '',
+            _subscription_discount: isSub ? discount : ''
+          }
+        })
+      });
+    } catch (err) {
+      console.error('[PURRKINS CART] Attribute update error:', err);
+    }
 
     /** @type {any} */
     const comp = this.querySelector('cart-items-component');
-    if (!comp || typeof comp.updateQuantity !== 'function') return;
-
     const rows = /** @type {NodeListOf<HTMLElement>} */ (this.querySelectorAll('.cart-items__table-row[data-key]'));
-    
-    /** @type {Array<{line: number, key: string, quantity: number, selling_plan: string, properties: Record<string, string>}>} */
-    const updatesToProcess = [];
 
     const subProps = isSub ? {
       _subscription: 'true',
@@ -148,6 +147,9 @@ class CartDrawerComponent extends Component {
       _subscription_discount: ''
     };
 
+    /** @type {Array<{line: number, key: string, quantity: number, selling_plan: number | null, properties: Record<string, string>}>} */
+    const updatesToProcess = [];
+
     rows.forEach((/** @type {any} */ row, /** @type {number} */ index) => {
       const key = row.dataset.key;
       if (!key) return;
@@ -155,14 +157,40 @@ class CartDrawerComponent extends Component {
       const planId = row.dataset.firstSellingPlanId;
       const currentType = row.dataset.subscriptionType;
 
+      let targetSellingPlan = null;
+      if (isSub && planId) {
+        const parsed = parseInt(planId, 10);
+        if (!isNaN(parsed) && parsed > 0) {
+          targetSellingPlan = parsed;
+        }
+      }
+
       if (isSub && currentType !== 'subscribe') {
-        updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: planId || '', properties: subProps });
+        updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: targetSellingPlan, properties: subProps });
       } else if (!isSub && currentType === 'subscribe') {
-        updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: '', properties: subProps });
+        updatesToProcess.push({ line: index + 1, key: key, quantity: qty, selling_plan: null, properties: subProps });
       }
     });
 
-    if (updatesToProcess.length === 0) return;
+    if (updatesToProcess.length === 0) {
+      if (comp && typeof comp.updateQuantity === 'function' && rows.length > 0) {
+        const firstRow = /** @type {HTMLElement} */ (rows[0]);
+        const firstQty = parseInt(firstRow.dataset.currentQuantity || '1', 10);
+        let firstPlan = null;
+        if (isSub && firstRow.dataset.firstSellingPlanId) {
+          const parsed = parseInt(firstRow.dataset.firstSellingPlanId, 10);
+          if (!isNaN(parsed) && parsed > 0) firstPlan = parsed;
+        }
+        comp.updateQuantity({
+          line: 1,
+          quantity: firstQty,
+          selling_plan: isSub ? firstPlan : null,
+          properties: subProps,
+          action: 'change'
+        });
+      }
+      return;
+    }
 
     if (updatesToProcess.length === 1) {
       const update = updatesToProcess[0];
@@ -183,45 +211,33 @@ class CartDrawerComponent extends Component {
     const shopifyInfo = /** @type {any} */ (window.Shopify);
     const url = shopifyInfo?.routes?.root ? shopifyInfo.routes.root + 'cart/change.js' : '/cart/change.js';
     
-    const updateNext = (/** @type {number} */ index) => {
-      if (index >= updatesToProcess.length) {
-        comp.updateQuantity({
-          line: lastUpdate.line,
-          quantity: lastUpdate.quantity,
-          selling_plan: lastUpdate.selling_plan,
-          properties: lastUpdate.properties,
-          action: 'change'
+    for (const update of updatesToProcess) {
+      try {
+        await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            id: update.key,
+            quantity: update.quantity,
+            selling_plan: update.selling_plan,
+            properties: update.properties
+          })
         });
-        return;
+      } catch (err) {
+        console.error('[PURRKINS CART] Multi-line update error:', err);
       }
-      
-      const update = updatesToProcess[index];
-      if (!update) {
-        updateNext(index + 1);
-        return;
-      }
-      
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          id: update.key,
-          quantity: update.quantity,
-          selling_plan: update.selling_plan,
-          properties: update.properties
-        })
-      })
-      .then(() => updateNext(index + 1))
-      .catch(err => {
-        console.error(err);
-        updateNext(index + 1);
-      });
-    };
-    
-    updateNext(0);
+    }
+
+    comp.updateQuantity({
+      line: lastUpdate.line,
+      quantity: lastUpdate.quantity,
+      selling_plan: lastUpdate.selling_plan,
+      properties: lastUpdate.properties,
+      action: 'change'
+    });
   };
 
   /**

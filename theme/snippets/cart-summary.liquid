@@ -271,12 +271,16 @@
 
 {% for item in cart.items %}
   {% assign is_curr_sub = false %}
-  {% if item.selling_plan_allocation %}
+  {% if cart.attributes._subscription == 'true' %}
     {% assign is_curr_sub = true %}
-  {% elsif item.properties._subscription == 'true' or item.properties.subscription == 'true' or item.properties.Frequency != blank %}
-    {% assign is_curr_sub = true %}
-  {% elsif cart.attributes._subscription == 'true' %}
-    {% assign is_curr_sub = true %}
+  {% elsif cart.attributes._subscription == 'false' %}
+    {% assign is_curr_sub = false %}
+  {% else %}
+    {% if item.selling_plan_allocation %}
+      {% assign is_curr_sub = true %}
+    {% elsif item.properties._subscription == 'true' or item.properties.subscription == 'true' or item.properties.Frequency != blank %}
+      {% assign is_curr_sub = true %}
+    {% endif %}
   {% endif %}
 
   {% if is_curr_sub %}
@@ -300,6 +304,8 @@
 
 {% if cart.attributes._subscription == 'true' %}
   {% assign has_sub_item = true %}
+{% elsif cart.attributes._subscription == 'false' %}
+  {% assign has_sub_item = false %}
 {% endif %}
 
 {% assign fallback_sub_saving = cart.total_price | times: default_discount_pct | divided_by: 100 %}

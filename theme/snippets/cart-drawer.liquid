@@ -93,18 +93,21 @@
 
           {%- comment -%} Always show the tab toggle, even when cart is empty {%- endcomment -%}
           {% assign has_subscription = false %}
-          {% for item in cart.items %}
-            {% if item.selling_plan_allocation %}
-              {% assign has_subscription = true %}
-            {% elsif item.properties._subscription == 'true'
-              or item.properties.subscription == 'true'
-              or item.properties.Frequency != blank
-            %}
-              {% assign has_subscription = true %}
-            {% endif %}
-          {% endfor %}
           {% if cart.attributes._subscription == 'true' %}
             {% assign has_subscription = true %}
+          {% elsif cart.attributes._subscription == 'false' %}
+            {% assign has_subscription = false %}
+          {% else %}
+            {% for item in cart.items %}
+              {% if item.selling_plan_allocation %}
+                {% assign has_subscription = true %}
+              {% elsif item.properties._subscription == 'true'
+                or item.properties.subscription == 'true'
+                or item.properties.Frequency != blank
+              %}
+                {% assign has_subscription = true %}
+              {% endif %}
+            {% endfor %}
           {% endif %}
           <div class="cart-drawer-tabs">
             <button class="cart-drawer-tab {% if has_subscription == false %}active{% endif %}" data-tab="one-time">

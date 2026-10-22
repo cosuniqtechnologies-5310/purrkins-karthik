@@ -143,6 +143,18 @@
                 },
               }),
             }).catch(() => {});
+          } else if (purchase_type === 'onetime') {
+            fetch((window.Shopify && window.Shopify.routes ? window.Shopify.routes.root : '/') + 'cart/update.js', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                attributes: {
+                  _subscription: 'false',
+                  _delivery_frequency: '',
+                  _subscription_discount: '',
+                },
+              }),
+            }).catch(() => {});
           }
 
           // Parse selling_plan strictly as numeric integer for Shopify API
