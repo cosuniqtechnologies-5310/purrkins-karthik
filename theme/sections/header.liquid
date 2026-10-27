@@ -308,6 +308,21 @@
                   <path d="M4.19922 17.5004C4.5968 16.1373 5.42578 14.9398 6.56172 14.0879C7.69766 13.2359 9.07929 12.7754 10.4992 12.7754C11.9191 12.7754 13.3008 13.2359 14.4367 14.0879C15.5727 14.9398 16.4016 16.1373 16.7992 17.5004" stroke="#21252A" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
               </a>
+              <script>
+                (function() {
+                  try {
+                    var token = localStorage.getItem('pk_session') || (document.cookie.match(/pk_session=([^;]+)/) ? RegExp.$1 : '');
+                    if (token) {
+                      var b = document.getElementById('purrkins-header-user-btn');
+                      if (b) {
+                        b.setAttribute('href', 'javascript:void(0)');
+                        b.setAttribute('role', 'button');
+                        b.setAttribute('aria-haspopup', 'true');
+                      }
+                    }
+                  } catch(e) {}
+                })();
+              </script>
 
               <!-- User Icon Click Popup (Screenshot 1) -->
               <div
@@ -340,12 +355,8 @@
                 </style>
                 <a href="/apps/purrkins/dashboard#overview" class="pk-nav-item">Profile</a>
                 <div style="border-bottom: 1px solid #e5e7eb; margin: 6px 20px 8px 20px;"></div>
-                <a href="/apps/purrkins/dashboard#subscriptions" class="pk-nav-item"
-                  >Subscriptions (<span id="pk-header-sub-count">0</span>)</a
-                >
-                <a href="/apps/purrkins/dashboard#reviews" class="pk-nav-item"
-                  >My Reviews (<span id="pk-header-rev-count">0</span>)</a
-                >
+                <a href="/apps/purrkins/dashboard#subscriptions" class="pk-nav-item">Subscriptions</a>
+                <a href="/apps/purrkins/dashboard#reviews" class="pk-nav-item">My Reviews</a>
                 <a href="/apps/purrkins/dashboard#wishlist" class="pk-nav-item">Wishlist</a>
                 <button type="button" id="pk-header-logout-btn" class="pk-logout-btn">Log out</button>
               </div>
@@ -497,19 +508,22 @@
       return !!(isCustomer || token || cookieMatch);
     }
 
-    // Restore cached counts immediately so dropdown is populated on every page
-    try {
-      var cachedSub = localStorage.getItem('pk_sub_count');
-      if (cachedSub !== null) {
-        var scEl = document.getElementById('pk-header-sub-count');
-        if (scEl) scEl.textContent = cachedSub;
+    function syncUserBtnState() {
+      if (!userBtn) return;
+      if (checkLoggedIn()) {
+        userBtn.setAttribute('href', 'javascript:void(0)');
+        userBtn.setAttribute('role', 'button');
+        userBtn.setAttribute('aria-haspopup', 'true');
+        userBtn.setAttribute('aria-expanded', userDropdown && userDropdown.style.display === 'block' ? 'true' : 'false');
+      } else {
+        userBtn.setAttribute('href', '/apps/purrkins/login');
+        userBtn.removeAttribute('role');
+        userBtn.removeAttribute('aria-haspopup');
+        userBtn.removeAttribute('aria-expanded');
       }
-      var cachedRev = localStorage.getItem('pk_rev_count');
-      if (cachedRev !== null) {
-        var rcEl = document.getElementById('pk-header-rev-count');
-        if (rcEl) rcEl.textContent = cachedRev;
-      }
-    } catch (e) {}
+    }
+
+    syncUserBtnState();
 
     if (userBtn && userDropdown) {
       userBtn.addEventListener('click', function (e) {
@@ -518,6 +532,7 @@
           e.stopPropagation();
           var isOpen = userDropdown.style.display === 'block';
           userDropdown.style.display = isOpen ? 'none' : 'block';
+          userBtn.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
         } else {
           window.location.href = '/apps/purrkins/login';
         }
@@ -526,6 +541,7 @@
       document.addEventListener('click', function (e) {
         if (userDropdown && !userDropdown.contains(e.target) && e.target !== userBtn && !userBtn.contains(e.target)) {
           userDropdown.style.display = 'none';
+          if (userBtn) userBtn.setAttribute('aria-expanded', 'false');
         }
       });
 
@@ -546,13 +562,14 @@
         link.addEventListener('click', function (e) {
           var href = link.getAttribute('href');
           var hashIdx = href.indexOf('#');
-          var token = localStorage.getItem('pk_session');
+          var token = localStorage.getItem('pk_session') || (document.cookie.match(/pk_session=([^;]+)/) ? RegExp.$1 : '');
           if (hashIdx !== -1 && window.location.pathname.indexOf('/apps/purrkins/dashboard') !== -1) {
             var tabId = href.substring(hashIdx + 1);
             if (typeof window.switchDashboardTab === 'function') {
               e.preventDefault();
               window.switchDashboardTab(tabId);
               userDropdown.style.display = 'none';
+              if (userBtn) userBtn.setAttribute('aria-expanded', 'false');
             }
           } else if (token) {
             e.preventDefault();
@@ -569,12 +586,18 @@
       });
     }
 
-    var pkToken = localStorage.getItem('pk_session');
-    if (pkToken) {
+    var pkToken = localStorage.getItem('pk_session') || (document.cookie.match(/pk_session=([^;]+)/) ? RegExp.$1 : '');
+    if (pkToken || checkLoggedIn()) {
       var links = document.querySelectorAll('a[href="/apps/purrkins/login"], a[href="/account"]');
       links.forEach(function (l) {
-        if (l.id !== 'purrkins-header-user-btn') {
+        if (l.id === 'purrkins-header-user-btn') {
+          l.setAttribute('href', 'javascript:void(0)');
+          l.setAttribute('role', 'button');
+          l.setAttribute('aria-haspopup', 'true');
+        } else if (pkToken) {
           l.href = '/apps/purrkins/dashboard?session=' + encodeURIComponent(pkToken);
+        } else {
+          l.href = '/apps/purrkins/dashboard';
         }
       });
     }
