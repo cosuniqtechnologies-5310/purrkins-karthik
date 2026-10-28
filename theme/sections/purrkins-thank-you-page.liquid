@@ -6,8 +6,9 @@
         handle: {{ prod.handle | json }},
         title: {{ prod.title | json }},
         image: {{ prod.featured_image | image_url: width: 200 | json }},
-        desc: {{ prod.metafields.custom.short_description | default: 'Nourishing fuel for growing kittens.' | json }},
+        desc: {{ prod.metafields.custom.short_description | default: prod.description | json }},
         variant_id: {{ prod.variants.first.id | json }},
+        price: {{ prod.price | divided_by: 100.0 | round | json }},
         tags: {{ prod.tags | json }}
       }{% unless forloop.last %},{% endunless %}
       {% endfor %}
@@ -19,71 +20,246 @@
       <h1>{{ section.settings.heading }}</h1>
       <p>{{ section.settings.subheading }}</p>
     </div>
-    {% if customer.metafields.custom.pets != blank %}
-      {% for pet in customer.metafields.custom.pets.value %}
-        <div class="quiz-results-card" style="{% if forloop.index0 > 0 %}margin-top: 40px;{% endif %}">
-          <h2>Recommend for {{ pet.name.value | default: pet.name | default: 'your kitten' }}</h2>
+    <div id="purrkins-dynamic-quiz-results">
+      {% if customer.metafields.custom.pets != blank %}
+        {% for pet in customer.metafields.custom.pets.value %}
+          <div class="quiz-results-card" style="{% if forloop.index0 > 0 %}margin-top: 40px;{% endif %}">
+            <h2>Recommend for {{ pet.name.value | default: pet.name | default: 'your kitten' }}</h2>
+
+            <div class="quiz-pills-container">
+              {% if pet.age.value != blank or pet.age != blank -%}
+                <span class="quiz-pill">{{ pet.age.value | default: pet.age }}</span>
+              {%- endif %}
+              {% if pet.weight.value != blank or pet.weight != blank -%}
+                <span class="quiz-pill">{{ pet.weight.value | default: pet.weight }}</span>
+              {%- endif %}
+              {% if pet.gender.value != blank or pet.gender != blank -%}
+                <span class="quiz-pill">{{ pet.gender.value | default: pet.gender }}</span>
+              {%- endif %}
+              {% if pet.neutered.value != blank or pet.neutered != blank -%}
+                <span class="quiz-pill">{{ pet.neutered.value | default: pet.neutered }}</span>
+              {%- endif %}
+              {% if pet.body.value != blank or pet.body != blank -%}
+                <span class="quiz-pill">{{ pet.body.value | default: pet.body }}</span>
+              {%- endif %}
+              {% if pet.activity.value != blank or pet.activity != blank -%}
+                <span class="quiz-pill">{{ pet.activity.value | default: pet.activity }}</span>
+              {%- endif %}
+
+              {% assign pet_focus = pet.focus.value | default: pet.focus %}
+              {% if pet_focus != blank %}
+                {% assign focuses = pet_focus | split: ',' %}
+                {% for f in focuses %}
+                  <span class="quiz-pill">{{ f | strip }}</span>
+                {% endfor %}
+              {% endif %}
+            </div>
+
+            <div class="quiz-recommendations-grid">
+              {% assign bg_colors = '#E8F4FE,#FFF2E8,#EAF6F0' | split: ',' %}
+              {% assign found_handles = '' %}
+              {% assign found_count = 0 %}
+
+              {% assign pet_focus = pet.focus.value | default: pet.focus %}
+              {% if pet_focus != blank %}
+                {% assign areas = pet_focus | split: ',' %}
+                {% assign search_pool = collections.all.products %}
+
+                {% for prod in search_pool %}
+                  {% assign matched = false %}
+                  {% for area in areas %}
+                    {% assign area_down = area | strip | downcase %}
+                    {% assign tags_down = prod.tags | join: ',' | downcase %}
+                    {% if tags_down contains area_down %}
+                      {% assign matched = true %}
+                    {% endif %}
+                  {% endfor %}
+
+                  {% if matched %}
+                    {% if found_handles == '' %}
+                      {% assign found_handles = prod.handle %}
+                    {% else %}
+                      {% assign found_handles = found_handles | append: ',' | append: prod.handle %}
+                    {% endif %}
+                    {% assign found_count = found_count | plus: 1 %}
+                    {% if found_count >= 3 %}{% break %}{% endif %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+
+              <!-- RENDER CARDS -->
+              {% if found_count > 0 %}
+                {% assign handle_array = found_handles | split: ',' %}
+                {% for handle in handle_array limit: 3 %}
+                  {% assign prod = all_products[handle] %}
+                  {% assign bg_color = bg_colors[forloop.index0] | default: '#E8F4FE' %}
+                  <div class="quiz-rec-card" style="background-color: {{ bg_color }};">
+                    <div class="quiz-rec-image">
+                      <img
+                        src="{{ prod.featured_image | image_url: width: 200 }}"
+                        alt="{{ prod.title }}"
+                        width="100"
+                        height="100"
+                        loading="lazy"
+                      >
+                    </div>
+                    <div class="quiz-rec-content">
+                      <h3>{{ prod.title }}</h3>
+                      <p>
+                        {{ prod.metafields.custom.short_description | default: 'Nourishing fuel for growing kittens.' }}
+                      </p>
+
+                      {% assign first_selling_plan_id = '' %}
+                      {% for plan_group in prod.selling_plan_groups %}
+                        {% for plan in plan_group.selling_plans %}
+                          {% assign first_selling_plan_id = plan.id %}
+                          {% break %}
+                        {% endfor %}
+                        {% if first_selling_plan_id != '' %}{% break %}{% endif %}
+                      {% endfor %}
+                      {% assign rec_price = prod.price
+                        | money_without_trailing_zeros
+                        | replace: 'Rs. ', '₹'
+                        | replace: 'Rs.', '₹'
+                      %}
+                      {% if rec_price contains '₹' %}
+                        {% assign rec_price = rec_price | replace: '₹ ', '₹' | replace: '₹', '₹ ' %}
+                      {% elsif rec_price contains '$' or rec_price contains '€' or rec_price contains '£' %}
+                        {% comment %}keep as is{% endcomment %}
+                      {% else %}
+                        {% assign rec_price = '₹ ' | append: rec_price %}
+                      {% endif %}
+                      <form method="post" action="{{ routes.cart_add_url }}" class="quiz-rec-form">
+                        <input type="hidden" name="id" value="{{ prod.variants.first.id }}">
+                        {% if first_selling_plan_id != '' %}
+                          <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
+                        {% endif %}
+                        <button
+                          type="submit"
+                          class="quiz-rec-btn"
+                          {% if first_selling_plan_id != '' %}
+                            data-first-plan="{{ first_selling_plan_id }}"
+                          {% endif %}
+                        >
+                          <span class="quiz-rec-btn-price">{{ rec_price }}</span> | Add to Cart
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: #f9f9f9; border-radius: 16px; border: 1px dashed #d1d1d1; color: #595961;">
+                  <h3 style="margin-top: 0; font-family: var(--purrkins-heading-font); color: #121217; margin-bottom: 8px;">
+                    No exact matches found
+                  </h3>
+                  <p style="margin-bottom: 0;">
+                    We couldn't find products that exactly match
+                    <strong>{{ pet.name.value | default: pet.name | default: 'your cat' }}'s</strong> specific focus
+                    areas. Please browse our collections below!
+                  </p>
+                </div>
+              {% endif %}
+            </div>
+
+            <p class="quiz-results-footer-note">
+              Based on {{ pet.name.value | default: pet.name | default: 'your cat' }}'s profile. Fresh water alongside
+              every meal.
+            </p>
+          </div>
+        {% endfor %}
+      {% elsif customer and customer.note %}
+        <div class="quiz-results-card">
+          {% assign kitten_name = 'your kitten' %}
+          {% if customer and customer.note %}
+            {% assign note_lines = customer.note | split: '\n' %}
+            {% for line in note_lines %}
+              {% assign key_value = line | split: ': ' %}
+              {% if key_value.size >= 2 %}
+                {% assign key = key_value[0] | strip %}
+                {% assign val = key_value[1] | strip %}
+                {% if key == 'Kitten Name' %}
+                  {% assign kitten_name = val %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+
+          <h2>Recommend for {{ kitten_name }}</h2>
 
           <div class="quiz-pills-container">
-            {% if pet.age.value != blank or pet.age != blank -%}
-              <span class="quiz-pill">{{ pet.age.value | default: pet.age }}</span>
-            {%- endif %}
-            {% if pet.weight.value != blank or pet.weight != blank -%}
-              <span class="quiz-pill">{{ pet.weight.value | default: pet.weight }}</span>
-            {%- endif %}
-            {% if pet.gender.value != blank or pet.gender != blank -%}
-              <span class="quiz-pill">{{ pet.gender.value | default: pet.gender }}</span>
-            {%- endif %}
-            {% if pet.neutered.value != blank or pet.neutered != blank -%}
-              <span class="quiz-pill">{{ pet.neutered.value | default: pet.neutered }}</span>
-            {%- endif %}
-            {% if pet.body.value != blank or pet.body != blank -%}
-              <span class="quiz-pill">{{ pet.body.value | default: pet.body }}</span>
-            {%- endif %}
-            {% if pet.activity.value != blank or pet.activity != blank -%}
-              <span class="quiz-pill">{{ pet.activity.value | default: pet.activity }}</span>
-            {%- endif %}
+            {% if customer and customer.note %}
+              {% for line in note_lines %}
+                {% assign key_value = line | split: ': ' %}
+                {% if key_value.size >= 2 %}
+                  {% assign key = key_value[0] | strip %}
+                  {% assign val = key_value[1] | strip %}
 
-            {% assign pet_focus = pet.focus.value | default: pet.focus %}
-            {% if pet_focus != blank %}
-              {% assign focuses = pet_focus | split: ',' %}
-              {% for f in focuses %}
-                <span class="quiz-pill">{{ f | strip }}</span>
+                  {% if key != 'Kitten Name' and key != 'Allergies' %}
+                    {% if key == 'Focus Areas' %}
+                      {% assign areas = val | split: ', ' %}
+                      {% for area in areas %}
+                        <span class="quiz-pill">{{ area }}</span>
+                      {% endfor %}
+                    {% else %}
+                      <span class="quiz-pill">
+                        {% if key == 'Age' or key == 'Weight' %}
+                          {{ key }} - {{ val }}
+                        {% else %}
+                          {{ val }}
+                        {% endif %}
+                      </span>
+                    {% endif %}
+                  {% endif %}
+                {% endif %}
               {% endfor %}
             {% endif %}
           </div>
 
           <div class="quiz-recommendations-grid">
             {% assign bg_colors = '#E8F4FE,#FFF2E8,#EAF6F0' | split: ',' %}
+
             {% assign found_handles = '' %}
             {% assign found_count = 0 %}
 
-            {% assign pet_focus = pet.focus.value | default: pet.focus %}
-            {% if pet_focus != blank %}
-              {% assign areas = pet_focus | split: ',' %}
-              {% assign search_pool = collections.all.products %}
-
-              {% for prod in search_pool %}
-                {% assign matched = false %}
-                {% for area in areas %}
-                  {% assign area_down = area | strip | downcase %}
-                  {% assign tags_down = prod.tags | join: ',' | downcase %}
-                  {% if tags_down contains area_down %}
-                    {% assign matched = true %}
-                  {% endif %}
-                {% endfor %}
-
-                {% if matched %}
-                  {% if found_handles == '' %}
-                    {% assign found_handles = prod.handle %}
-                  {% else %}
-                    {% assign found_handles = found_handles | append: ',' | append: prod.handle %}
-                  {% endif %}
-                  {% assign found_count = found_count | plus: 1 %}
-                  {% if found_count >= 3 %}{% break %}{% endif %}
+            <!-- QUIZ FILTERING LOGIC -->
+            {% if customer and customer.note %}
+              {% assign areas_string = '' %}
+              {% assign note_lines = customer.note | split: '\n' %}
+              {% for line in note_lines %}
+                {% assign key_value = line | split: ': ' %}
+                {% assign key = key_value[0] | strip %}
+                {% if key == 'Focus Areas' %}
+                  {% assign areas_string = key_value[1] | strip %}
                 {% endif %}
               {% endfor %}
+
+              {% if areas_string != blank %}
+                {% assign areas = areas_string | split: ', ' %}
+                {% assign search_pool = collections.all.products %}
+
+                {% for prod in search_pool %}
+                  {% assign matched = false %}
+                  {% for area in areas %}
+                    {% assign area_down = area | downcase %}
+                    {% assign tags_down = prod.tags | join: ',' | downcase %}
+                    {% if tags_down contains area_down %}
+                      {% assign matched = true %}
+                    {% endif %}
+                  {% endfor %}
+
+                  {% if matched %}
+                    {% if found_handles == '' %}
+                      {% assign found_handles = prod.handle %}
+                    {% else %}
+                      {% assign found_handles = found_handles | append: ',' | append: prod.handle %}
+                    {% endif %}
+                    {% assign found_count = found_count | plus: 1 %}
+                    {% if found_count >= 3 %}{% break %}{% endif %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
             {% endif %}
+            <!-- END QUIZ FILTERING LOGIC -->
 
             <!-- RENDER CARDS -->
             {% if found_count > 0 %}
@@ -146,343 +322,168 @@
                 </div>
               {% endfor %}
             {% else %}
-              <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: #f9f9f9; border-radius: 16px; border: 1px dashed #d1d1d1; color: #595961;">
-                <h3 style="margin-top: 0; font-family: var(--purrkins-heading-font); color: #121217; margin-bottom: 8px;">
-                  No exact matches found
-                </h3>
-                <p style="margin-bottom: 0;">
-                  We couldn't find products that exactly match
-                  <strong>{{ pet.name.value | default: pet.name | default: 'your cat' }}'s</strong> specific focus
-                  areas. Please browse our collections below!
-                </p>
-              </div>
-            {% endif %}
-          </div>
-
-          <p class="quiz-results-footer-note">
-            Based on {{ pet.name.value | default: pet.name | default: 'your cat' }}'s profile. Fresh water alongside
-            every meal.
-          </p>
-        </div>
-      {% endfor %}
-    {% elsif customer and customer.note %}
-      <div class="quiz-results-card">
-        {% assign kitten_name = 'your kitten' %}
-        {% if customer and customer.note %}
-          {% assign note_lines = customer.note | split: '\n' %}
-          {% for line in note_lines %}
-            {% assign key_value = line | split: ': ' %}
-            {% if key_value.size >= 2 %}
-              {% assign key = key_value[0] | strip %}
-              {% assign val = key_value[1] | strip %}
-              {% if key == 'Kitten Name' %}
-                {% assign kitten_name = val %}
-              {% endif %}
-            {% endif %}
-          {% endfor %}
-        {% endif %}
-
-        <h2>Recommend for {{ kitten_name }}</h2>
-
-        <div class="quiz-pills-container">
-          {% if customer and customer.note %}
-            {% for line in note_lines %}
-              {% assign key_value = line | split: ': ' %}
-              {% if key_value.size >= 2 %}
-                {% assign key = key_value[0] | strip %}
-                {% assign val = key_value[1] | strip %}
-
-                {% if key != 'Kitten Name' and key != 'Allergies' %}
-                  {% if key == 'Focus Areas' %}
-                    {% assign areas = val | split: ', ' %}
-                    {% for area in areas %}
-                      <span class="quiz-pill">{{ area }}</span>
-                    {% endfor %}
-                  {% else %}
-                    <span class="quiz-pill">
-                      {% if key == 'Age' or key == 'Weight' %}
-                        {{ key }} - {{ val }}
+              {% assign bundles_col = collections.bundles %}
+              {% if bundles_col and bundles_col.products.size > 0 %}
+                {% for prod in bundles_col.products limit: 3 %}
+                  {% assign bg_color = '#E8F4FE' %}
+                  <div class="quiz-rec-card" style="background-color: {{ bg_color }};">
+                    <div class="quiz-rec-image">
+                      <img
+                        src="{{ prod.featured_image | image_url: width: 200 }}"
+                        alt="{{ prod.title | escape }}"
+                        width="100"
+                        height="100"
+                        loading="lazy"
+                      >
+                    </div>
+                    <div class="quiz-rec-content">
+                      <h3>{{ prod.title | escape }}</h3>
+                      <p>
+                        {{
+                          prod.metafields.custom.short_description
+                          | default: 'Nourishing fuel for growing kittens.'
+                          | escape
+                        }}
+                      </p>
+                      {% assign first_selling_plan_id = '' %}
+                      {% for plan_group in prod.selling_plan_groups %}
+                        {% for plan in plan_group.selling_plans %}
+                          {% assign first_selling_plan_id = plan.id %}
+                          {% break %}
+                        {% endfor %}
+                        {% if first_selling_plan_id != '' %}{% break %}{% endif %}
+                      {% endfor %}
+                      {% assign rec_price = prod.price
+                        | money_without_trailing_zeros
+                        | replace: 'Rs. ', '₹'
+                        | replace: 'Rs.', '₹'
+                      %}
+                      {% if rec_price contains '₹' %}
+                        {% assign rec_price = rec_price | replace: '₹ ', '₹' | replace: '₹', '₹ ' %}
+                      {% elsif rec_price contains '$' or rec_price contains '€' or rec_price contains '£' %}
+                        {% comment %}keep as is{% endcomment %}
                       {% else %}
-                        {{ val }}
+                        {% assign rec_price = '₹ ' | append: rec_price %}
                       {% endif %}
-                    </span>
-                  {% endif %}
-                {% endif %}
-              {% endif %}
-            {% endfor %}
-          {% endif %}
-        </div>
-
-        <div class="quiz-recommendations-grid">
-          {% assign bg_colors = '#E8F4FE,#FFF2E8,#EAF6F0' | split: ',' %}
-
-          {% assign found_handles = '' %}
-          {% assign found_count = 0 %}
-
-          <!-- QUIZ FILTERING LOGIC -->
-          {% if customer and customer.note %}
-            {% assign areas_string = '' %}
-            {% assign note_lines = customer.note | split: '\n' %}
-            {% for line in note_lines %}
-              {% assign key_value = line | split: ': ' %}
-              {% assign key = key_value[0] | strip %}
-              {% if key == 'Focus Areas' %}
-                {% assign areas_string = key_value[1] | strip %}
-              {% endif %}
-            {% endfor %}
-
-            {% if areas_string != blank %}
-              {% assign areas = areas_string | split: ', ' %}
-              {% assign search_pool = collections.all.products %}
-
-              {% for prod in search_pool %}
-                {% assign matched = false %}
-                {% for area in areas %}
-                  {% assign area_down = area | downcase %}
-                  {% assign tags_down = prod.tags | join: ',' | downcase %}
-                  {% if tags_down contains area_down %}
-                    {% assign matched = true %}
-                  {% endif %}
+                      <form method="post" action="{{ routes.cart_add_url }}" class="quiz-rec-form">
+                        <input type="hidden" name="id" value="{{ prod.variants.first.id }}">
+                        {% if first_selling_plan_id != '' %}
+                          <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
+                        {% endif %}
+                        <button
+                          type="submit"
+                          class="quiz-rec-btn"
+                          {% if first_selling_plan_id != '' %}
+                            data-first-plan="{{ first_selling_plan_id }}"
+                          {% endif %}
+                        >
+                          <span class="quiz-rec-btn-price">{{ rec_price }}</span> | Add to Cart
+                        </button>
+                      </form>
+                    </div>
+                  </div>
                 {% endfor %}
-
-                {% if matched %}
-                  {% if found_handles == '' %}
-                    {% assign found_handles = prod.handle %}
-                  {% else %}
-                    {% assign found_handles = found_handles | append: ',' | append: prod.handle %}
-                  {% endif %}
-                  {% assign found_count = found_count | plus: 1 %}
-                  {% if found_count >= 3 %}{% break %}{% endif %}
-                {% endif %}
-              {% endfor %}
+              {% else %}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: #f9f9f9; border-radius: 16px; border: 1px dashed #d1d1d1; color: #595961;">
+                  <h3 style="margin-top: 0; font-family: var(--purrkins-heading-font); color: #121217; margin-bottom: 8px;">
+                    No recommendations found
+                  </h3>
+                  <p style="margin-bottom: 0;">Please browse our collections below!</p>
+                </div>
+              {% endif %}
             {% endif %}
-          {% endif %}
-          <!-- END QUIZ FILTERING LOGIC -->
+          </div>
 
-          <!-- RENDER CARDS -->
-          {% if found_count > 0 %}
-            {% assign handle_array = found_handles | split: ',' %}
-            {% for handle in handle_array limit: 3 %}
-              {% assign prod = all_products[handle] %}
-              {% assign bg_color = bg_colors[forloop.index0] | default: '#E8F4FE' %}
-              <div class="quiz-rec-card" style="background-color: {{ bg_color }};">
-                <div class="quiz-rec-image">
-                  <img
-                    src="{{ prod.featured_image | image_url: width: 200 }}"
-                    alt="{{ prod.title }}"
-                    width="100"
-                    height="100"
-                    loading="lazy"
-                  >
-                </div>
-                <div class="quiz-rec-content">
-                  <h3>{{ prod.title }}</h3>
-                  <p>
-                    {{ prod.metafields.custom.short_description | default: 'Nourishing fuel for growing kittens.' }}
-                  </p>
-
-                  {% assign first_selling_plan_id = '' %}
-                  {% for plan_group in prod.selling_plan_groups %}
-                    {% for plan in plan_group.selling_plans %}
-                      {% assign first_selling_plan_id = plan.id %}
-                      {% break %}
-                    {% endfor %}
-                    {% if first_selling_plan_id != '' %}{% break %}{% endif %}
-                  {% endfor %}
-                  {% assign rec_price = prod.price
-                    | money_without_trailing_zeros
-                    | replace: 'Rs. ', '₹'
-                    | replace: 'Rs.', '₹'
-                  %}
-                  {% if rec_price contains '₹' %}
-                    {% assign rec_price = rec_price | replace: '₹ ', '₹' | replace: '₹', '₹ ' %}
-                  {% elsif rec_price contains '$' or rec_price contains '€' or rec_price contains '£' %}
-                    {% comment %}keep as is{% endcomment %}
-                  {% else %}
-                    {% assign rec_price = '₹ ' | append: rec_price %}
-                  {% endif %}
-                  <form method="post" action="{{ routes.cart_add_url }}" class="quiz-rec-form">
-                    <input type="hidden" name="id" value="{{ prod.variants.first.id }}">
-                    {% if first_selling_plan_id != '' %}
-                      <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
-                    {% endif %}
-                    <button
-                      type="submit"
-                      class="quiz-rec-btn"
-                      {% if first_selling_plan_id != '' %}
-                        data-first-plan="{{ first_selling_plan_id }}"
-                      {% endif %}
-                    >
-                      <span class="quiz-rec-btn-price">{{ rec_price }}</span> | Add to Cart
-                    </button>
-                  </form>
-                </div>
-              </div>
-            {% endfor %}
-          {% else %}
-            {% assign bundles_col = collections.bundles %}
-            {% if bundles_col and bundles_col.products.size > 0 %}
-              {% for prod in bundles_col.products limit: 3 %}
-                {% assign bg_color = '#E8F4FE' %}
-                <div class="quiz-rec-card" style="background-color: {{ bg_color }};">
-                  <div class="quiz-rec-image">
-                    <img
-                      src="{{ prod.featured_image | image_url: width: 200 }}"
-                      alt="{{ prod.title | escape }}"
-                      width="100"
-                      height="100"
-                      loading="lazy"
-                    >
-                  </div>
-                  <div class="quiz-rec-content">
-                    <h3>{{ prod.title | escape }}</h3>
-                    <p>
-                      {{
-                        prod.metafields.custom.short_description
-                        | default: 'Nourishing fuel for growing kittens.'
-                        | escape
-                      }}
-                    </p>
-                    {% assign first_selling_plan_id = '' %}
-                    {% for plan_group in prod.selling_plan_groups %}
-                      {% for plan in plan_group.selling_plans %}
-                        {% assign first_selling_plan_id = plan.id %}
-                        {% break %}
-                      {% endfor %}
-                      {% if first_selling_plan_id != '' %}{% break %}{% endif %}
-                    {% endfor %}
-                    {% assign rec_price = prod.price
-                      | money_without_trailing_zeros
-                      | replace: 'Rs. ', '₹'
-                      | replace: 'Rs.', '₹'
-                    %}
-                    {% if rec_price contains '₹' %}
-                      {% assign rec_price = rec_price | replace: '₹ ', '₹' | replace: '₹', '₹ ' %}
-                    {% elsif rec_price contains '$' or rec_price contains '€' or rec_price contains '£' %}
-                      {% comment %}keep as is{% endcomment %}
-                    {% else %}
-                      {% assign rec_price = '₹ ' | append: rec_price %}
-                    {% endif %}
-                    <form method="post" action="{{ routes.cart_add_url }}" class="quiz-rec-form">
-                      <input type="hidden" name="id" value="{{ prod.variants.first.id }}">
-                      {% if first_selling_plan_id != '' %}
-                        <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
-                      {% endif %}
-                      <button
-                        type="submit"
-                        class="quiz-rec-btn"
-                        {% if first_selling_plan_id != '' %}
-                          data-first-plan="{{ first_selling_plan_id }}"
-                        {% endif %}
+          <p class="quiz-results-footer-note">Based on your cat's profile. Fresh water alongside every meal.</p>
+        </div>
+      {% else %}
+        <div class="quiz-results-card" id="quiz-results-login-card" style="text-align: center;">
+          {% assign bundles_col = collections.bundles %}
+          {% if bundles_col and bundles_col.products.size > 0 %}
+            <div style="text-align: left;">
+              <h2 style="font-family: var(--purrkins-heading-font); font-size: 28px; font-weight: 700; margin: 0 0 20px 0; color: #121217;">
+                Recommended for you
+              </h2>
+              <div class="quiz-recommendations-grid">
+                {% for prod in bundles_col.products limit: 3 %}
+                  {% assign bg_color = '#E8F4FE' %}
+                  <div class="quiz-rec-card" style="background-color: {{ bg_color }};">
+                    <div class="quiz-rec-image">
+                      <img
+                        src="{{ prod.featured_image | image_url: width: 200 }}"
+                        alt="{{ prod.title | escape }}"
+                        width="100"
+                        height="100"
+                        loading="lazy"
                       >
-                        <span class="quiz-rec-btn-price">{{ rec_price }}</span> | Add to Cart
-                      </button>
-                    </form>
+                    </div>
+                    <div class="quiz-rec-content">
+                      <h3>{{ prod.title | escape }}</h3>
+                      <p>
+                        {{
+                          prod.metafields.custom.short_description
+                          | default: 'Nourishing fuel for growing kittens.'
+                          | escape
+                        }}
+                      </p>
+                      {% assign first_selling_plan_id = '' %}
+                      {% for plan_group in prod.selling_plan_groups %}
+                        {% for plan in plan_group.selling_plans %}
+                          {% assign first_selling_plan_id = plan.id %}
+                          {% break %}
+                        {% endfor %}
+                        {% if first_selling_plan_id != '' %}{% break %}{% endif %}
+                      {% endfor %}
+                      {% assign rec_price = prod.price
+                        | money_without_trailing_zeros
+                        | replace: 'Rs. ', '₹'
+                        | replace: 'Rs.', '₹'
+                      %}
+                      {% if rec_price contains '₹' %}
+                        {% assign rec_price = rec_price | replace: '₹ ', '₹' | replace: '₹', '₹ ' %}
+                      {% elsif rec_price contains '$' or rec_price contains '€' or rec_price contains '£' %}
+                        {% comment %}keep as is{% endcomment %}
+                      {% else %}
+                        {% assign rec_price = '₹ ' | append: rec_price %}
+                      {% endif %}
+                      <form method="post" action="{{ routes.cart_add_url }}" class="quiz-rec-form">
+                        <input type="hidden" name="id" value="{{ prod.variants.first.id }}">
+                        {% if first_selling_plan_id != '' %}
+                          <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
+                        {% endif %}
+                        <button
+                          type="submit"
+                          class="quiz-rec-btn"
+                          {% if first_selling_plan_id != '' %}
+                            data-first-plan="{{ first_selling_plan_id }}"
+                          {% endif %}
+                        >
+                          <span class="quiz-rec-btn-price">{{ rec_price }}</span> | Add to Cart
+                        </button>
+                      </form>
+                    </div>
                   </div>
-                </div>
-              {% endfor %}
-            {% else %}
-              <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: #f9f9f9; border-radius: 16px; border: 1px dashed #d1d1d1; color: #595961;">
-                <h3 style="margin-top: 0; font-family: var(--purrkins-heading-font); color: #121217; margin-bottom: 8px;">
-                  No recommendations found
-                </h3>
-                <p style="margin-bottom: 0;">Please browse our collections below!</p>
+                {% endfor %}
               </div>
-            {% endif %}
+              <p class="quiz-results-footer-note" style="margin-top: 30px; font-size: 14px; color: #8C8C94;">
+                Fresh water alongside every meal.
+              </p>
+            </div>
+          {% else %}
+            <h2 class="quiz-results-title">Your results are ready!</h2>
           {% endif %}
         </div>
+      {% endif %}
+    </div>
 
-        <p class="quiz-results-footer-note">Based on your cat's profile. Fresh water alongside every meal.</p>
-      </div>
-    {% else %}
-      <div class="quiz-results-card" id="quiz-results-login-card" style="text-align: center;">
-        {% assign bundles_col = collections.bundles %}
-        {% if bundles_col and bundles_col.products.size > 0 %}
-          <div style="text-align: left;">
-            <h2 style="font-family: var(--purrkins-heading-font); font-size: 28px; font-weight: 700; margin: 0 0 20px 0; color: #121217;">
-              Recommended for you
-            </h2>
-            <div class="quiz-recommendations-grid">
-              {% for prod in bundles_col.products limit: 3 %}
-                {% assign bg_color = '#E8F4FE' %}
-                <div class="quiz-rec-card" style="background-color: {{ bg_color }};">
-                  <div class="quiz-rec-image">
-                    <img
-                      src="{{ prod.featured_image | image_url: width: 200 }}"
-                      alt="{{ prod.title | escape }}"
-                      width="100"
-                      height="100"
-                      loading="lazy"
-                    >
-                  </div>
-                  <div class="quiz-rec-content">
-                    <h3>{{ prod.title | escape }}</h3>
-                    <p>
-                      {{
-                        prod.metafields.custom.short_description
-                        | default: 'Nourishing fuel for growing kittens.'
-                        | escape
-                      }}
-                    </p>
-                    {% assign first_selling_plan_id = '' %}
-                    {% for plan_group in prod.selling_plan_groups %}
-                      {% for plan in plan_group.selling_plans %}
-                        {% assign first_selling_plan_id = plan.id %}
-                        {% break %}
-                      {% endfor %}
-                      {% if first_selling_plan_id != '' %}{% break %}{% endif %}
-                    {% endfor %}
-                    {% assign rec_price = prod.price
-                      | money_without_trailing_zeros
-                      | replace: 'Rs. ', '₹'
-                      | replace: 'Rs.', '₹'
-                    %}
-                    {% if rec_price contains '₹' %}
-                      {% assign rec_price = rec_price | replace: '₹ ', '₹' | replace: '₹', '₹ ' %}
-                    {% elsif rec_price contains '$' or rec_price contains '€' or rec_price contains '£' %}
-                      {% comment %}keep as is{% endcomment %}
-                    {% else %}
-                      {% assign rec_price = '₹ ' | append: rec_price %}
-                    {% endif %}
-                    <form method="post" action="{{ routes.cart_add_url }}" class="quiz-rec-form">
-                      <input type="hidden" name="id" value="{{ prod.variants.first.id }}">
-                      {% if first_selling_plan_id != '' %}
-                        <input type="hidden" name="data-first-plan" value="{{ first_selling_plan_id }}">
-                      {% endif %}
-                      <button
-                        type="submit"
-                        class="quiz-rec-btn"
-                        {% if first_selling_plan_id != '' %}
-                          data-first-plan="{{ first_selling_plan_id }}"
-                        {% endif %}
-                      >
-                        <span class="quiz-rec-btn-price">{{ rec_price }}</span> | Add to Cart
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
-            <p class="quiz-results-footer-note" style="margin-top: 30px; font-size: 14px; color: #8C8C94;">
-              Fresh water alongside every meal.
-            </p>
-          </div>
-        {% else %}
-          <h2 class="quiz-results-title">Your results are ready!</h2>
-        {% endif %}
-      </div>
-    {% endif %}
-
-    {% if customer %}
-      <div style="text-align: center; margin-top: 30px;">
-        <a
-          href="/pages/quiz"
-          class="quiz-rec-btn"
-          style="background: #121217; padding: 14px 32px; font-size: 16px; border-radius: 30px; text-decoration: none; display: inline-block;"
-          >+ Add Another Cat's Profile</a
-        >
-      </div>
-    {% endif %}
+    <div style="text-align: center; margin-top: 30px;">
+      <a
+        href="/pages/byob"
+        class="quiz-rec-btn"
+        style="background: #121217; padding: 14px 32px; font-size: 16px; border-radius: 30px; text-decoration: none; display: inline-block;"
+        >+ Add Another Cat's Profile</a
+      >
+    </div>
   </div>
 
   <!-- Collection Rows -->
@@ -869,23 +870,384 @@
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    document.body.addEventListener('submit', function (e) {
-      if (e.target && e.target.tagName === 'FORM') {
-        var action = e.target.getAttribute('action') || '';
-        if (action.indexOf('/cart/add') !== -1) {
-          e.preventDefault();
-          var btn = e.target.querySelector('button[type="submit"]');
-          if (window.purrkinsAddToCart) {
-            window.purrkinsAddToCart(null, btn, new FormData(e.target));
-          } else {
-            // Fallback if theme JS is not loaded yet
-            e.target.submit();
-          }
+  (function () {
+    function computeRecommendations(pet, allProducts) {
+      var age = String(pet.age || '').toLowerCase();
+      var body = String(pet.body || pet.eatingStyle || '').toLowerCase();
+      var activity = String(pet.activity || pet.activityLevel || '').toLowerCase();
+      var focus = (
+        Array.isArray(pet.focus) ? pet.focus.join(', ') : String(pet.focus || pet.healthFlags || '')
+      ).toLowerCase();
+
+      var scores = {};
+      function addScore(title, pts) {
+        scores[title] = (scores[title] || 0) + pts;
+      }
+
+      // 1. Mumma & Kitty (chicken-in-broth)
+      if (age.indexOf('lactating') !== -1 || focus.indexOf('nursing mother') !== -1) addScore('Mumma & Kitty', 15);
+      if (age.indexOf('3-8 week') !== -1) addScore('Mumma & Kitty', 8);
+      if (focus.indexOf('dehydration') !== -1) addScore('Mumma & Kitty', 4);
+      if (focus.indexOf('under nourishment') !== -1 || focus.indexOf('kitty growth') !== -1)
+        addScore('Mumma & Kitty', 4);
+
+      // 2. Baby Kitty (chicken-with-dha-epa)
+      if (age.indexOf('lactating') !== -1) addScore('Baby Kitty', 6);
+      if (age.indexOf('3-8 week') !== -1) addScore('Baby Kitty', 7);
+      if (age.indexOf('2-4-month') !== -1 || age.indexOf('2-4 month') !== -1) addScore('Baby Kitty', 9);
+      if (age.indexOf('4+ month') !== -1) addScore('Baby Kitty', 5);
+      if (focus.indexOf('kitty growth') !== -1) addScore('Baby Kitty', 9);
+      if (focus.indexOf('weak immunity') !== -1) addScore('Baby Kitty', 9);
+      if (focus.indexOf('under nourishment') !== -1) addScore('Baby Kitty', 5);
+      if (activity.indexOf('playful') !== -1 || activity.indexOf('explorer') !== -1) addScore('Baby Kitty', 3);
+
+      // 3. Shiny Kitty (salmon-broth)
+      if (focus.indexOf('shedding') !== -1) addScore('Shiny Kitty', 15);
+      if (focus.indexOf('hairball') !== -1) addScore('Shiny Kitty', 8);
+      if (focus.indexOf('dehydration') !== -1) addScore('Shiny Kitty', 4);
+      if (body.indexOf('healthy') !== -1) addScore('Shiny Kitty', 4);
+      if (body.indexOf('lean') !== -1) addScore('Shiny Kitty', 2);
+
+      // 4. Gutty Kitty (chicken-australian-lamb)
+      if (focus.indexOf('gut') !== -1 || focus.indexOf('tummy') !== -1) addScore('Gutty Kitty', 12);
+      if (focus.indexOf('loose motion') !== -1) addScore('Gutty Kitty', 12);
+      if (focus.indexOf('hairball') !== -1) addScore('Gutty Kitty', 6);
+      if (focus.indexOf('picky eater') !== -1) addScore('Gutty Kitty', 5);
+      if (focus.indexOf('dehydration') !== -1) addScore('Gutty Kitty', 4);
+      if (age.indexOf('adult') !== -1 || age.indexOf('senior') !== -1 || age.indexOf('4+ month') !== -1)
+        addScore('Gutty Kitty', 4);
+
+      // 5. Lean Kitty (chicken-broth)
+      if (focus.indexOf('obesity') !== -1) addScore('Lean Kitty', 15);
+      if (body.indexOf('obese') !== -1) addScore('Lean Kitty', 12);
+      if (body.indexOf('lean') !== -1) addScore('Lean Kitty', 5);
+      if (activity.indexOf('couch potato') !== -1) addScore('Lean Kitty', 8);
+      if (age.indexOf('adult') !== -1 || age.indexOf('senior') !== -1) addScore('Lean Kitty', 6);
+      if (focus.indexOf('dental') !== -1) addScore('Lean Kitty', 5);
+      if (focus.indexOf('dehydration') !== -1) addScore('Lean Kitty', 4);
+
+      // 6. Zoomy Kitty (tuna-in-broth)
+      if (body.indexOf('skinny') !== -1) addScore('Zoomy Kitty', 12);
+      if (activity.indexOf('super-active') !== -1) addScore('Zoomy Kitty', 9);
+      if (activity.indexOf('explorer') !== -1) addScore('Zoomy Kitty', 7);
+      if (activity.indexOf('playful') !== -1) addScore('Zoomy Kitty', 4);
+      if (focus.indexOf('under nourishment') !== -1) addScore('Zoomy Kitty', 6);
+      if (focus.indexOf('kitty growth') !== -1) addScore('Zoomy Kitty', 4);
+
+      // 7. Chicken + Mackerel (chicken-mackerel)
+      if (focus.indexOf('picky eater') !== -1) addScore('Chicken + Mackerel', 10);
+      if (activity.indexOf('playful') !== -1 || activity.indexOf('explorer') !== -1) addScore('Chicken + Mackerel', 4);
+
+      // 8. Tuna (tuna)
+      if (focus.indexOf('picky eater') !== -1) addScore('Tuna', 7);
+      if (activity.indexOf('playful') !== -1) addScore('Tuna', 4);
+
+      // 9. Growth Combo (growth-combo)
+      if (
+        age.indexOf('kitten') !== -1 ||
+        age.indexOf('month') !== -1 ||
+        age.indexOf('3-8 week') !== -1 ||
+        age.indexOf('lactating') !== -1
+      )
+        addScore('Growth Combo', 5);
+      if (focus.indexOf('kitty growth') !== -1 || focus.indexOf('under nourishment') !== -1)
+        addScore('Growth Combo', 6);
+
+      // 10. Dry Food Combo (dry-food-combo)
+      addScore('Dry Food Combo', 2);
+
+      // 11. Treats Combo (treats-combo)
+      if (activity.indexOf('super-active') !== -1 || activity.indexOf('playful') !== -1) addScore('Treats Combo', 4);
+      if (focus.indexOf('picky eater') !== -1) addScore('Treats Combo', 5);
+
+      var sortedTitles = Object.keys(scores).sort(function (a, b) {
+        return (scores[b] || 0) - (scores[a] || 0);
+      });
+      var topTitles = sortedTitles.slice(0, 3);
+      if (topTitles.length < 3) {
+        var fallbacks = ['Baby Kitty', 'Chicken + Mackerel', 'Dry Food Combo'];
+        for (var i = 0; i < fallbacks.length; i++) {
+          if (topTitles.indexOf(fallbacks[i]) === -1) topTitles.push(fallbacks[i]);
+          if (topTitles.length >= 3) break;
         }
       }
+
+      var fallbackCatalog = {
+        'Mumma & Kitty': {
+          handle: 'chicken-in-broth',
+          desc: 'For the little one growing and the mumma giving everything she has. 90% meat & broth, 30+ nutrients for energy & recovery.',
+          price: '90',
+          vid: '51172688134423',
+          img: 'https://cdn.shopify.com/s/files/1/0955/9366/0663/files/Chicken-Broth-Product-Image.png?v=1789634066',
+        },
+        'Baby Kitty': {
+          handle: 'chicken-with-dha-epa',
+          desc: 'The Perfect Start for Growing Kittens. Double animal protein, DHA & EPA for brain & vision, cow colostrum for immunity.',
+          price: '90',
+          vid: '51221448818935',
+          img: 'https://cdn.shopify.com/s/files/1/0955/9366/0663/files/Chicken-Broth-Product-Image.png?v=1789634066',
+        },
+        'Shiny Kitty': {
+          handle: 'salmon-broth',
+          desc: 'Chicken & ocean fish with Omega 3 & 6 + Japanese collagen for a glossy coat, healthy skin, reduced shedding, and hydration.',
+          price: '90',
+          vid: '51172688134423',
+          img: 'https://cdn.shopify.com/s/files/1/0955/9366/0663/files/Salmon-Broth-Product-Image.png?v=1789634066',
+        },
+        'Gutty Kitty': {
+          handle: 'chicken-australian-lamb',
+          desc: 'Gentle, easy-to-digest goodness with pre- and post-biotics, fiber for digestion, and electrolytes for hydration.',
+          price: '90',
+          vid: '51172691050743',
+          img: 'https://cdn.shopify.com/s/files/1/0955/9366/0663/files/Chicken-Broth-Product-Image.png?v=1789634066',
+        },
+        'Lean Kitty': {
+          handle: 'chicken-broth',
+          desc: '90% chicken, low fat, 45 kcal per pouch with Japanese collagen for joints and slurr-pable broth for hydration.',
+          price: '90',
+          vid: '51221448818935',
+          img: 'https://cdn.shopify.com/s/files/1/0955/9366/0663/files/Chicken-Broth-Product-Image.png?v=1789634066',
+        },
+        'Zoomy Kitty': {
+          handle: 'tuna-in-broth',
+          desc: '2X protein with Australian lamb and broth to support healthy weight gain, muscle growth, and boundless energy.',
+          price: '90',
+          vid: '51221448818935',
+          img: 'https://cdn.shopify.com/s/files/1/0955/9366/0663/files/Salmon-Broth-Product-Image.png?v=1789634066',
+        },
+        'Chicken + Mackerel': {
+          handle: 'chicken-mackerel',
+          desc: '80g pouch, light, tasty nutrition to keep them playful and agile. Highly palatable chicken & mackerel.',
+          price: '90',
+          vid: '51172688134423',
+          img: 'https://cdn.shopify.com/s/files/1/0955/9366/0663/files/Chicken-Broth-Product-Image.png?v=1789634066',
+        },
+        Tuna: {
+          handle: 'tuna',
+          desc: 'Pure tuna treats for bonding, playtime, and fussy eaters.',
+          price: '90',
+          vid: '51172688134423',
+          img: 'https://cdn.shopify.com/s/files/1/0955/9366/0663/files/Salmon-Broth-Product-Image.png?v=1789634066',
+        },
+        'Growth Combo': {
+          handle: 'growth-combo',
+          desc: 'A comforting mix of nourishing growth meals and fresh broths to soothe, fuel, and hydrate.',
+          price: '899',
+          vid: '51172691050743',
+          img: 'https://cdn.shopify.com/s/files/1/0955/9366/0663/files/Chicken-Broth-Product-Image.png?v=1789634066',
+        },
+        'Dry Food Combo': {
+          handle: 'dry-food-combo',
+          desc: '80g pouch, light, tasty nutrition to keep them playful and agile.',
+          price: '899',
+          vid: '51172691050743',
+          img: 'https://cdn.shopify.com/s/files/1/0955/9366/0663/files/Chicken-Broth-Product-Image.png?v=1789634066',
+        },
+        'Treats Combo': {
+          handle: 'treats-combo',
+          desc: 'Tasty reward packs to encourage playful bonding and excite picky eaters.',
+          price: '899',
+          vid: '51172691050743',
+          img: 'https://cdn.shopify.com/s/files/1/0955/9366/0663/files/Chicken-Broth-Product-Image.png?v=1789634066',
+        },
+      };
+
+      return topTitles.map(function (t) {
+        var matched = (allProducts || []).find(function (p) {
+          var pT = String(p.title || '')
+            .toLowerCase()
+            .trim();
+          var pH = String(p.handle || '')
+            .toLowerCase()
+            .trim();
+          var tLow = t.toLowerCase().trim();
+          return (
+            pT === tLow ||
+            pT.indexOf(tLow) !== -1 ||
+            tLow.indexOf(pT) !== -1 ||
+            (fallbackCatalog[t] && pH === fallbackCatalog[t].handle)
+          );
+        });
+
+        var fb = fallbackCatalog[t] || {
+          handle: 'baby-kitty',
+          desc: '80g pouch, light, tasty nutrition to keep them playful and agile.',
+          price: '90',
+          vid: '51221448818935',
+          img: 'https://cdn.shopify.com/s/files/1/0955/9366/0663/files/Chicken-Broth-Product-Image.png?v=1789634066',
+        };
+
+        return {
+          title: matched && matched.title ? matched.title : t,
+          handle: matched && matched.handle ? matched.handle : fb.handle,
+          desc:
+            fb.desc && (!matched || !matched.desc || matched.desc.length < 15)
+              ? fb.desc
+              : matched && matched.desc
+              ? matched.desc
+              : fb.desc,
+          price: matched && matched.price ? String(matched.price) : fb.price,
+          variantId: matched && matched.variant_id ? String(matched.variant_id) : fb.vid,
+          image: matched && matched.image ? matched.image : fb.img,
+        };
+      });
+    }
+
+    function renderDynamicCard(pet) {
+      var name = pet.name || 'your kitten';
+      var pills = [];
+      if (pet.age) pills.push('Age: ' + pet.age);
+      if (pet.weight) {
+        var w = String(pet.weight).replace(/[^0-9.]/g, '');
+        if (w) pills.push('Weight: ' + w + ' kg');
+      }
+      if (pet.gender) pills.push(pet.gender);
+      if (pet.neutered) pills.push(pet.neutered);
+      if (pet.body) pills.push('Body: ' + pet.body);
+      if (pet.activity) pills.push('Activity: ' + pet.activity);
+      if (pet.focus) {
+        var focusArr = Array.isArray(pet.focus) ? pet.focus : String(pet.focus).split(',');
+        focusArr.forEach(function (f) {
+          var cl = f.trim();
+          if (cl && pills.indexOf(cl) === -1) pills.push(cl);
+        });
+      }
+      if (
+        pet.allergies &&
+        String(pet.allergies).toLowerCase() !== 'none' &&
+        String(pet.allergies).toLowerCase() !== 'none recorded'
+      ) {
+        pills.push('Allergies: ' + pet.allergies);
+      }
+
+      var bgColors = ['#E8F4FE', '#FFF1EB', '#EAF6F0'];
+      var recs = computeRecommendations(pet, window.purrkinsProducts || []);
+
+      var cardHtml =
+        '<div class="quiz-results-card" style="margin-top: 40px;">' +
+        '<div style="margin-bottom:20px;">' +
+        '<h2 style="font-family:var(--purrkins-heading-font); font-size:28px; font-weight:700; margin:0 0 8px 0; color:#121217;">Recommend for ' +
+        name +
+        '</h2>' +
+        '<p style="color:#595961; margin:0; font-size:14px;">Personalized for ' +
+        name +
+        '. Everything below is built from these answers.</p>' +
+        '</div>' +
+        '<div class="quiz-pills-container">' +
+        pills
+          .map(function (pill) {
+            return '<span class="quiz-pill">' + pill + '</span>';
+          })
+          .join('') +
+        '</div>' +
+        '<div class="quiz-recommendations-grid">' +
+        recs
+          .map(function (prod, idx) {
+            var bg = bgColors[idx % bgColors.length];
+            return (
+              '<div class="quiz-rec-card" style="background-color: ' +
+              bg +
+              ';">' +
+              '<div class="quiz-rec-image">' +
+              '<img src="' +
+              prod.image +
+              '" alt="' +
+              prod.title.replace(/"/g, '&quot;') +
+              '" width="100" height="100" loading="lazy">' +
+              '</div>' +
+              '<div class="quiz-rec-content">' +
+              '<h3>' +
+              prod.title +
+              '</h3>' +
+              '<p>' +
+              prod.desc +
+              '</p>' +
+              '<form method="post" action="/cart/add" class="quiz-rec-form">' +
+              '<input type="hidden" name="id" value="' +
+              prod.variantId +
+              '">' +
+              '<button type="submit" class="quiz-rec-btn">' +
+              '<span class="quiz-rec-btn-price">₹' +
+              prod.price +
+              '</span> · Add to Cart' +
+              '</button>' +
+              '</form>' +
+              '</div>' +
+              '</div>'
+            );
+          })
+          .join('') +
+        '</div>' +
+        '<p class="quiz-results-footer-note">Based on ' +
+        name +
+        "'s profile. Fresh water alongside every meal.</p>" +
+        '</div>';
+
+      return cardHtml;
+    }
+
+    function initDynamicQuizResults() {
+      var targetEl = document.getElementById('purrkins-dynamic-quiz-results');
+      if (!targetEl) return;
+
+      // Priority 1: Check recent_quiz_data in localStorage
+      var recentQuiz = null;
+      try {
+        var raw = localStorage.getItem('recent_quiz_data');
+        if (raw) recentQuiz = JSON.parse(raw);
+      } catch (e) {}
+
+      if (recentQuiz && recentQuiz.name) {
+        targetEl.innerHTML = renderDynamicCard(recentQuiz);
+        return;
+      }
+
+      // Priority 2: Check pk_session to fetch active pet from customer-api
+      var pkSession = null;
+      try {
+        pkSession = localStorage.getItem('pk_session');
+      } catch (e) {}
+
+      if (pkSession) {
+        fetch('/apps/purrkins/customer-api?session=' + encodeURIComponent(pkSession) + '&intent=get_pets')
+          .then(function (res) {
+            return res.json();
+          })
+          .then(function (data) {
+            if (data && data.success && data.pets && data.pets.length > 0) {
+              targetEl.innerHTML = renderDynamicCard(data.pets[0]);
+            }
+          })
+          .catch(function (e) {
+            console.warn('Could not load pets from customer-api:', e);
+          });
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initDynamicQuizResults);
+    } else {
+      initDynamicQuizResults();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      document.body.addEventListener('submit', function (e) {
+        if (e.target && e.target.tagName === 'FORM') {
+          var action = e.target.getAttribute('action') || '';
+          if (action.indexOf('/cart/add') !== -1) {
+            e.preventDefault();
+            var btn = e.target.querySelector('button[type="submit"]');
+            if (window.purrkinsAddToCart) {
+              window.purrkinsAddToCart(null, btn, new FormData(e.target));
+            } else {
+              // Fallback if theme JS is not loaded yet
+              e.target.submit();
+            }
+          }
+        }
+      });
     });
-  });
+  })();
 </script>
 
 {% schema %}
