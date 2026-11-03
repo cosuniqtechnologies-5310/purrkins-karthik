@@ -322,14 +322,15 @@
                       </label>
                       <label class="quiz-image-option">
                         <input type="radio" name="quiz_activity" value="Super-active">
-                        <div class="quiz-image-card">
+                        <div class="quiz-image-card quiz-image-card--full-width">
                           <h4>Super-active</h4>
                           <img
                             src="https://cdn.shopify.com/s/files/1/0955/9366/0663/files/super_active.webp"
                             alt="Super-active"
-                            width="200"
-                            height="200"
+                            width="400"
+                            height="260"
                             loading="lazy"
+                            class="quiz-img-full-width"
                           >
                         </div>
                       </label>
@@ -666,6 +667,25 @@
     justify-content: space-between;
     border-radius: var(--radius-medium, 16px);
     background: var(--peach-200, #e8cdbb);
+    overflow: hidden;
+  }
+
+  .quiz-image-card--full-width {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .quiz-image-card--full-width h4 {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .quiz-image-card--full-width img,
+  .quiz-img-full-width {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
   }
 
   .quiz-image-option input:checked + .quiz-image-card {
