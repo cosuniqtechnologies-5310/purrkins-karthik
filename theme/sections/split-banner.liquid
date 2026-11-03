@@ -48,7 +48,7 @@
                         <div class="split-banner-modal-content">
                             <button class="split-banner-modal-close js-split-banner-close" aria-label="Close video">&times;</button>
                             <div class="split-banner-modal-video">
-                                <iframe src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=0" frameborder="0" allowfullscreen></iframe>
+                                <iframe src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=0" title="{{ section.settings.heading | default: 'Video' | strip_html | escape }}" frameborder="0" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; compute-pressure" allowfullscreen></iframe>
                             </div>
                         </div>
                     </div>
