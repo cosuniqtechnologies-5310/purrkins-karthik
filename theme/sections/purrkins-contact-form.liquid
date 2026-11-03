@@ -177,7 +177,17 @@
                 })
                 .then(function (data) {
                   if (data.success) {
-                    if (successEl) successEl.style.display = 'flex';
+                    if (successEl) {
+                      if (!successEl.hasAttribute('data-default-text')) {
+                        successEl.setAttribute('data-default-text', successEl.innerHTML);
+                      }
+                      if (data.already_customer) {
+                        successEl.textContent = (data.message || 'You are already a customer with us.');
+                      } else {
+                        successEl.innerHTML = successEl.getAttribute('data-default-text');
+                      }
+                      successEl.style.display = 'flex';
+                    }
                     submitBtn.textContent = 'Send Message';
                     submitBtn.disabled = false;
                     setTimeout(function () {

@@ -128,9 +128,14 @@
                             (data && (data.message || data.error)) || 'Something went wrong. Please try again.'
                           );
                         }
+                        return data;
                       });
                   })
-                  .then(function () {
+                  .then(function (data) {
+                    okEl.textContent =
+                      data && data.already_customer
+                        ? data.message || 'You are already a customer with us.'
+                        : 'Claimed successfully!';
                     okEl.style.display = 'block';
                     form.reset();
                     btn.disabled = false;

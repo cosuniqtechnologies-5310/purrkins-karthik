@@ -348,6 +348,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     throw new Error((result.data && result.data.message) || 'Something went wrong. Please try again.');
                 }
                 // Show success, hide form fields
+                if (successEl) {
+                    if (!successEl.hasAttribute('data-default-text')) {
+                        successEl.setAttribute('data-default-text', successEl.innerHTML);
+                    }
+                    if ((result.data && result.data.already_customer)) {
+                      successEl.textContent = (result.data.message || 'You are already a customer with us.');
+                    } else {
+                      successEl.innerHTML = successEl.getAttribute('data-default-text');
+                    }
+                }
                 if (fieldsEl) fieldsEl.style.display = 'none';
                 if (successEl) successEl.style.display = 'block';
                 submitBtn.textContent = 'Claim';

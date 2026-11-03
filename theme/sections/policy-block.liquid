@@ -479,16 +479,27 @@
                 return data;
               });
           })
-          .then(function () {
+          .then(function (data) {
             var fields = form.querySelector('.fs-fields');
             var successMsg = form.querySelector('.fs-form-success');
+            var alreadyCustomer = !!(data && data.already_customer);
+            if (successMsg) {
+              if (!successMsg.hasAttribute('data-default-text')) {
+                successMsg.setAttribute('data-default-text', successMsg.innerHTML);
+              }
+              if (alreadyCustomer) {
+                successMsg.textContent = data.message || 'You are already a customer with us.';
+              } else {
+                successMsg.innerHTML = successMsg.getAttribute('data-default-text');
+              }
+            }
             if (fields) fields.style.display = 'none';
             if (successMsg) successMsg.style.display = 'flex';
 
             var currentLeftStr = countHighlight.innerText;
             var currentLeft = parseInt(currentLeftStr, 10) || 0;
 
-            if (currentLeft > 0) {
+            if (!alreadyCustomer && currentLeft > 0) {
               var newLeft = currentLeft - 1;
               countHighlight.innerText = newLeft;
               if (badgeText) badgeText.innerText = newLeft + ' left';
