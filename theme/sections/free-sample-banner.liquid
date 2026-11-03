@@ -8,7 +8,8 @@
               src="{{ section.settings.image | image_url: width: 800 }}"
               alt="{{ section.settings.image.alt | escape }}"
               width="692"
-              height="auto"
+              height="{{ 692 | divided_by: section.settings.image.aspect_ratio | round }}"
+              style="height: auto;"
             />
           {% else %}
             <div class="fs-placeholder">Image</div>
@@ -476,12 +477,17 @@
               body: JSON.stringify(payload),
             })
               .then(function (response) {
-                if (!response.ok) {
-                  throw new Error('Network response was not ok');
-                }
-                return response.json().catch(function () {
-                  return {};
-                });
+                return response
+                  .json()
+                  .catch(function () {
+                    return {};
+                  })
+                  .then(function (data) {
+                    if (!response.ok || (data && data.success === false)) {
+                      throw new Error((data && (data.message || data.error)) || 'Network response was not ok');
+                    }
+                    return data;
+                  });
               })
               .then(function (data) {
                 if (data && data.error) {

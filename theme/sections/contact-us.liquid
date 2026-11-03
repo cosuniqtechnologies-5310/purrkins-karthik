@@ -28,7 +28,8 @@
               src="{{ section.settings.illustration | image_url: width: 600 }}"
               alt="{{ section.settings.illustration.alt | default: 'Contact Illustration' | escape }}"
               width="407"
-              height="auto"
+              height="{{ 407 | divided_by: section.settings.illustration.aspect_ratio | round }}"
+              style="height: auto;"
             />
           </div>
         {% endif %}
@@ -183,6 +184,13 @@
                       })
                       .then(function (data) {
                         console.log('[ContactUs] Response:', data);
+                        if (!data || data.success === false) {
+                          errorEl.textContent = (data && data.message) || 'Something went wrong. Please try again.';
+                          errorEl.style.display = 'block';
+                          submitBtn.textContent = 'Send Message';
+                          submitBtn.disabled = false;
+                          return;
+                        }
                         // Show success message at top — keep fields visible
                         if (successEl) successEl.style.display = 'block';
                         submitBtn.textContent = 'Send Message';

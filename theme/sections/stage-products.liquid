@@ -1,368 +1,449 @@
 <div id="stage-products-{{ section.id }}" class="stage-products-block {{ section.settings.custom_class }}">
-    <div class="purrkins-container">
-        
-        <div class="sp-header">
-            <div class="sp-header-left">
-                {% if section.settings.heading != blank %}
-                    <h2 class="sp-heading">{{ section.settings.heading }}</h2>
-                {% endif %}
-                {% if section.settings.subheading != blank %}
-                    <p class="sp-subheading">{{ section.settings.subheading }}</p>
-                {% endif %}
-            </div>
-            <div class="sp-header-right">
-                <div class="sp-select-wrapper">
-                    <select class="sp-category-select">
-                        <option>All Categories</option>
-                        <option>Dry Food</option>
-                        <option>Wet Food</option>
-                    </select>
-                </div>
-            </div>
+  <div class="purrkins-container">
+    <div class="sp-header">
+      <div class="sp-header-left">
+        {% if section.settings.heading != blank %}
+          <h2 class="sp-heading">{{ section.settings.heading }}</h2>
+        {% endif %}
+        {% if section.settings.subheading != blank %}
+          <p class="sp-subheading">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </div>
+      <div class="sp-header-right">
+        <div class="sp-select-wrapper">
+          <select class="sp-category-select">
+            <option>All Categories</option>
+            <option>Dry Food</option>
+            <option>Wet Food</option>
+          </select>
         </div>
-
-        <div class="sp-tabs-wrapper">
-            <ul class="sp-tabs">
-                <li class="sp-tab">Issues</li>
-                <li class="sp-tab active">Lactating Mother</li>
-                <li class="sp-tab">Weaning Mother</li>
-                <li class="sp-tab">Digestive Issues</li>
-                <li class="sp-tab">Senior Cat</li>
-                <li class="sp-tab">Obesity</li>
-                <li class="sp-tab">Shedding</li>
-                <li class="sp-tab">Shiny Coat</li>
-            </ul>
-        </div>
-
-        <div class="sp-content-layout">
-            
-            <!-- Left Samples Card -->
-            <div class="sp-samples-card">
-                <div class="sp-samples-inner">
-                    {% if section.settings.samples_title != blank %}
-                        <h3 class="sp-samples-title">{{ section.settings.samples_title | newline_to_br }}</h3>
-                    {% endif %}
-                    
-                    <div class="sp-progress-bar">
-                        <div class="sp-progress-fill"></div>
-                    </div>
-                    
-                    {% if section.settings.samples_desc != blank %}
-                        <p class="sp-samples-desc">{{ section.settings.samples_desc }}</p>
-                    {% endif %}
-                    
-                    {% if section.settings.samples_terms != blank %}
-                        <p class="sp-terms">{{ section.settings.samples_terms }}</p>
-                    {% endif %}
-                    
-                    {% form 'contact', class: 'sp-samples-form' %}
-                        {% if form.posted_successfully? %}
-                            <p style="color: #25D366; font-weight: bold;">Claimed successfully!</p>
-                        {% endif %}
-                        {{ form.errors | default_errors }}
-                        
-                        <input type="hidden" name="contact[tags]" value="stage-sample-claim">
-                        <div class="sp-form-group">
-                            <input type="text" name="contact[name]" placeholder="Full Name" class="sp-input" required>
-                        </div>
-                        <div class="sp-form-group">
-                            <input type="tel" name="contact[phone]" placeholder="Mobile Number" class="sp-input" required>
-                        </div>
-                        <button type="submit" class="purrkins-btn-primary sp-submit-btn">Submit</button>
-                    {% endform %}
-                </div>
-            </div>
-            
-            <!-- Right Products Scroll -->
-            <div class="sp-products-scroll">
-                <div class="sp-products-inner">
-                    {% assign product_blocks = section.blocks | where: 'type', 'product' %}
-                    
-                    {% if product_blocks.size > 0 %}
-                        {% for block in product_blocks %}
-                            {% assign prod = all_products[block.settings.product] %}
-                            <div class="sp-product-card-wrap" {{ block.shopify_attributes }}>
-                                <div class="sp-product-card" style="background-color: {{ block.settings.bg_color }};">
-                                    <span class="sp-product-badge">{{ block.settings.badge | default: 'Featured' }}</span>
-                                    <div class="sp-product-image">
-                                        {% if prod.featured_image != blank %}
-                                            <a href="{{ prod.url }}">
-                                                <img src="{{ prod.featured_image | image_url: width: 300 }}" alt="{{ prod.title | escape }}" style="max-width: 100%; height: auto;">
-                                            </a>
-                                        {% else %}
-                                            <div style="width:100%; height:250px; display:flex; align-items:center; justify-content:center; color:#999; font-size:14px; border:2px dashed #ccc;">
-                                                Product Image
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <h4 class="sp-product-title">
-                                    <a href="{{ prod.url }}" style="color: inherit; text-decoration: none;">
-                                        {{ prod.title | default: 'Example Product' }}
-                                    </a>
-                                </h4>
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <!-- Placeholder Products -->
-                        <div class="sp-product-card-wrap">
-                            <div class="sp-product-card" style="background-color: #E2F2EE;">
-                                <span class="sp-product-badge">Digestive Care</span>
-                                <div class="sp-product-image">
-                                    <div style="width:100%; height:250px; display:flex; align-items:center; justify-content:center; color:#999; font-size:14px; border:2px dashed #ccc;">
-                                        Product Image
-                                    </div>
-                                </div>
-                            </div>
-                            <h4 class="sp-product-title">Chicken Broth</h4>
-                        </div>
-                        <div class="sp-product-card-wrap">
-                            <div class="sp-product-card" style="background-color: #EBF3E6;">
-                                <span class="sp-product-badge">Hydration Support</span>
-                                <div class="sp-product-image">
-                                    <div style="width:100%; height:250px; display:flex; align-items:center; justify-content:center; color:#999; font-size:14px; border:2px dashed #ccc;">
-                                        Product Image
-                                    </div>
-                                </div>
-                            </div>
-                            <h4 class="sp-product-title">Turkey Stew</h4>
-                        </div>
-                        <div class="sp-product-card-wrap">
-                            <div class="sp-product-card" style="background-color: #EAE6FA;">
-                                <span class="sp-product-badge">High Protein</span>
-                                <div class="sp-product-image">
-                                    <div style="width:100%; height:250px; display:flex; align-items:center; justify-content:center; color:#999; font-size:14px; border:2px dashed #ccc;">
-                                        Product Image
-                                    </div>
-                                </div>
-                            </div>
-                            <h4 class="sp-product-title">Lamb Jerky</h4>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-
-        </div>
+      </div>
     </div>
+
+    <div class="sp-tabs-wrapper">
+      <ul class="sp-tabs">
+        <li class="sp-tab">Issues</li>
+        <li class="sp-tab active">Lactating Mother</li>
+        <li class="sp-tab">Weaning Mother</li>
+        <li class="sp-tab">Digestive Issues</li>
+        <li class="sp-tab">Senior Cat</li>
+        <li class="sp-tab">Obesity</li>
+        <li class="sp-tab">Shedding</li>
+        <li class="sp-tab">Shiny Coat</li>
+      </ul>
+    </div>
+
+    <div class="sp-content-layout">
+      <!-- Left Samples Card -->
+      <div class="sp-samples-card">
+        <div class="sp-samples-inner">
+          {% if section.settings.samples_title != blank %}
+            <h3 class="sp-samples-title">{{ section.settings.samples_title | newline_to_br }}</h3>
+          {% endif %}
+
+          <div class="sp-progress-bar">
+            <div class="sp-progress-fill"></div>
+          </div>
+
+          {% if section.settings.samples_desc != blank %}
+            <p class="sp-samples-desc">{{ section.settings.samples_desc }}</p>
+          {% endif %}
+
+          {% if section.settings.samples_terms != blank %}
+            <p class="sp-terms">{{ section.settings.samples_terms }}</p>
+          {% endif %}
+
+          <form class="sp-samples-form" id="sp-samples-form-{{ section.id }}" novalidate>
+            <p class="sp-form-success" style="display: none; color: #25D366; font-weight: bold;">
+              Claimed successfully!
+            </p>
+            <p class="sp-form-error" style="display: none; color: #d72c0d; font-size: 14px;"></p>
+
+            <div class="sp-form-group">
+              <input type="text" name="contact[name]" placeholder="Full Name" class="sp-input" required>
+            </div>
+            <div class="sp-form-group">
+              <input
+                type="tel"
+                name="contact[phone]"
+                placeholder="Mobile Number"
+                class="sp-input"
+                maxlength="10"
+                required
+                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
+              >
+            </div>
+            <button type="submit" class="purrkins-btn-primary sp-submit-btn">Submit</button>
+          </form>
+          <script>
+            (function () {
+              var form = document.getElementById('sp-samples-form-{{ section.id }}');
+              if (!form) return;
+              form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var btn = form.querySelector('.sp-submit-btn');
+                var okEl = form.querySelector('.sp-form-success');
+                var errEl = form.querySelector('.sp-form-error');
+                okEl.style.display = 'none';
+                errEl.style.display = 'none';
+
+                function fail(msg) {
+                  errEl.textContent = msg;
+                  errEl.style.display = 'block';
+                  btn.disabled = false;
+                  btn.textContent = 'Submit';
+                }
+
+                var name = form.querySelector('[name="contact[name]"]').value.trim();
+                var rawPhone = form.querySelector('[name="contact[phone]"]').value.replace(/\D/g, '');
+                if (!name) return fail('Please enter your full name.');
+                if (rawPhone.length < 10) return fail('Please enter a valid 10-digit mobile number.');
+
+                btn.disabled = true;
+                btn.textContent = 'Submitting...';
+
+                // Goes through the Purrkins app so duplicate rules are enforced server-side:
+                // same phone + same name = always allowed, same phone + different name = rejected.
+                fetch('/apps/purrkins/customer', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                  body: JSON.stringify({
+                    name: name,
+                    phone: '+91' + rawPhone.slice(-10),
+                    tag: 'stage-sample-claim',
+                    email: 'lead-' + Date.now() + '@noemail.purrkins.com',
+                    accepts_marketing: true,
+                    note: 'Stage sample claim',
+                  }),
+                })
+                  .then(function (response) {
+                    return response
+                      .json()
+                      .catch(function () {
+                        return {};
+                      })
+                      .then(function (data) {
+                        if (!response.ok || (data && data.success === false)) {
+                          throw new Error(
+                            (data && (data.message || data.error)) || 'Something went wrong. Please try again.'
+                          );
+                        }
+                      });
+                  })
+                  .then(function () {
+                    okEl.style.display = 'block';
+                    form.reset();
+                    btn.disabled = false;
+                    btn.textContent = 'Submit';
+                    setTimeout(function () {
+                      okEl.style.display = 'none';
+                    }, 8000);
+                  })
+                  .catch(function (err) {
+                    fail(err && err.message ? err.message : 'Something went wrong. Please try again.');
+                  });
+              });
+            })();
+          </script>
+        </div>
+      </div>
+
+      <!-- Right Products Scroll -->
+      <div class="sp-products-scroll">
+        <div class="sp-products-inner">
+          {% assign product_blocks = section.blocks | where: 'type', 'product' %}
+
+          {% if product_blocks.size > 0 %}
+            {% for block in product_blocks %}
+              {% assign prod = all_products[block.settings.product] %}
+              <div class="sp-product-card-wrap" {{ block.shopify_attributes }}>
+                <div class="sp-product-card" style="background-color: {{ block.settings.bg_color }};">
+                  <span class="sp-product-badge">{{ block.settings.badge | default: 'Featured' }}</span>
+                  <div class="sp-product-image">
+                    {% if prod.featured_image != blank %}
+                      <a href="{{ prod.url }}">
+                        <img
+                          src="{{ prod.featured_image | image_url: width: 300 }}"
+                          alt="{{ prod.title | escape }}"
+                          width="300"
+                          height="{{ 300 | divided_by: prod.featured_image.aspect_ratio | round }}"
+                          loading="lazy"
+                          style="max-width: 100%; height: auto;"
+                        >
+                      </a>
+                    {% else %}
+                      <div style="width:100%; height:250px; display:flex; align-items:center; justify-content:center; color:#999; font-size:14px; border:2px dashed #ccc;">
+                        Product Image
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+                <h4 class="sp-product-title">
+                  <a href="{{ prod.url }}" style="color: inherit; text-decoration: none;">
+                    {{ prod.title | default: 'Example Product' }}
+                  </a>
+                </h4>
+              </div>
+            {% endfor %}
+          {% else %}
+            <!-- Placeholder Products -->
+            <div class="sp-product-card-wrap">
+              <div class="sp-product-card" style="background-color: #E2F2EE;">
+                <span class="sp-product-badge">Digestive Care</span>
+                <div class="sp-product-image">
+                  <div style="width:100%; height:250px; display:flex; align-items:center; justify-content:center; color:#999; font-size:14px; border:2px dashed #ccc;">
+                    Product Image
+                  </div>
+                </div>
+              </div>
+              <h4 class="sp-product-title">Chicken Broth</h4>
+            </div>
+            <div class="sp-product-card-wrap">
+              <div class="sp-product-card" style="background-color: #EBF3E6;">
+                <span class="sp-product-badge">Hydration Support</span>
+                <div class="sp-product-image">
+                  <div style="width:100%; height:250px; display:flex; align-items:center; justify-content:center; color:#999; font-size:14px; border:2px dashed #ccc;">
+                    Product Image
+                  </div>
+                </div>
+              </div>
+              <h4 class="sp-product-title">Turkey Stew</h4>
+            </div>
+            <div class="sp-product-card-wrap">
+              <div class="sp-product-card" style="background-color: #EAE6FA;">
+                <span class="sp-product-badge">High Protein</span>
+                <div class="sp-product-image">
+                  <div style="width:100%; height:250px; display:flex; align-items:center; justify-content:center; color:#999; font-size:14px; border:2px dashed #ccc;">
+                    Product Image
+                  </div>
+                </div>
+              </div>
+              <h4 class="sp-product-title">Lamb Jerky</h4>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <style>
-.stage-products-block {
+  .stage-products-block {
     padding: 80px 0;
-    font-family: "Inter", sans-serif; /* Fallback if not globally set */
+    font-family: 'Inter', sans-serif; /* Fallback if not globally set */
     overflow: hidden;
-}
+  }
 
-.sp-header {
+  .sp-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 40px;
     flex-wrap: wrap;
     gap: 20px;
-}
+  }
 
-.sp-header-left {
+  .sp-header-left {
     max-width: 800px;
-}
+  }
 
-.sp-heading {
+  .sp-heading {
     margin: 0 0 16px;
-    color: var(--semantic-text-primary, #21252A);
-    font-family: "Cabinet Grotesk";
+    color: var(--semantic-text-primary, #21252a);
+    font-family: 'Cabinet Grotesk';
     font-size: 56px;
     font-weight: 800;
     line-height: 110%;
     letter-spacing: -0.56px;
-}
+  }
 
-.sp-subheading {
-    color: var(--semantic-text-secondary, #6B7280);
+  .sp-subheading {
+    color: var(--semantic-text-secondary, #6b7280);
     font-size: 18px;
     line-height: 160%;
     margin: 0;
-}
+  }
 
-.sp-select-wrapper {
+  .sp-select-wrapper {
     position: relative;
-}
+  }
 
-.sp-category-select {
+  .sp-category-select {
     appearance: none;
     background-color: transparent;
-    border: 1px solid #21252A;
+    border: 1px solid #21252a;
     border-radius: 999px;
     padding: 12px 40px 12px 24px;
     font-size: 14px;
     font-weight: 500;
-    color: #21252A;
+    color: #21252a;
     cursor: pointer;
     min-width: 180px;
-}
+  }
 
-.sp-select-wrapper::after {
-    content: "";
+  .sp-select-wrapper::after {
+    content: '';
     position: absolute;
     right: 20px;
     top: 50%;
     transform: translateY(-50%);
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-top: 5px solid #21252A;
+    border-top: 5px solid #21252a;
     pointer-events: none;
-}
+  }
 
-.sp-tabs-wrapper {
+  .sp-tabs-wrapper {
     margin-bottom: 50px;
     overflow-x: auto;
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-}
-.sp-tabs-wrapper::-webkit-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .sp-tabs-wrapper::-webkit-scrollbar {
     display: none;
-}
+  }
 
-.sp-tabs {
+  .sp-tabs {
     display: flex;
     list-style: none;
     padding: 0;
     margin: 0;
-    border-bottom: 1px solid #E5E7EB;
+    border-bottom: 1px solid #e5e7eb;
     min-width: max-content;
-}
+  }
 
-.sp-tab {
+  .sp-tab {
     padding: 16px 24px;
     font-size: 16px;
     font-weight: 500;
-    color: #6B7280;
+    color: #6b7280;
     cursor: pointer;
     position: relative;
-}
+  }
 
-.sp-tab.active {
-    color: #21252A;
-}
+  .sp-tab.active {
+    color: #21252a;
+  }
 
-.sp-tab.active::after {
-    content: "";
+  .sp-tab.active::after {
+    content: '';
     position: absolute;
     bottom: -1px;
     left: 0;
     width: 100%;
     height: 3px;
-    background-color: #FFE330; /* Yellow */
-}
+    background-color: #ffe330; /* Yellow */
+  }
 
-.sp-content-layout {
+  .sp-content-layout {
     display: flex;
     gap: 32px;
-}
+  }
 
-.sp-samples-card {
+  .sp-samples-card {
     flex: 0 0 380px;
-}
+  }
 
-.sp-samples-inner {
-    background-color: #21252A;
+  .sp-samples-inner {
+    background-color: #21252a;
     border-radius: 24px;
     padding: 40px;
-    color: #FFF;
+    color: #fff;
     height: 100%;
-}
+  }
 
-.sp-samples-title {
-    font-family: "Cabinet Grotesk";
+  .sp-samples-title {
+    font-family: 'Cabinet Grotesk';
     font-size: 32px;
     font-weight: 700;
     line-height: 120%;
     margin: 0 0 24px;
-    color: #FFF;
-}
+    color: #fff;
+  }
 
-.sp-progress-bar {
+  .sp-progress-bar {
     height: 8px;
     background-color: rgba(255, 255, 255, 0.2);
     border-radius: 999px;
     margin-bottom: 24px;
     position: relative;
-}
+  }
 
-.sp-progress-fill {
+  .sp-progress-fill {
     position: absolute;
     left: 0;
     top: 0;
     height: 100%;
     width: 80%; /* Representing last few samples */
-    background-color: #FFE330;
+    background-color: #ffe330;
     border-radius: 999px;
-}
+  }
 
-.sp-samples-desc {
+  .sp-samples-desc {
     font-size: 14px;
     line-height: 160%;
     margin: 0 0 8px;
-    color: #D1D5DB;
-}
+    color: #d1d5db;
+  }
 
-.sp-terms {
+  .sp-terms {
     font-size: 12px;
-    color: #9CA3AF;
+    color: #9ca3af;
     margin: 0 0 32px;
-}
+  }
 
-.sp-form-group {
+  .sp-form-group {
     margin-bottom: 16px;
-}
+  }
 
-.sp-input {
+  .sp-input {
     width: 100%;
     background-color: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 14px 20px;
     border-radius: 8px;
-    color: #FFF;
+    color: #fff;
     font-size: 15px;
     transition: border-color 0.2s;
-}
-.sp-input::placeholder {
-    color: #9CA3AF;
-}
-.sp-input:focus {
+  }
+  .sp-input::placeholder {
+    color: #9ca3af;
+  }
+  .sp-input:focus {
     outline: none;
-    border-color: #FFE330;
-}
+    border-color: #ffe330;
+  }
 
-.sp-submit-btn {
+  .sp-submit-btn {
     width: 100%;
     border: none;
     cursor: pointer;
     text-align: center;
     margin-top: 8px;
-}
+  }
 
-.sp-products-scroll {
+  .sp-products-scroll {
     flex: 1;
     overflow-x: auto;
     -ms-overflow-style: none;
     scrollbar-width: none;
     padding-bottom: 20px; /* Space for hover effects if any */
-}
-.sp-products-scroll::-webkit-scrollbar {
+  }
+  .sp-products-scroll::-webkit-scrollbar {
     display: none;
-}
+  }
 
-.sp-products-inner {
+  .sp-products-inner {
     display: flex;
     gap: 24px;
     min-width: max-content;
-}
+  }
 
-.sp-product-card-wrap {
+  .sp-product-card-wrap {
     width: 340px;
-}
+  }
 
-.sp-product-card {
+  .sp-product-card {
     border-radius: 24px;
     padding: 24px;
     position: relative;
@@ -371,57 +452,57 @@
     flex-direction: column;
     margin-bottom: 16px;
     transition: transform 0.2s ease;
-}
-.sp-product-card:hover {
+  }
+  .sp-product-card:hover {
     transform: translateY(-4px);
-}
+  }
 
-.sp-product-badge {
-    background-color: rgba(255,255,255,0.6);
-    color: #21252A;
+  .sp-product-badge {
+    background-color: rgba(255, 255, 255, 0.6);
+    color: #21252a;
     padding: 6px 16px;
     border-radius: 999px;
     font-size: 13px;
     font-weight: 600;
     align-self: flex-start;
     display: inline-block;
-}
+  }
 
-.sp-product-image {
+  .sp-product-image {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-top: 20px;
-}
+  }
 
-.sp-product-title {
-    font-family: "Cabinet Grotesk";
+  .sp-product-title {
+    font-family: 'Cabinet Grotesk';
     font-size: 24px;
     font-weight: 700;
     margin: 0;
-    color: #21252A;
-}
+    color: #21252a;
+  }
 
-@media (max-width: 1024px) {
+  @media (max-width: 1024px) {
     .sp-content-layout {
-        flex-direction: column;
+      flex-direction: column;
     }
     .sp-samples-card {
-        flex: 0 0 auto;
+      flex: 0 0 auto;
     }
-}
-@media (max-width: 768px) {
+  }
+  @media (max-width: 768px) {
     .sp-heading {
-        font-size: 36px;
+      font-size: 36px;
     }
     .sp-product-card-wrap {
-        width: 280px;
+      width: 280px;
     }
     .sp-product-card {
-        height: 360px;
+      height: 360px;
     }
-}
+  }
 </style>
 
 {% schema %}
