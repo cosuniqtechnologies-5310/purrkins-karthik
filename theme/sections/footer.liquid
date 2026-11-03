@@ -191,10 +191,16 @@
                   assign facebook_link = section.settings.facebook_link | default: settings.social_facebook_link
                   assign youtube_link = section.settings.youtube_link | default: settings.social_youtube_link
 
-                  if instagram_link == blank and linkedin_link == blank and facebook_link == blank and youtube_link == blank
-                    assign instagram_link = 'https://www.instagram.com/purrkins'
-                    assign linkedin_link = 'https://www.linkedin.com/company/purrkins'
+                  if instagram_link == blank or instagram_link contains 'instagram.com/purrkins'
+                    assign instagram_link = 'https://www.instagram.com/petsofparadise.store/'
+                  endif
+                  if linkedin_link == blank or linkedin_link contains 'linkedin.com/company/purrkins'
+                    assign linkedin_link = 'https://in.linkedin.com/company/petsofparadise?trk=public_post-text'
+                  endif
+                  if facebook_link == blank
                     assign facebook_link = 'https://www.facebook.com/purrkins'
+                  endif
+                  if youtube_link == blank
                     assign youtube_link = 'https://www.youtube.com/@purrkins'
                   endif
                 -%}

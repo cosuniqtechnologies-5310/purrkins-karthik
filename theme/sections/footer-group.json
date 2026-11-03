@@ -41,14 +41,14 @@
                 "menu_3"
             ],
             "settings": {
-                "footer_logo": "shopify:\/\/shop_images\/Purkkins-Footer-Logo.svg",
+                "footer_logo": "shopify://shop_images/Purkkins-Footer-Logo.svg",
                 "footer_description": "Kitten-first nutrition, made in India. Built by a family that's cared about pet food for three decades.",
-                "instagram_link": "https:\/\/www.instagram.com\/purrkins",
-                "linkedin_link": "https:\/\/www.linkedin.com\/company\/purrkins",
-                "facebook_link": "https:\/\/www.facebook.com\/purrkins",
-                "youtube_link": "https:\/\/www.youtube.com\/@purrkins",
-                "footer_illustration": "shopify:\/\/shop_images\/Footer-illustrator.svg",
-                "footer_illustration_mobile": "shopify:\/\/shop_images\/footer-banner-mob.webp",
+                "instagram_link": "https://www.instagram.com/petsofparadise.store/",
+                "linkedin_link": "https://in.linkedin.com/company/petsofparadise?trk=public_post-text",
+                "facebook_link": "https://www.facebook.com/purrkins",
+                "youtube_link": "https://www.youtube.com/@purrkins",
+                "footer_illustration": "shopify://shop_images/Footer-illustrator.svg",
+                "footer_illustration_mobile": "shopify://shop_images/footer-banner-mob.webp",
                 "footer_copyright": "Purrkins. All rights reserved. FSSAI: 12345678901234",
                 "trust_badges": "Secure checkout  |  Made in India"
             }

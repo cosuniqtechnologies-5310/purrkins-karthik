@@ -45,8 +45,12 @@
         </div>
 
         <div class="family-wild-actions">
-            {% if section.settings.ig_link != blank %}
-                <a href="{{ section.settings.ig_link }}" target="_blank" rel="noopener noreferrer" class="btn-ig">
+            {% assign ig_url = section.settings.ig_link | default: 'https://www.instagram.com/petsofparadise.store/' %}
+            {% if ig_url == '/#' or ig_url == '#' or ig_url == blank %}
+                {% assign ig_url = 'https://www.instagram.com/petsofparadise.store/' %}
+            {% endif %}
+            {% if ig_url != blank %}
+                <a href="{{ ig_url }}" target="_blank" rel="noopener noreferrer" class="btn-ig">
                     {{ section.settings.ig_btn_text | default: 'Follow Along on Instagram' }}
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
                       <path d="M21.5694 25.9341H9.69779C7.2873 25.9341 5.33325 23.98 5.33325 21.5695V9.69798C5.33325 7.28749 7.2873 5.33344 9.69779 5.33344H21.5694C23.9798 5.33344 25.9339 7.28749 25.9339 9.69798V21.5695C25.9339 23.98 23.9798 25.9341 21.5694 25.9341Z" stroke="white" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
@@ -56,8 +60,12 @@
                 </a>
             {% endif %}
             
-            {% if section.settings.li_link != blank %}
-                <a href="{{ section.settings.li_link }}" target="_blank" rel="noopener noreferrer" class="btn-li">
+            {% assign li_url = section.settings.li_link | default: 'https://in.linkedin.com/company/petsofparadise?trk=public_post-text' %}
+            {% if li_url == '/#' or li_url == '#' or li_url == blank %}
+                {% assign li_url = 'https://in.linkedin.com/company/petsofparadise?trk=public_post-text' %}
+            {% endif %}
+            {% if li_url != blank %}
+                <a href="{{ li_url }}" target="_blank" rel="noopener noreferrer" class="btn-li">
                     {{ section.settings.li_btn_text | default: "Follow Founder's Journey on LinkedIn" }}
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
                       <path d="M10.5709 22.9219H9.26158C8.77947 22.9219 8.38867 22.5311 8.38867 22.049V13.9309C8.38867 13.4488 8.77947 13.058 9.26158 13.058H10.5709C11.053 13.058 11.4439 13.4488 11.4439 13.9309V22.049C11.4439 22.5311 11.053 22.9219 10.5709 22.9219Z" fill="white"/>
