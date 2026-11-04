@@ -195,17 +195,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loggedIn = isCustomerLoggedIn();
 
-    if (!loggedIn) {
-      // Guest: Persist to session storage
-      let sessionWl = getSessionWishlist();
-      if (isSaved) {
-        if (!sessionWl.includes(productGid)) {
-          sessionWl.push(productGid);
-        }
-      } else {
-        sessionWl = sessionWl.filter((id) => id !== productGid && id !== productId && id !== String(productId));
+    // Always ensure session storage is updated so removed items never linger
+    let sessionWl = getSessionWishlist();
+    if (isSaved) {
+      if (!sessionWl.includes(productGid)) {
+        sessionWl.push(productGid);
       }
-      saveSessionWishlist(sessionWl);
+    } else {
+      const cleanTargetId = String(productId).split('/').pop();
+      sessionWl = sessionWl.filter((id) => {
+        const cId = String(id).split('/').pop();
+        return cId !== cleanTargetId && id !== productGid && id !== productId;
+      });
+    }
+    saveSessionWishlist(sessionWl);
+
+    if (!loggedIn) {
       return;
     }
 
