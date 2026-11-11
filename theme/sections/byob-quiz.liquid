@@ -1084,11 +1084,15 @@
           submitBtn.textContent = 'Submit';
           submitBtn.disabled = false;
 
-          const loginModal = document.getElementById('byob-login-modal');
-          if (loginModal) {
-            loginModal.style.display = 'flex';
+          if (typeof window.pkOpenByobLoginModal === 'function') {
+            window.pkOpenByobLoginModal();
           } else {
-            window.location.href = '/apps/purrkins/login';
+            const loginModal = document.getElementById('byob-login-modal');
+            if (loginModal) {
+              loginModal.style.display = 'flex';
+            } else {
+              window.location.href = '/apps/purrkins/login';
+            }
           }
           return;
         }

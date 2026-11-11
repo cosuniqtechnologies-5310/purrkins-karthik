@@ -140,11 +140,45 @@
     const loginModal = document.getElementById('byob-login-modal');
     const loginClose = document.getElementById('byob-login-close');
 
-    if (loginClose) {
-      loginClose.addEventListener('click', () => {
+    // Move modal directly to document.body to avoid stacking context traps from main/sections
+    if (loginModal && loginModal.parentElement !== document.body) {
+      document.body.appendChild(loginModal);
+    }
+
+    function openLoginModal() {
+      if (loginModal) {
+        loginModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeLoginModal() {
+      if (loginModal) {
         loginModal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    }
+
+    window.pkOpenByobLoginModal = openLoginModal;
+    window.pkCloseByobLoginModal = closeLoginModal;
+
+    if (loginClose) {
+      loginClose.addEventListener('click', closeLoginModal);
+    }
+
+    if (loginModal) {
+      loginModal.addEventListener('click', function (e) {
+        if (e.target === loginModal) {
+          closeLoginModal();
+        }
       });
     }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && loginModal && loginModal.style.display !== 'none') {
+        closeLoginModal();
+      }
+    });
 
     quizBtns.forEach((btn) => {
       btn.addEventListener('click', function (e) {
@@ -155,9 +189,7 @@
         const hasCustomLogin = !!localStorage.getItem('pk_session');
 
         if (!hasNativeLogin && !hasCustomLogin) {
-          if (loginModal) {
-            loginModal.style.display = 'flex';
-          }
+          openLoginModal();
           return;
         }
 
@@ -251,7 +283,7 @@
         if(data.success && data.token) {
           localStorage.setItem('pk_session', data.token);
           // Hide modal and show quiz
-          if (loginModal) loginModal.style.display = 'none';
+          closeLoginModal();
           if (quizSection) {
             quizSection.style.display = 'block';
             quizSection.scrollIntoView({ behavior: 'smooth' });
@@ -427,15 +459,21 @@
 
   /* Login Modal Styles */
   .byob-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 99999;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 10000000 !important; /* Higher than #header-group (999999) and cart drawer */
     align-items: center;
     justify-content: center;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 24px 16px;
+    box-sizing: border-box;
   }
   .byob-modal-content {
     background: transparent;
@@ -444,21 +482,35 @@
     width: 95%;
     max-width: 900px;
     position: relative;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.28);
     overflow: hidden;
     display: flex;
+    margin: auto !important;
+    max-height: calc(100vh - 48px);
   }
   .byob-modal-close {
     position: absolute;
-    top: 15px;
-    right: 20px;
-    font-size: 28px;
+    top: 16px;
+    right: 18px;
+    font-size: 26px;
     line-height: 1;
     border: none;
-    background: none;
+    background: rgba(255, 255, 255, 0.9);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    color: #333;
-    z-index: 2;
+    color: #121217;
+    z-index: 30;
+    transition: all 0.15s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  .byob-modal-close:hover {
+    background: #fff;
+    transform: scale(1.06);
   }
 
   /* Embedded Login Styles */
@@ -681,14 +733,33 @@
   /* Google button removed */
 
   @media (max-width: 900px) {
+    .byob-modal-overlay {
+      padding: 16px 12px !important;
+    }
+    .byob-modal-content {
+      width: 100% !important;
+      max-width: 440px !important;
+      max-height: calc(100vh - 32px) !important;
+      overflow-y: auto !important;
+      border-radius: 20px !important;
+    }
     .pk-login-card {
       flex-direction: column;
     }
     .pk-login-right {
-      min-height: 300px;
+      min-height: 220px;
+      max-height: 260px;
+      background-size: contain;
+      background-position: center bottom;
+      background-repeat: no-repeat;
     }
     .pk-login-left {
-      padding: 40px 20px;
+      padding: 36px 20px 16px 20px;
+    }
+    .pk-login-title {
+      font-size: 26px;
+      margin: 0 0 24px 0;
+      padding-right: 32px;
     }
     .pk-otp-inputs input {
       width: 40px;
