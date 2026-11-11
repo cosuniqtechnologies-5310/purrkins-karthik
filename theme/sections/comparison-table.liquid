@@ -226,6 +226,8 @@ document.addEventListener("DOMContentLoaded", function() {
 .comp-table-wrapper {
     width: 100%;
     padding-bottom: 35px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 .comp-table {
     width: 100%;
@@ -454,70 +456,236 @@ content: '';
     }
 
     .header-icon-cat, .header-icon-bowl {
-    display: none;
+        display: none;
     }
     .purrkins-header-inner{
-            padding: 36px 0;
+        padding: 20px 0;
     }
-    .col-purrkins-header, .col-others-header {
-        width: 106px;
-    }
-    .col-feature-cell {
-        padding: 12px 14px 13px 17px;
-        font-size: 14px;
-    }
-    .comp-table tr:last-child .col-feature-cell{
-        padding-bottom: 20px;
-    }
-    .comp-table{
-        min-width: auto;
-    }
-    .header-icon-bowl svg { width: 24px; }
     .comp-table-heading {
         margin-bottom: 32px;
     }
     .comp-table-wrapper{
+        width: 100%;
+        overflow-x: visible;
+        overflow-y: visible;
         padding-bottom: 0;
     }
-    .comp-table tr:last-child .col-purrkins-cell::after{
-        height: 12px;
+    .comp-table-wrapper::-webkit-scrollbar {
+        display: none;
     }
+    .comp-table{
+        min-width: 0 !important;
+        width: 100% !important;
+        table-layout: fixed;
+    }
+    .col-feature-header, .col-feature-cell {
+        width: 48%;
+        min-width: 0;
+    }
+    .col-purrkins-header, .col-purrkins-cell {
+        width: 26%;
+        min-width: 0;
+    }
+    .col-others-header, .col-others-cell {
+        width: 26%;
+        min-width: 0;
+    }
+    .col-feature-cell {
+        display: table-cell !important;
+        vertical-align: middle;
+        padding: 16px 14px;
+        font-size: 15px;
+    }
+    .col-purrkins-cell {
+        display: table-cell !important;
+        vertical-align: middle;
+    }
+    .col-others-cell {
+        display: table-cell !important;
+        vertical-align: middle;
+    }
+    .comp-table tr:last-child .col-feature-cell{
+        padding-bottom: 20px;
+        border-bottom: 2.5px solid transparent;
+        border-bottom-left-radius: var(--border-radius-purrkins, 20px);
+    }
+    .comp-table tr:last-child .col-others-cell{
+        padding-bottom: 20px;
+        border-bottom: 2.5px solid transparent;
+        border-bottom-right-radius: var(--border-radius-purrkins, 20px);
+    }
+    .comp-table tr:last-child .col-purrkins-cell{
+        padding-bottom: 16px;
+        border-bottom: 2.5px solid #FFE330 !important;
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+    .comp-table tr:last-child .col-purrkins-cell::after{
+        display: none !important;
+    }
+    .others-header-inner, .feature-header-inner{
+    padding: 13px 14px;
+}
 }
 
 @media(max-width: 767px){
+    .comp-table-wrapper{
+        width: 100%;
+        overflow-x: visible;
+        overflow-y: visible;
+        padding-bottom: 24px;
+    }
+    .comp-table-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+    .comp-table{
+        min-width: 0 !important;
+        width: 100% !important;
+        table-layout: fixed;
+    }
+    .col-feature-header, .col-feature-cell {
+        width: 46%;
+        min-width: 0;
+        max-width: 46%;
+    }
+    .col-purrkins-header, .col-purrkins-cell {
+        width: 27%;
+        min-width: 0;
+        max-width: 27%;
+        border-left: 2.5px solid #FFE330;
+        border-right: 2.5px solid #FFE330;
+    }
+    .col-others-header, .col-others-cell {
+        width: 27%;
+        min-width: 0;
+        max-width: 27%;
+    }
+    .feature-header-inner,
+    .purrkins-header-inner,
+    .others-header-inner {
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+    }
     .feature-header-inner {
-        padding: 8px 12px;
+        padding: 12px 10px;
+        font-size: 13.5px;
+        font-weight: 700;
+        line-height: 1.25;
+        justify-content: flex-start;
+        text-align: left;
+        border-radius: var(--border-radius-purrkins, 16px) 0 0 0;
+    }
+    .header-inner.purrkins-header-inner {
+        padding: 12px 4px;
+        font-size: 14.5px;
+        font-weight: 700;
+        line-height: 1.25;
+        justify-content: center;
+        text-align: center;
+        border-radius: 0 !important;
+    }
+    .header-inner.others-header-inner {
+        height: unset;
+        padding: 12px 4px;
+        font-size: 14.5px;
+        font-weight: 700;
+        line-height: 1.25;
+        justify-content: center;
+        text-align: center;
+        border-radius: 0 var(--border-radius-purrkins, 16px) 0 0;
+        gap: 0;
+    }
+    .col-feature-cell {
+        display: table-cell !important;
+        vertical-align: middle;
+        padding: 12px 8px 12px 10px;
+        font-size: 12.5px;
+        font-weight: 500;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+    td.col-feature-cell::before {
+        width: calc(100% - 16px);
+        left: 8px;
+        border-bottom: 0.5px solid rgba(100, 172, 216, 0.45);
+    }
+    .col-purrkins-cell {
+        display: table-cell !important;
+        vertical-align: middle;
+        font-size: 20px;
+        font-weight: 700;
+        padding: 10px 4px;
+        text-align: center;
+    }
+    td.col-purrkins-cell::before {
+        width: 75%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-bottom: 0.5px solid rgba(160, 140, 10, 0.35);
+    }
+    .col-others-cell {
+        display: table-cell !important;
+        vertical-align: middle;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 10px 4px;
+        text-align: center;
+    }
+    td.col-others-cell::before {
+        width: 75%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-bottom: 0.5px solid rgba(170, 173, 178, 0.45);
+    }
+    .comp-table tr:last-child .col-feature-cell {
+        padding-bottom: 14px;
+        border-bottom: 2.5px solid transparent;
+        border-bottom-left-radius: var(--border-radius-purrkins, 16px);
+    }
+    .comp-table tr:last-child .col-others-cell {
+        padding-bottom: 14px;
+        border-bottom: 2.5px solid transparent;
+        border-bottom-right-radius: var(--border-radius-purrkins, 16px);
+    }
+    .comp-table tr:last-child .col-purrkins-cell {
+        padding-bottom: 10px;
+        border-bottom: 2.5px solid #FFE330 !important;
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+    .comp-table tr:last-child .col-purrkins-cell::after {
+        display: none !important;
+    }
+    .comp-table .header-icon-cat img, .header-icon-bowl img, .header-icon-bowl {
+        display: none;
+    }
+    .comp-pf-cat-btn.comp-tab {
+        width: calc(50% - 16px);
+    }
+}
+
+@media(max-width: 380px){
+    .feature-header-inner {
+        padding: 10px 6px;
+        font-size: 12px;
+    }
+    .header-inner.purrkins-header-inner,
+    .header-inner.others-header-inner {
+        font-size: 13.5px;
+        padding: 10px 2px;
+    }
+    .col-feature-cell {
+        font-size: 11.5px;
+        padding: 10px 6px;
+        line-height: 1.3;
     }
     .col-purrkins-cell {
         font-size: 18px;
     }
-    .col-others-cell{
+    .col-others-cell {
         font-size: 15px;
-    }
-    .others-header-inner, .purrkins-header-inner, .feature-header-inner{
-        font-size: 14px;
-    }
-    .comp-table .header-icon-cat img, .header-icon-bowl img, .header-icon-bowl{
-        display: none;
-    }
-    .header-inner.purrkins-header-inner {
-        padding: 15px 0;
-        border-radius: var(--border-radius-purrkins, 24px) var(--border-radius-purrkins, 24px) 0 0;
-    }
-    .header-inner.others-header-inner {
-        height: unset;
-        padding: 8px 12px;
-    }
-    .comp-table-inner {
-        padding-bottom: 76px;
-    }
-    .comp-pf-cat-btn.comp-tab{
-        width: calc(50% - 16px);
-    }
-}
-@media(max-width: 380px){
-    .others-header-inner, .purrkins-header-inner, .feature-header-inner {
-        font-size: 13px;
     }
 }
 </style>

@@ -46,6 +46,91 @@
     {% endif %}
 
     <script>
+      window.initPurrkinsBenefitsSliders = function(root) {
+        var container = root || document;
+        var sliders = container.querySelectorAll('.pf-qv-benefits');
+        sliders.forEach(function(slider) {
+          var track = slider.querySelector('.pf-qv-benefits-track');
+          var dotsContainer = slider.querySelector('.pf-qv-benefits-dots');
+          var items = slider.querySelectorAll('.pf-qv-benefit-item');
+          if (!track || items.length <= 2) {
+            if (dotsContainer) dotsContainer.style.display = 'none';
+            return;
+          }
+
+          var numPages = Math.ceil(items.length / 2);
+          if (dotsContainer) {
+            dotsContainer.innerHTML = '';
+            for (var i = 0; i < numPages; i++) {
+              var btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'pf-qv-dot' + (i === 0 ? ' active' : '');
+              btn.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+              btn.dataset.page = i;
+              (function(pageIndex) {
+                btn.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  var targetItem = items[pageIndex * 2];
+                  if (targetItem) {
+                    track.scrollTo({
+                      left: targetItem.offsetLeft - track.offsetLeft,
+                      behavior: 'smooth'
+                    });
+                  }
+                });
+              })(i);
+              dotsContainer.appendChild(btn);
+            }
+
+            var scrollDebounce;
+            track.addEventListener('scroll', function() {
+              clearTimeout(scrollDebounce);
+              scrollDebounce = setTimeout(function() {
+                var scrollLeft = track.scrollLeft;
+                var pageWidth = track.clientWidth;
+                var currentPage = Math.min(numPages - 1, Math.round(scrollLeft / pageWidth));
+                var dots = dotsContainer.querySelectorAll('.pf-qv-dot');
+                dots.forEach(function(dot, idx) {
+                  dot.classList.toggle('active', idx === currentPage);
+                });
+              }, 40);
+            }, { passive: true });
+          }
+
+          // Mouse drag support for desktop/simulator testing
+          var isDown = false;
+          var startX, scrollStart;
+          track.addEventListener('mousedown', function(e) {
+            isDown = true;
+            startX = e.pageX - track.offsetLeft;
+            scrollStart = track.scrollLeft;
+            track.style.cursor = 'grabbing';
+          });
+          window.addEventListener('mouseup', function() {
+            if (isDown) {
+              isDown = false;
+              track.style.cursor = '';
+            }
+          });
+          track.addEventListener('mousemove', function(e) {
+            if (!isDown) return;
+            e.preventDefault();
+            var x = e.pageX - track.offsetLeft;
+            var walk = (x - startX) * 1.5;
+            track.scrollLeft = scrollStart - walk;
+          });
+        });
+      };
+
+      // Backwards-compatible alias
+      window.initBenefitsSliders = window.initPurrkinsBenefitsSliders;
+
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof window.initPurrkinsBenefitsSliders === 'function') {
+          window.initPurrkinsBenefitsSliders();
+        }
+      });
+
       let isUpdatingCart = false;
       let cartUpdateQueue = [];
 

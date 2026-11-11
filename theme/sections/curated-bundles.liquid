@@ -106,27 +106,30 @@
 
                   {% assign inside_items = product.metafields.custom.bundle_whats_inside.value %}
                   {% if inside_items != blank %}
-                    <div class="cb-section">
+                    <div class=" cb-inside-cb-sectionsection">
                       <h4 class="cb-section-heading">What's inside</h4>
-                      <div class="cb-inside-grid">
-                        {% for item in inside_items %}
-                          <div class="cb-inside-pill">
-                            <div class="cb-inside-left-icons">
-                              {% if item.item_icon != blank %}
-                                <img
-                                  src="{{ item.item_icon | image_url: width: 64 }}"
-                                  class="cb-inside-icon"
-                                  alt=""
-                                  width="64"
-                                  height="64"
-                                >
-                              {% else %}
-                                <div></div>
-                              {% endif %}
-                              <span class="cb-inside-text">{{ item.item_name }}</span>
+                      <div class="cb-inside-slider">
+                        <div class="cb-inside-grid swiper-no-swiping">
+                          {% for item in inside_items %}
+                            <div class="cb-inside-pill">
+                              <div class="cb-inside-left-icons">
+                                {% if item.item_icon != blank %}
+                                  <img
+                                    src="{{ item.item_icon | image_url: width: 64 }}"
+                                    class="cb-inside-icon"
+                                    alt=""
+                                    width="64"
+                                    height="64"
+                                  >
+                                {% else %}
+                                  <div></div>
+                                {% endif %}
+                                <span class="cb-inside-text">{{ item.item_name }}</span>
+                              </div>
                             </div>
-                          </div>
-                        {% endfor %}
+                          {% endfor %}
+                        </div>
+                        <div class="cb-inside-dots"></div>
                       </div>
                     </div>
                   {% endif %}
@@ -215,6 +218,9 @@
       var cbSwiper = new Swiper(container, {
           slidesPerView: 1,
           spaceBetween: 20,
+          noSwiping: true,
+          noSwipingClass: 'swiper-no-swiping',
+          noSwipingSelector: '.swiper-no-swiping',
           pagination: {
               el: "#cb-{{ section.id }} .cb-pagination",
               clickable: true,
@@ -264,6 +270,111 @@
   }
 
 
+  function initCBInsideDots_{{ section.id | replace: '-', '_' }}() {
+      var root = document.getElementById('cb-{{ section.id }}');
+      if (!root) return;
+      var sliders = root.querySelectorAll('.cb-inside-slider');
+      sliders.forEach(function(slider) {
+          var track = slider.querySelector('.cb-inside-grid');
+          var dotsContainer = slider.querySelector('.cb-inside-dots');
+          var items = slider.querySelectorAll('.cb-inside-pill');
+          if (!track || !dotsContainer || items.length <= 1) return;
+
+          var numPages = Math.ceil(items.length / 2);
+          if (numPages <= 1) {
+              dotsContainer.innerHTML = '';
+              dotsContainer.style.display = 'none';
+              return;
+          }
+          dotsContainer.style.display = 'flex';
+
+          if (slider.dataset.dotsReady) return;
+          slider.dataset.dotsReady = 'true';
+
+          dotsContainer.innerHTML = '';
+          for (var i = 0; i < numPages; i++) {
+              var dot = document.createElement('button');
+              dot.type = 'button';
+              dot.className = 'cb-inside-dot' + (i === 0 ? ' active' : '');
+              dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+              dot.dataset.page = i;
+              (function(pageIndex) {
+                  dot.addEventListener('click', function(e) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      var targetItem = items[pageIndex * 2];
+                      if (targetItem) {
+                          var targetLeft = targetItem.getBoundingClientRect().left - track.getBoundingClientRect().left + track.scrollLeft;
+                          track.scrollTo({
+                              left: targetLeft,
+                              behavior: 'smooth'
+                          });
+                          var dots = dotsContainer.querySelectorAll('.cb-inside-dot');
+                          dots.forEach(function(d, idx) {
+                              d.classList.toggle('active', idx === pageIndex);
+                          });
+                      }
+                  });
+              })(i);
+              dotsContainer.appendChild(dot);
+          }
+
+          var scrollDebounce;
+          track.addEventListener('scroll', function() {
+              clearTimeout(scrollDebounce);
+              scrollDebounce = setTimeout(function() {
+                  var currentScroll = track.scrollLeft;
+                  var currentPage = 0;
+                  var minDiff = Infinity;
+
+                  if (track.scrollLeft + track.clientWidth >= track.scrollWidth - 10) {
+                      currentPage = numPages - 1;
+                  } else {
+                      for (var p = 0; p < numPages; p++) {
+                          var targetItem = items[p * 2];
+                          if (targetItem) {
+                              var targetLeft = targetItem.getBoundingClientRect().left - track.getBoundingClientRect().left + track.scrollLeft;
+                              var diff = Math.abs(targetLeft - currentScroll);
+                              if (diff < minDiff) {
+                                  minDiff = diff;
+                                  currentPage = p;
+                              }
+                          }
+                      }
+                  }
+
+                  var dots = dotsContainer.querySelectorAll('.cb-inside-dot');
+                  dots.forEach(function(d, idx) {
+                      d.classList.toggle('active', idx === currentPage);
+                  });
+              }, 40);
+          }, { passive: true });
+
+          // Mouse drag support for desktop/simulator testing
+          var isDown = false;
+          var startX, scrollStart;
+          track.addEventListener('mousedown', function(e) {
+              isDown = true;
+              startX = e.pageX;
+              scrollStart = track.scrollLeft;
+              track.style.cursor = 'grabbing';
+          });
+          window.addEventListener('mouseup', function() {
+              if (isDown) {
+                  isDown = false;
+                  track.style.cursor = '';
+              }
+          });
+          track.addEventListener('mousemove', function(e) {
+              if (!isDown) return;
+              e.preventDefault();
+              var x = e.pageX;
+              var walk = (x - startX) * 1.2;
+              track.scrollLeft = scrollStart - walk;
+          });
+      });
+  }
+
   function tryInitCBSwiper_{{ section.id | replace: '-', '_' }}() {
       if (typeof Swiper !== 'undefined') {
           initCBSwiper_{{ section.id | replace: '-', '_' }}();
@@ -277,6 +388,7 @@
       tryInitCBSwiper_{{ section.id | replace: '-', '_' }}();
       {% endif %}
       initCBAddToCart_{{ section.id | replace: '-', '_' }}();
+      initCBInsideDots_{{ section.id | replace: '-', '_' }}();
   });
 
   if (window.Shopify && window.Shopify.designMode) {
@@ -284,6 +396,7 @@
       tryInitCBSwiper_{{ section.id | replace: '-', '_' }}();
       {% endif %}
       initCBAddToCart_{{ section.id | replace: '-', '_' }}();
+      initCBInsideDots_{{ section.id | replace: '-', '_' }}();
 
       document.addEventListener('shopify:section:load', function(event) {
           if (event.detail.sectionId === '{{ section.id }}') {
@@ -291,6 +404,7 @@
               tryInitCBSwiper_{{ section.id | replace: '-', '_' }}();
               {% endif %}
               initCBAddToCart_{{ section.id | replace: '-', '_' }}();
+              initCBInsideDots_{{ section.id | replace: '-', '_' }}();
           }
       });
   }
@@ -419,6 +533,12 @@
     font-size: 18px;
     font-weight: 700;
     line-height: 2;
+  }
+  .cb-inside-slider {
+    width: 100%;
+  }
+  .cb-inside-dots {
+    display: none;
   }
   .cb-inside-grid {
     display: grid;
@@ -568,12 +688,258 @@
       gap: 40px;
       margin-bottom: 20px;
     }
+
+    .cb-slide-right {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    .cb-section {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    .cb-section-heading {
+      text-align: center;
+    }
+
+    .cb-inside-slider {
+      width: 100%;
+      min-width: 0;
+      position: relative;
+    }
+
+    .cb-inside-grid {
+      display: grid;
+      grid-template-columns: none;
+      grid-template-rows: repeat(2, auto);
+      grid-auto-flow: column;
+      grid-auto-columns: 100%;
+      row-gap: 8px;
+      column-gap: 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      min-width: 0;
+      max-width: 100%;
+      width: 100%;
+      cursor: grab;
+      padding-bottom: 2px;
+    }
+
+    .cb-inside-grid::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cb-inside-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: #fff;
+      border-radius: var(--radius-small, 8px);
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 52px;
+      user-select: none;
+      overflow: hidden;
+    }
+
+    .cb-inside-pill:nth-child(2n+1) {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    .cb-inside-pill:nth-child(2n) {
+      scroll-snap-align: none;
+    }
+
+    .cb-inside-left-icons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .cb-inside-text {
+      white-space: normal;
+      word-break: break-word;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-primary, #121217);
+      line-height: 1.3;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .cb-inside-icon {
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .cb-inside-dots {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      width: 100%;
+    }
+
+    .cb-inside-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #C4D3E0;
+      border: none;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .cb-inside-dot:hover {
+      background: #8FA2B2;
+    }
+
+    .cb-inside-dot.active {
+      background: var(--brand-slate-900, #21252A);
+      transform: scale(1.33);
+    }
   }
 
   @media (max-width: 767px) {
+    .cb-section-heading {
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .cb-inside-slider {
+      width: 100%;
+      min-width: 0;
+      position: relative;
+    }
+
     .cb-inside-grid {
-      grid-template-columns: 1fr;
-      gap: 8px;
+      display: grid;
+      grid-template-columns: none;
+      grid-template-rows: repeat(2, auto);
+      grid-auto-flow: column;
+      grid-auto-columns: 100%;
+      row-gap: 8px;
+      column-gap: 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      min-width: 0;
+      max-width: 100%;
+      width: 100%;
+      cursor: grab;
+      padding-bottom: 2px;
+    }
+
+    .cb-inside-grid::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cb-inside-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: #fff;
+      border-radius: var(--radius-small, 8px);
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 52px;
+      user-select: none;
+      overflow: hidden;
+    }
+
+    .cb-inside-pill:nth-child(2n+1) {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    .cb-inside-pill:nth-child(2n) {
+      scroll-snap-align: none;
+    }
+
+    .cb-inside-left-icons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .cb-inside-text {
+      white-space: normal;
+      word-break: break-word;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-primary, #121217);
+      line-height: 1.3;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .cb-inside-icon {
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .cb-inside-dots {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      width: 100%;
+    }
+
+    .cb-inside-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #C4D3E0;
+      border: none;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .cb-inside-dot:hover {
+      background: #8FA2B2;
+    }
+
+    .cb-inside-dot.active {
+      background: var(--brand-slate-900, #21252A);
+      transform: scale(1.33);
     }
 
     .cb-badge {

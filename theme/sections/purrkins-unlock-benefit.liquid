@@ -1,97 +1,134 @@
 {{ 'purrkins-unlock-benefit.css' | asset_url | stylesheet_tag }}
 
 <div class="pf-ub-section purrkins-container purrkins-section-block">
-    <div class="pf-ub-inner">
-        <div class="pf-ub-content">
-            <h3 class="pf-ub-heading purrkins-h3-text purrkins-heading-mb">{{ section.settings.heading | escape }}</h3>
-            <p class="pf-ub-subheading purrkins-subtext">{{ section.settings.subheading | escape }}</p>
-            <button type="button" class="pf-ub-btn purrkins-btn-primary js-ub-open-modal">
-                {{ section.settings.button_text | escape }}
-            </button>
-        </div>
-        
-        <div class="pf-ub-media">
-            {% if section.settings.video_url != blank %}
-                <video class="pf-ub-video" autoplay loop muted playsinline preload="metadata">
-                    <source src="{{ section.settings.video_url }}" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-            {% elsif section.settings.image != blank %}
-                {{ section.settings.image | image_url: width: 800 | image_tag: alt: section.settings.heading, loading: 'lazy', class: 'pf-ub-image' }}
-            {% else %}
-                <!-- Placeholder if no media uploaded -->
-                <div style="width: 100%; height: 400px; background: #f0f0f1; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #475467;">
-                    Please upload an MP4 video or Image in Section Settings.
-                </div>
-            {% endif %}
-        </div>
+  <div class="pf-ub-inner">
+    <div class="pf-ub-content">
+      <h3 class="pf-ub-heading purrkins-h3-text purrkins-heading-mb">{{ section.settings.heading | escape }}</h3>
+      <p class="pf-ub-subheading purrkins-subtext">{{ section.settings.subheading | escape }}</p>
+      <button type="button" class="pf-ub-btn purrkins-btn-primary js-ub-open-modal">
+        {{ section.settings.button_text | escape }}
+      </button>
     </div>
+
+    <div class="pf-ub-media">
+      {% if section.settings.video_url != blank %}
+        <video class="pf-ub-video" autoplay loop muted playsinline preload="metadata">
+          <source src="{{ section.settings.video_url }}" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      {% elsif section.settings.image != blank %}
+        {{
+          section.settings.image
+          | image_url: width: 800
+          | image_tag: alt: section.settings.heading, loading: 'lazy', class: 'pf-ub-image'
+        }}
+      {% else %}
+        <!-- Placeholder if no media uploaded -->
+        <div style="width: 100%; height: 400px; background: #f0f0f1; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #475467;">
+          Please upload an MP4 video or Image in Section Settings.
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 
 <!-- Unlock Benefit Modal -->
 <div class="pf-ub-modal-overlay" id="ubModalOverlay-{{ section.id }}">
-    <div class="pf-ub-modal">
-        <button type="button" class="pf-ub-modal-close" id="ubModalClose-{{ section.id }}" aria-label="Close modal">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
+  <div class="pf-ub-modal">
+    <button type="button" class="pf-ub-modal-close" id="ubModalClose-{{ section.id }}" aria-label="Close modal">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
 
-        <h2 class="pf-ub-modal-title">{{ section.settings.modal_title }}</h2>
+    <h2 class="pf-ub-modal-title">{{ section.settings.modal_title }}</h2>
 
-        <div class="pf-ub-modal-form-wrapper">
-            <!-- Plain HTML form — submits JSON to app proxy, no page reload -->
-            <form id="ub-claim-form-{{ section.id }}" class="ub-ajax-form" novalidate>
-                <div class="ub-form-success" id="ub-success-{{ section.id }}" style="display:none; color:#10B981; text-align:center; margin-bottom:20px; font-weight:700; font-size:16px;">
-                    Thank you! We've received your request.
-                </div>
-                <div class="ub-form-error" id="ub-error-{{ section.id }}" style="display:none; color:#D32F2F; text-align:center; margin-bottom:16px; font-size:14px; font-weight:500;"></div>
-
-                <div class="ub-placeholder-form" id="ub-fields-{{ section.id }}">
-                    <div class="ub-form-row">
-                        <div class="ub-form-col">
-                            <label for="ubName-{{ section.id }}">Your Name *</label>
-                            <input type="text" id="ubName-{{ section.id }}" name="ub_name" placeholder="Full Name" required autocomplete="name">
-                            <div class="ub-field-error" id="ubNameError-{{ section.id }}"></div>
-                        </div>
-                        <div class="ub-form-col">
-                            <label for="ubPhone-{{ section.id }}">Mobile Number *</label>
-                            <input type="tel" id="ubPhone-{{ section.id }}" name="ub_phone" placeholder="10-digit number" maxlength="10" inputmode="numeric" required autocomplete="tel">
-                            <div class="ub-field-error" id="ubPhoneError-{{ section.id }}"></div>
-                        </div>
-                    </div>
-                    <div class="ub-form-row">
-                        <div class="ub-form-col" style="flex:1;">
-                            <label for="ubEmail-{{ section.id }}">Your Email *</label>
-                            <input type="email" id="ubEmail-{{ section.id }}" name="ub_email" placeholder="yourname@example.com" required autocomplete="email">
-                            <div class="ub-field-error" id="ubEmailError-{{ section.id }}"></div>
-                        </div>
-                    </div>
-
-                    <div class="ub-form-action">
-                        <button type="submit" class="pf-ub-btn purrkins-btn-primary" id="ub-submit-{{ section.id }}">Claim</button>
-                    </div>
-                </div>
-            </form>
+    <div class="pf-ub-modal-form-wrapper">
+      <!-- Plain HTML form — submits JSON to app proxy, no page reload -->
+      <form id="ub-claim-form-{{ section.id }}" class="ub-ajax-form" novalidate>
+        <div
+          class="ub-form-success"
+          id="ub-success-{{ section.id }}"
+          style="display:none; color:#10B981; text-align:center; margin-bottom:20px; font-weight:700; font-size:16px;"
+        >
+          Thank you! We've received your request.
         </div>
+        <div
+          class="ub-form-error"
+          id="ub-error-{{ section.id }}"
+          style="display:none; color:#D32F2F; text-align:center; margin-bottom:16px; font-size:14px; font-weight:500;"
+        ></div>
+
+        <div class="ub-placeholder-form" id="ub-fields-{{ section.id }}">
+          <div class="ub-form-row">
+            <div class="ub-form-col">
+              <label for="ubName-{{ section.id }}">Your Name *</label>
+              <input
+                type="text"
+                id="ubName-{{ section.id }}"
+                name="ub_name"
+                placeholder="Full Name"
+                required
+                autocomplete="name"
+              >
+              <div class="ub-field-error" id="ubNameError-{{ section.id }}"></div>
+            </div>
+            <div class="ub-form-col">
+              <label for="ubPhone-{{ section.id }}">Mobile Number *</label>
+              <input
+                type="tel"
+                id="ubPhone-{{ section.id }}"
+                name="ub_phone"
+                placeholder="10-digit number"
+                maxlength="10"
+                inputmode="numeric"
+                required
+                autocomplete="tel"
+              >
+              <div class="ub-field-error" id="ubPhoneError-{{ section.id }}"></div>
+            </div>
+          </div>
+          <div class="ub-form-row">
+            <div class="ub-form-col" style="flex:1;">
+              <label for="ubEmail-{{ section.id }}">Your Email *</label>
+              <input
+                type="email"
+                id="ubEmail-{{ section.id }}"
+                name="ub_email"
+                placeholder="yourname@example.com"
+                required
+                autocomplete="email"
+              >
+              <div class="ub-field-error" id="ubEmailError-{{ section.id }}"></div>
+            </div>
+          </div>
+
+          <div class="ub-form-action">
+            <button type="submit" class="pf-ub-btn purrkins-btn-primary" id="ub-submit-{{ section.id }}">Claim</button>
+          </div>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function () {
     // Video Lazy Loading
     var lazyVideos = [].slice.call(document.querySelectorAll('.pf-ub-section video'));
     if ('IntersectionObserver' in window) {
-        var lazyVideoObserver = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.play();
-                } else {
-                    entry.target.pause();
-                }
-            });
+      var lazyVideoObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.play();
+          } else {
+            entry.target.pause();
+          }
         });
-        lazyVideos.forEach(function (v) { lazyVideoObserver.observe(v); });
+      });
+      lazyVideos.forEach(function (v) {
+        lazyVideoObserver.observe(v);
+      });
     }
 
     // Modal Logic
@@ -100,281 +137,282 @@ document.addEventListener('DOMContentLoaded', function () {
     var closeBtn = document.getElementById('ubModalClose-{{ section.id }}');
 
     if (openBtn && overlay && closeBtn) {
-        openBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            overlay.classList.add('is-active');
-            document.body.style.overflow = 'hidden';
-        });
-        closeBtn.addEventListener('click', function () {
-            overlay.classList.remove('is-active');
-            document.body.style.overflow = '';
-        });
-        overlay.addEventListener('click', function (e) {
-            if (e.target === overlay) {
-                overlay.classList.remove('is-active');
-                document.body.style.overflow = '';
-            }
-        });
+      openBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        overlay.classList.add('is-active');
+        document.body.style.overflow = 'hidden';
+      });
+      closeBtn.addEventListener('click', function () {
+        overlay.classList.remove('is-active');
+        document.body.style.overflow = '';
+      });
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) {
+          overlay.classList.remove('is-active');
+          document.body.style.overflow = '';
+        }
+      });
     }
 
     // Form Submit & Real-Time Validation
     var ubForm = document.getElementById('ub-claim-form-{{ section.id }}');
     if (ubForm) {
-        var nameInput = document.getElementById('ubName-{{ section.id }}');
-        var phoneInput = document.getElementById('ubPhone-{{ section.id }}');
-        var emailInput = document.getElementById('ubEmail-{{ section.id }}');
+      var nameInput = document.getElementById('ubName-{{ section.id }}');
+      var phoneInput = document.getElementById('ubPhone-{{ section.id }}');
+      var emailInput = document.getElementById('ubEmail-{{ section.id }}');
 
-        var nameError = document.getElementById('ubNameError-{{ section.id }}');
-        var phoneError = document.getElementById('ubPhoneError-{{ section.id }}');
-        var emailError = document.getElementById('ubEmailError-{{ section.id }}');
+      var nameError = document.getElementById('ubNameError-{{ section.id }}');
+      var phoneError = document.getElementById('ubPhoneError-{{ section.id }}');
+      var emailError = document.getElementById('ubEmailError-{{ section.id }}');
 
-        var submitBtn = document.getElementById('ub-submit-{{ section.id }}');
-        var fieldsEl = document.getElementById('ub-fields-{{ section.id }}');
-        var successEl = document.getElementById('ub-success-{{ section.id }}');
-        var errorEl = document.getElementById('ub-error-{{ section.id }}');
+      var submitBtn = document.getElementById('ub-submit-{{ section.id }}');
+      var fieldsEl = document.getElementById('ub-fields-{{ section.id }}');
+      var successEl = document.getElementById('ub-success-{{ section.id }}');
+      var errorEl = document.getElementById('ub-error-{{ section.id }}');
 
-        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        function showFieldError(input, errBox, message) {
-            if (input) {
-                input.classList.add('has-error');
-                input.classList.remove('is-valid');
-            }
-            if (errBox) {
-                errBox.textContent = message;
-                errBox.classList.add('is-visible');
-            }
+      function showFieldError(input, errBox, message) {
+        if (input) {
+          input.classList.add('has-error');
+          input.classList.remove('is-valid');
         }
-
-        function clearFieldError(input, errBox) {
-            if (input) {
-                input.classList.remove('has-error');
-                input.classList.add('is-valid');
-            }
-            if (errBox) {
-                errBox.textContent = '';
-                errBox.classList.remove('is-visible');
-            }
+        if (errBox) {
+          errBox.textContent = message;
+          errBox.classList.add('is-visible');
         }
+      }
 
-        // Phone Input Handlers
-        if (phoneInput) {
-            // Block non-digits and prevent typing when already at 10 digits
-            phoneInput.addEventListener('keydown', function (e) {
-                var navigationKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'];
-                if (navigationKeys.indexOf(e.key) !== -1 || e.ctrlKey || e.metaKey) {
-                    return;
-                }
-                if (!/^[0-9]$/.test(e.key)) {
-                    e.preventDefault();
-                    showFieldError(phoneInput, phoneError, 'Only numbers are allowed.');
-                    return;
-                }
-                var selectedText = window.getSelection().toString();
-                if (this.value.length >= 10 && !selectedText) {
-                    e.preventDefault();
-                    showFieldError(phoneInput, phoneError, 'Mobile number cannot exceed 10 digits.');
-                    return;
-                }
-            });
-
-            phoneInput.addEventListener('input', function () {
-                var cleaned = this.value.replace(/\D/g, '');
-                if (this.value !== cleaned) {
-                    this.value = cleaned;
-                }
-
-                if (cleaned.length > 10) {
-                    this.value = cleaned.slice(0, 10);
-                    showFieldError(phoneInput, phoneError, 'Mobile number cannot exceed 10 digits.');
-                    return;
-                }
-
-                if (this.value.length === 10) {
-                    if (!/^[6-9]\d{9}$/.test(this.value)) {
-                        showFieldError(phoneInput, phoneError, 'Please enter a valid 10-digit mobile number.');
-                    } else {
-                        clearFieldError(phoneInput, phoneError);
-                    }
-                } else if (this.value.length > 0 && phoneInput.classList.contains('has-error')) {
-                    showFieldError(phoneInput, phoneError, 'Must be 10 digits (' + this.value.length + '/10)');
-                }
-            });
-
-            phoneInput.addEventListener('paste', function (e) {
-                var paste = (e.clipboardData || window.clipboardData).getData('text');
-                var digits = paste.replace(/\D/g, '');
-                if (digits.length > 10) {
-                    e.preventDefault();
-                    this.value = digits.slice(0, 10);
-                    showFieldError(phoneInput, phoneError, 'Mobile number cannot exceed 10 digits.');
-                }
-            });
-
-            phoneInput.addEventListener('blur', function () {
-                var digits = this.value.replace(/\D/g, '');
-                if (!digits) {
-                    showFieldError(phoneInput, phoneError, 'Mobile number is required.');
-                } else if (digits.length !== 10) {
-                    showFieldError(phoneInput, phoneError, 'Mobile number must be exactly 10 digits.');
-                } else if (!/^[6-9]\d{9}$/.test(digits)) {
-                    showFieldError(phoneInput, phoneError, 'Please enter a valid 10-digit mobile number.');
-                } else {
-                    clearFieldError(phoneInput, phoneError);
-                }
-            });
+      function clearFieldError(input, errBox) {
+        if (input) {
+          input.classList.remove('has-error');
+          input.classList.add('is-valid');
         }
-
-        // Name Input Handlers
-        if (nameInput) {
-            nameInput.addEventListener('blur', function () {
-                var val = this.value.trim();
-                if (!val) {
-                    showFieldError(nameInput, nameError, 'Your name is required.');
-                } else if (val.length < 2) {
-                    showFieldError(nameInput, nameError, 'Name must be at least 2 characters.');
-                } else {
-                    clearFieldError(nameInput, nameError);
-                }
-            });
-
-            nameInput.addEventListener('input', function () {
-                if (nameInput.classList.contains('has-error') && this.value.trim().length >= 2) {
-                    clearFieldError(nameInput, nameError);
-                }
-            });
+        if (errBox) {
+          errBox.textContent = '';
+          errBox.classList.remove('is-visible');
         }
+      }
 
-        // Email Input Handlers
-        if (emailInput) {
-            emailInput.addEventListener('blur', function () {
-                var val = this.value.trim();
-                if (!val) {
-                    showFieldError(emailInput, emailError, 'Your email is required.');
-                } else if (!emailPattern.test(val)) {
-                    showFieldError(emailInput, emailError, 'Please enter a valid email address.');
-                } else {
-                    clearFieldError(emailInput, emailError);
-                }
-            });
-
-            emailInput.addEventListener('input', function () {
-                if (emailInput.classList.contains('has-error') && emailPattern.test(this.value.trim())) {
-                    clearFieldError(emailInput, emailError);
-                }
-            });
-        }
-
-        // Submit Handler
-        ubForm.addEventListener('submit', function (e) {
+      // Phone Input Handlers
+      if (phoneInput) {
+        // Block non-digits and prevent typing when already at 10 digits
+        phoneInput.addEventListener('keydown', function (e) {
+          var navigationKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'];
+          if (navigationKeys.indexOf(e.key) !== -1 || e.ctrlKey || e.metaKey) {
+            return;
+          }
+          if (!/^[0-9]$/.test(e.key)) {
             e.preventDefault();
-            e.stopPropagation();
+            showFieldError(phoneInput, phoneError, 'Only numbers are allowed.');
+            return;
+          }
+          var selectedText = window.getSelection().toString();
+          if (this.value.length >= 10 && !selectedText) {
+            e.preventDefault();
+            showFieldError(phoneInput, phoneError, 'Mobile number cannot exceed 10 digits.');
+            return;
+          }
+        });
 
-            if (submitBtn.disabled) return false;
+        phoneInput.addEventListener('input', function () {
+          var cleaned = this.value.replace(/\D/g, '');
+          if (this.value !== cleaned) {
+            this.value = cleaned;
+          }
 
-            var isValid = true;
-            var name = nameInput ? nameInput.value.trim() : '';
-            var rawPhone = phoneInput ? phoneInput.value.replace(/\D/g, '') : '';
-            var email = emailInput ? emailInput.value.trim() : '';
+          if (cleaned.length > 10) {
+            this.value = cleaned.slice(0, 10);
+            showFieldError(phoneInput, phoneError, 'Mobile number cannot exceed 10 digits.');
+            return;
+          }
 
-            // Name Check
-            if (!name || name.length < 2) {
-                showFieldError(nameInput, nameError, name ? 'Name must be at least 2 characters.' : 'Your name is required.');
-                isValid = false;
+          if (this.value.length === 10) {
+            if (!/^[6-9]\d{9}$/.test(this.value)) {
+              showFieldError(phoneInput, phoneError, 'Please enter a valid 10-digit mobile number.');
             } else {
-                clearFieldError(nameInput, nameError);
+              clearFieldError(phoneInput, phoneError);
             }
+          } else if (this.value.length > 0 && phoneInput.classList.contains('has-error')) {
+            showFieldError(phoneInput, phoneError, 'Must be 10 digits (' + this.value.length + '/10)');
+          }
+        });
 
-            // Phone Check (Strict 10 digits, valid starting digit)
-            if (!rawPhone) {
-                showFieldError(phoneInput, phoneError, 'Mobile number is required.');
-                isValid = false;
-            } else if (rawPhone.length !== 10) {
-                showFieldError(phoneInput, phoneError, 'Mobile number must be exactly 10 digits.');
-                isValid = false;
-            } else if (!/^[6-9]\d{9}$/.test(rawPhone)) {
-                showFieldError(phoneInput, phoneError, 'Please enter a valid 10-digit mobile number.');
-                isValid = false;
-            } else {
-                clearFieldError(phoneInput, phoneError);
-            }
+        phoneInput.addEventListener('paste', function (e) {
+          var paste = (e.clipboardData || window.clipboardData).getData('text');
+          var digits = paste.replace(/\D/g, '');
+          if (digits.length > 10) {
+            e.preventDefault();
+            this.value = digits.slice(0, 10);
+            showFieldError(phoneInput, phoneError, 'Mobile number cannot exceed 10 digits.');
+          }
+        });
 
-            // Email Check
-            if (!email) {
-                showFieldError(emailInput, emailError, 'Your email is required.');
-                isValid = false;
-            } else if (!emailPattern.test(email)) {
-                showFieldError(emailInput, emailError, 'Please enter a valid email address.');
-                isValid = false;
-            } else {
-                clearFieldError(emailInput, emailError);
-            }
+        phoneInput.addEventListener('blur', function () {
+          var digits = this.value.replace(/\D/g, '');
+          if (!digits) {
+            showFieldError(phoneInput, phoneError, 'Mobile number is required.');
+          } else if (digits.length !== 10) {
+            showFieldError(phoneInput, phoneError, 'Mobile number must be exactly 10 digits.');
+          } else if (!/^[6-9]\d{9}$/.test(digits)) {
+            showFieldError(phoneInput, phoneError, 'Please enter a valid 10-digit mobile number.');
+          } else {
+            clearFieldError(phoneInput, phoneError);
+          }
+        });
+      }
 
-            if (!isValid) {
-                var firstError = ubForm.querySelector('.has-error');
-                if (firstError) firstError.focus();
-                return false;
-            }
+      // Name Input Handlers
+      if (nameInput) {
+        nameInput.addEventListener('blur', function () {
+          var val = this.value.trim();
+          if (!val) {
+            showFieldError(nameInput, nameError, 'Your name is required.');
+          } else if (val.length < 2) {
+            showFieldError(nameInput, nameError, 'Name must be at least 2 characters.');
+          } else {
+            clearFieldError(nameInput, nameError);
+          }
+        });
 
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
-            errorEl.style.display = 'none';
+        nameInput.addEventListener('input', function () {
+          if (nameInput.classList.contains('has-error') && this.value.trim().length >= 2) {
+            clearFieldError(nameInput, nameError);
+          }
+        });
+      }
 
-            // Format phone with +91 country code
-            var phone = '+91' + rawPhone.replace(/^\+91/, '');
+      // Email Input Handlers
+      if (emailInput) {
+        emailInput.addEventListener('blur', function () {
+          var val = this.value.trim();
+          if (!val) {
+            showFieldError(emailInput, emailError, 'Your email is required.');
+          } else if (!emailPattern.test(val)) {
+            showFieldError(emailInput, emailError, 'Please enter a valid email address.');
+          } else {
+            clearFieldError(emailInput, emailError);
+          }
+        });
 
-            var payload = {
-                name: name,
-                phone: phone,
-                email: email,
-                tag: 'unlock-benefit',
-                accepts_marketing: true
-            };
+        emailInput.addEventListener('input', function () {
+          if (emailInput.classList.contains('has-error') && emailPattern.test(this.value.trim())) {
+            clearFieldError(emailInput, emailError);
+          }
+        });
+      }
 
-            fetch('/apps/purrkins/unlock-benefit/customer', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify(payload)
-            })
+      // Submit Handler
+      ubForm.addEventListener(
+        'submit',
+        function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (submitBtn.disabled) return false;
+
+          var isValid = true;
+          var name = nameInput ? nameInput.value.trim() : '';
+          var rawPhone = phoneInput ? phoneInput.value.replace(/\D/g, '') : '';
+          var email = emailInput ? emailInput.value.trim() : '';
+
+          // Name Check
+          if (!name || name.length < 2) {
+            showFieldError(
+              nameInput,
+              nameError,
+              name ? 'Name must be at least 2 characters.' : 'Your name is required.'
+            );
+            isValid = false;
+          } else {
+            clearFieldError(nameInput, nameError);
+          }
+
+          // Phone Check (Strict 10 digits, valid starting digit)
+          if (!rawPhone) {
+            showFieldError(phoneInput, phoneError, 'Mobile number is required.');
+            isValid = false;
+          } else if (rawPhone.length !== 10) {
+            showFieldError(phoneInput, phoneError, 'Mobile number must be exactly 10 digits.');
+            isValid = false;
+          } else if (!/^[6-9]\d{9}$/.test(rawPhone)) {
+            showFieldError(phoneInput, phoneError, 'Please enter a valid 10-digit mobile number.');
+            isValid = false;
+          } else {
+            clearFieldError(phoneInput, phoneError);
+          }
+
+          // Email Check
+          if (!email) {
+            showFieldError(emailInput, emailError, 'Your email is required.');
+            isValid = false;
+          } else if (!emailPattern.test(email)) {
+            showFieldError(emailInput, emailError, 'Please enter a valid email address.');
+            isValid = false;
+          } else {
+            clearFieldError(emailInput, emailError);
+          }
+
+          if (!isValid) {
+            var firstError = ubForm.querySelector('.has-error');
+            if (firstError) firstError.focus();
+            return false;
+          }
+
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Submitting...';
+          errorEl.style.display = 'none';
+
+          // Format phone with +91 country code
+          var phone = '+91' + rawPhone.replace(/^\+91/, '');
+
+          var payload = {
+            name: name,
+            phone: phone,
+            email: email,
+            tag: 'unlock-benefit',
+            accepts_marketing: true,
+          };
+
+          fetch('/apps/purrkins/unlock-benefit/customer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify(payload),
+          })
             .then(function (response) {
-                return response.json().then(function (data) {
-                    return { ok: response.ok, data: data };
-                }).catch(function () {
-                    return { ok: response.ok, data: {} };
+              return response
+                .json()
+                .then(function (data) {
+                  return { ok: response.ok, data: data };
+                })
+                .catch(function () {
+                  return { ok: response.ok, data: {} };
                 });
             })
             .then(function (result) {
-                if (!result.ok || (result.data && result.data.success === false)) {
-                    throw new Error((result.data && result.data.message) || 'Something went wrong. Please try again.');
-                }
-                // Show success, hide form fields
-                if (successEl) {
-                    if (!successEl.hasAttribute('data-default-text')) {
-                        successEl.setAttribute('data-default-text', successEl.innerHTML);
-                    }
-                    if ((result.data && result.data.already_customer)) {
-                      successEl.textContent = (result.data.message || 'You are already a customer with us.');
-                    } else {
-                      successEl.innerHTML = successEl.getAttribute('data-default-text');
-                    }
-                }
-                if (fieldsEl) fieldsEl.style.display = 'none';
-                if (successEl) successEl.style.display = 'block';
-                submitBtn.textContent = 'Claim';
-                submitBtn.disabled = false;
+              if (!result.ok || (result.data && result.data.success === false)) {
+                throw new Error((result.data && result.data.message) || 'Something went wrong. Please try again.');
+              }
+              // Show success, hide form fields
+              if (fieldsEl) fieldsEl.style.display = 'none';
+              if (successEl) successEl.style.display = 'block';
+              submitBtn.textContent = 'Claim';
+              submitBtn.disabled = false;
             })
             .catch(function (err) {
-                console.error('[UnlockBenefit] Error:', err);
-                errorEl.textContent = err.message || 'Something went wrong. Please try again.';
-                errorEl.style.display = 'block';
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Claim';
+              console.error('[UnlockBenefit] Error:', err);
+              errorEl.textContent = err.message || 'Something went wrong. Please try again.';
+              errorEl.style.display = 'block';
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Claim';
             });
 
-            return false;
-        }, false);
+          return false;
+        },
+        false
+      );
     }
-});
+  });
 </script>
 
 {% schema %}

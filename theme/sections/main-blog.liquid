@@ -1,6 +1,6 @@
 {{ 'purrkins-blog.css' | asset_url | stylesheet_tag }}
 
-<div class="purrkins-container">
+<div class="purrkins-container blog-specialize">
   {%- paginate blog.articles by 9 -%}
     {%- if paginate.current_page == 1 and blog.articles.size > 0 -%}
       {%- assign featured = blog.articles.first -%}
@@ -176,7 +176,11 @@
     });
   });
 </script>
-
+<style>
+.purrkins-container.blog-specialize {
+    margin-top: 20px;
+}
+</style>
 {% schema %}
 {
   "name": "Purrkins Blog Posts",

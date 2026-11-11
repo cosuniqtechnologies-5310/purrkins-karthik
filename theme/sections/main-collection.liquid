@@ -64,7 +64,7 @@
           {% if block.type == 'collection_group' and block.settings.collection != blank %}
             {% assign coll = block.settings.collection %}
             <div class="collection-group-section" {{ block.shopify_attributes }}>
-              <h2 class="purrkins-h2-text" style="margin-top: 60px; margin-bottom: 24px; font-size: 32px; font-weight: 700;">{{ coll.title }}</h2>
+              <h2 class="purrkins-h2-text">{{ coll.title }}</h2>
               {% capture group_children %}
                 {% for product in coll.products limit: 50 %}
                   <li

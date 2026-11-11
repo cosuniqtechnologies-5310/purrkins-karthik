@@ -1162,6 +1162,9 @@ figure.woocommerce-product-gallery__wrapper.pf-desktop-gallery {
 }
 
 @media(max-width: 767px) {
+    .pf-ft-quote {
+    font-size: 18px;
+  }
   .pf-comparison-table {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1275,6 +1278,10 @@ figure.woocommerce-product-gallery__wrapper.pf-desktop-gallery {
   .single-product .pf-product-price .price-size {
     font-size: 14px;
   }
+    .pf-po-price {
+    font-size: 20px;
+  }
+
 
 }
 
@@ -1472,19 +1479,151 @@ span.pf-qv-weight {
 }
 
 .pf-qv-benefits {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px 35px;
-  margin-bottom: 26px;
-  color: var(--brand-slate-800, #32373E);
-  text-align: center;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.5;
+  position: relative;
+  border-radius: 16px;
+  background: #F7F7F7;
+  padding: 28px 14px 20px;
+  margin-bottom: 32px;
+  font-size: 15px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.pf-qv-benefits-track {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scroll-snap-type: x mandatory !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  gap: 16px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  align-items: flex-start !important;
+}
+
+.pf-qv-benefits-track::-webkit-scrollbar {
+  display: none !important;
+}
+
+.pf-qv-benefit-item {
+  flex: 0 0 calc((100% - 16px) / 2) !important;
+  min-width: calc((100% - 16px) / 2) !important;
+  max-width: calc((100% - 16px) / 2) !important;
+  width: calc((100% - 16px) / 2) !important;
+  scroll-snap-align: start !important;
+  scroll-snap-stop: normal !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
 }
 
 .pf-qv-benefits .pf-qv-benefits-icon {
-  margin-bottom: 8px;
+  width: 80px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+}
+
+.pf-qv-benefits .pf-qv-benefits-icon img {
+  width: 67px;
+  height: 67px;
+  object-fit: contain;
+  display: block;
+}
+
+.pf-qv-benefit-item span {
+  display: block;
+  max-width: 140px;
+  margin: 0 auto;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--brand-slate-800, #32373e);
+}
+
+.pf-qv-benefits-dots {
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  width: 100%;
+}
+
+.pf-qv-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 999px !important;
+  background: var(--brand-yellow-200, #F1EABC) !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.pf-qv-dot.active {
+  background: var(--primary-yellow-400, #FFE330) !important;
+  width: 22px !important;
+}
+
+@media (min-width: 768px) {
+  .pf-qv-benefits {
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin-bottom: 26px !important;
+  }
+  .pf-qv-benefits-track {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    gap: 20px 28px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .pf-qv-benefit-item {
+    flex: 0 0 115px !important;
+    min-width: 0 !important;
+    max-width: 115px !important;
+    width: 115px !important;
+  }
+  .pf-qv-benefits-dots {
+    display: none !important;
+  }
+}
+
+.pf-benefits-grid {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .pf-benefits-grid .pf-qv-benefits-track,
+  .pf-product-summary-col .pf-qv-benefits-track {
+    justify-content: center !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .pf-benefits-grid .pf-qv-benefits-track,
+  .pf-product-summary-col .pf-qv-benefits-track {
+    justify-content: flex-start !important;
+  }
 }
 
 .pf-qv-info .pf-qv-addtocart {
@@ -1627,7 +1766,7 @@ span.pf-qv-weight {
 
   .pf-qv-info .pf-qv-addtocart .btn-add-to-cart {
     height: 48px;
-    padding: 0 14px;
+    padding: 12px 14px;
     font-size: 15px;
     flex: 1;
     min-width: 0;
@@ -2263,7 +2402,7 @@ span.woocommerce-Price-amount.amount {
   line-height: 1.5;
 }
 
-.pf-qv-benefits div {
+.pf-qv-benefits .pf-qv-benefit-item {
   max-width: 115px;
   width: 100%;
 }
@@ -2388,38 +2527,104 @@ span.woocommerce-Price-amount.amount {
   }
 
   .pf-qv-benefits {
-    gap: 16px;
+    position: relative;
     border-radius: 16px;
     background: #F7F7F7;
-    padding: 30px 10px;
+    padding: 28px 14px 20px;
     margin-bottom: 32px;
-    justify-content: center;
-
+    font-size: 15px;
+    box-sizing: border-box;
+    width: 100%;
   }
 
-  .pf-qv-benefits div {
-    max-width: 177px;
-    width: calc(50% - 12px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  .pf-qv-benefits-track {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    gap: 16px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-items: flex-start !important;
+  }
+
+  .pf-qv-benefits-track::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .pf-qv-benefit-item {
+    flex: 0 0 calc((100% - 16px) / 2) !important;
+    min-width: calc((100% - 16px) / 2) !important;
+    max-width: calc((100% - 16px) / 2) !important;
+    width: calc((100% - 16px) / 2) !important;
+    scroll-snap-align: start !important;
+    scroll-snap-stop: normal !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
   }
 
   .pf-qv-benefits span {
-    max-width: 130px;
+    display: block;
+    max-width: 140px;
+    margin: 0 auto;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.35;
+    color: var(--brand-slate-800, #32373e);
   }
 
   .pf-qv-benefits .pf-qv-benefits-icon {
     width: 80px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
   }
 
   .pf-qv-benefits .pf-qv-benefits-icon img {
     width: 67px;
     height: 67px;
+    object-fit: contain;
+    display: block;
   }
 
-  .pf-qv-benefits {
-    font-size: 16px;
+  .pf-qv-benefits-dots {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    width: 100%;
+  }
+
+  .pf-qv-dot {
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 999px !important;
+    background: var(--brand-yellow-200, #F1EABC) !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .pf-qv-dot.active {
+    background: var(--primary-yellow-400, #FFE330) !important;
+    width: 22px !important;
   }
 
   .pf-qv-info .pf-qv-addtocart {
@@ -2755,4 +2960,17 @@ span.woocommerce-Price-amount.amount {
   .purrkins-faq-answer p {
     font-size: 16px;
   }
+  .pf-product-grid-container .swiper-wrapper{
+    margin-bottom: 0;
+  }
+      .pf-product-summary-col h1 {
+        font-size: 28px;
+    }
+}
+
+@media(max-width: 600px){
+.pf-po-header {
+flex-wrap: wrap;
+    gap: 14px;
+}
 }

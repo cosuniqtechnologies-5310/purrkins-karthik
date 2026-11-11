@@ -142,6 +142,11 @@ hr.purrkins-hr {
   max-width: 900px;
 }
 
+.collection-group-section {
+    margin-top: 60px;
+}
+
+
 @media(max-width: 1024px) {
   .purrkins-h1-text {
     font-size: 58px;
@@ -158,6 +163,19 @@ hr.purrkins-hr {
   .purrkins-section-block {
     padding: 60px 20px;
   }
+}
+
+@media(max-width: 991px) {
+
+  .purrkins-faq-block.bundle-faq .purrkins-section-block,
+  main[data-template="collection.bundle"] .purrkins-faq-block .purrkins-section-block {
+    padding: 0 20px 60px !important;
+  }
+
+  .collection-group-section {
+    margin-top: 40px;
+}
+
 }
 
 @media(max-width: 767px) {
@@ -180,12 +198,19 @@ hr.purrkins-hr {
   .purrkins-subtext {
     font-size: 18px;
   }
+  .collection-wrapper.grid {
+    padding: 0 20px;
+}
 }
 
 @media(min-width: 990px) {
   .pf-collection-main-grid .product-grid {
     grid-template-columns: repeat(3, 1fr) !important;
   }
+}
+
+.pf-collection-main-grid .product-grid {
+  padding: 0 !important;
 }
 
 .pf-collection-main-grid .column-options-wrapper,
@@ -196,6 +221,7 @@ hr.purrkins-hr {
 main[data-template="collection"] .comp-table-inner {
   padding-bottom: 0 !important;
 }
+
 
 @media (max-width: 575px) {
 

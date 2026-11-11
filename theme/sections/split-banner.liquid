@@ -48,7 +48,7 @@
                         <div class="split-banner-modal-content">
                             <button class="split-banner-modal-close js-split-banner-close" aria-label="Close video">&times;</button>
                             <div class="split-banner-modal-video">
-                                <iframe src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=0" title="{{ section.settings.heading | default: 'Video' | strip_html | escape }}" frameborder="0" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; compute-pressure" allowfullscreen></iframe>
+                                <iframe src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=0" frameborder="0" allowfullscreen></iframe>
                             </div>
                         </div>
                     </div>
@@ -248,6 +248,9 @@ padding: 75px 55px 77px 61px;
 @media(max-width: 991px){
     .split-banner-content {
         padding: 40px 20px;
+        padding: 40px 20px;
+        width: 100%;
+        max-width: 100%;
     }
     .split-banner-features {
         max-width: 100%;
@@ -255,9 +258,19 @@ padding: 75px 55px 77px 61px;
     }
 }
 
+@media(max-width: 800px){
+.split-banner-features{
+flex-wrap: nowrap;
+}
+    .split-banner-inner {
+        flex-direction: column;
+        padding: 0 20px 16px;
+    }
+}
+
 @media (max-width: 767px) {
     .split-banner-content {
-    padding: 28px 26px;
+    padding: 28px 20px;
 }
     .split-banner-subheading{
     font-size: 18px;
@@ -265,10 +278,6 @@ padding: 75px 55px 77px 61px;
         text-align: center;
         max-width: 292px;
 
-    }
-    .split-banner-inner {
-            flex-direction: column;
-                    padding: 0 20px 16px;
     }
 
     .split-banner-media {
@@ -281,7 +290,7 @@ padding: 75px 55px 77px 61px;
 }
 
 .sb-feature-item{
-    max-width: 95px;
+   max-width: calc(33.3% - 5px);
 }
 .sb-feature-item .sb-feature-text {
     max-width: 100%;
@@ -297,16 +306,6 @@ padding: 75px 55px 77px 61px;
 }
 }
 
-@media(max-width: 390px){
-        .split-banner-features {
-    gap: 30px;
-    flex-direction: column;
-}
-.sb-feature-item .sb-feature-text {
-    max-width: 100% !important;
-}
-
-}
 </style>
 
 <script>

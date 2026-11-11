@@ -215,28 +215,32 @@
 
       <!-- Benefits Grid Placeholder -->
       <div class="pf-benefits-grid">
-        <div class="pf-qv-benefits">
-          {% if product.metafields.custom.key_benefits.value != blank %}
-            {% for benefit in product.metafields.custom.key_benefits.value %}
-              <div>
-                <div class="pf-qv-benefits-icon">
-                  {% if benefit.icon %}
-                    <img
-                      src="{{ benefit.icon | image_url: width: 54 }}"
-                      alt="{{ benefit.title | default: benefit.name | default: benefit.system.handle }}"
-                      width="54"
-                      height="54"
-                      style="display:inline-block;"
-                    >
-                  {% else %}
-                    &#128049;
-                  {% endif %}
+        {% if product.metafields.custom.key_benefits.value != blank %}
+          <div class="pf-qv-benefits">
+            <div class="pf-qv-benefits-track">
+              {% for benefit in product.metafields.custom.key_benefits.value %}
+                <div class="pf-qv-benefit-item">
+                  <div class="pf-qv-benefits-icon">
+                    {% if benefit.icon %}
+                      <img
+                        src="{{ benefit.icon | image_url: width: 100 }}"
+                        alt="{{ benefit.title | default: benefit.name | default: benefit.system.handle }}"
+                        width="54"
+                        height="54"
+                        loading="lazy"
+                        style="display:inline-block;"
+                      >
+                    {% else %}
+                      &#128049;
+                    {% endif %}
+                  </div>
+                  <span>{{ benefit.title | default: benefit.name | default: benefit.system.handle }}</span>
                 </div>
-                <span>{{ benefit.title | default: benefit.name | default: benefit.system.handle }}</span>
-              </div>
-            {% endfor %}
-          {% endif %}
-        </div>
+              {% endfor %}
+            </div>
+            <div class="pf-qv-benefits-dots"></div>
+          </div>
+        {% endif %}
       </div>
 
       <!-- Purchase Box -->
@@ -531,13 +535,13 @@
   </div>
 
   <!-- Lightbox Modal -->
-  <div id="pf-gallery-lightbox" class="pf-lightbox" style="display: none;">
-    <span class="pf-lightbox-close">&times;</span>
+  <div id="pf-gallery-lightbox" class="pf-lightbox" style="display: none;" role="dialog" aria-modal="true" aria-label="Product Gallery Lightbox">
+    <button type="button" class="pf-lightbox-close" aria-label="Close lightbox">&times;</button>
     <div class="pf-lightbox-content">
       <img id="pf-lightbox-img" src="" alt="Gallery Image" width="1200" height="auto">
     </div>
-    <a class="pf-lightbox-prev">&#10094;</a>
-    <a class="pf-lightbox-next">&#10095;</a>
+    <button type="button" class="pf-lightbox-prev" aria-label="Previous image">&#10094;</button>
+    <button type="button" class="pf-lightbox-next" aria-label="Next image">&#10095;</button>
   </div>
 </div>
 
@@ -583,30 +587,53 @@
     height: 100%;
     max-width: 900px;
     position: relative;
-    z-index: 2147483647;
+    z-index: 10;
+    pointer-events: none;
   }
   .pf-lightbox-content img {
     max-width: 100%;
     max-height: 88vh;
     object-fit: contain;
     border-radius: 12px;
+    pointer-events: auto;
   }
   .pf-lightbox-close {
     position: absolute;
-    top: 24px;
-    right: 32px;
+    top: 20px;
+    right: 24px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: #ffffff;
-    font-size: 38px;
+    font-size: 40px;
     font-weight: 300;
     line-height: 1;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
     cursor: pointer;
-    z-index: 2147483647;
+    z-index: 2147483648 !important;
+    pointer-events: auto !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
     transition: transform 0.2s ease, opacity 0.2s ease;
     user-select: none;
   }
   .pf-lightbox-close:hover {
     transform: scale(1.15);
     opacity: 0.85;
+  }
+  @media (max-width: 767px) {
+    .pf-lightbox-close {
+      top: 14px;
+      right: 14px;
+      width: 44px;
+      height: 44px;
+      font-size: 36px;
+    }
   }
 
   /* Description & Tabs Typography & Spacing */
@@ -716,11 +743,16 @@
     color: white;
     font-weight: bold;
     font-size: 40px;
-    transition: 0.6s ease;
+    background: transparent;
+    border: none;
+    transition: 0.3s ease;
     border-radius: 0 3px 3px 0;
     user-select: none;
     -webkit-user-select: none;
-    z-index: 10000;
+    z-index: 2147483647;
+    pointer-events: auto;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
   .pf-lightbox-next {
     right: 0;
@@ -747,6 +779,161 @@
     font-size: 16px !important;
     font-weight: 400 !important;
     line-height: 1.5 !important;
+  }
+
+  /* Benefits Section Mobile Slider & Desktop Grid */
+  .pf-qv-benefits {
+    position: relative;
+    border-radius: 16px;
+    background: #F7F7F7;
+    padding: 28px 14px 20px;
+    margin-bottom: 32px;
+    font-size: 15px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .pf-qv-benefits-track {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    gap: 16px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-items: flex-start !important;
+  }
+
+  .pf-qv-benefits-track::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .pf-qv-benefit-item {
+    flex: 0 0 calc((100% - 16px) / 2) !important;
+    min-width: calc((100% - 16px) / 2) !important;
+    max-width: calc((100% - 16px) / 2) !important;
+    width: calc((100% - 16px) / 2) !important;
+    scroll-snap-align: start !important;
+    scroll-snap-stop: normal !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+  }
+
+  .pf-qv-benefits .pf-qv-benefits-icon {
+    width: 80px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+  }
+
+  .pf-qv-benefits .pf-qv-benefits-icon img {
+    width: 67px;
+    height: 67px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .pf-qv-benefit-item span {
+    display: block;
+    max-width: 140px;
+    margin: 0 auto;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.35;
+    color: var(--brand-slate-800, #32373e);
+  }
+
+  .pf-qv-benefits-dots {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    width: 100%;
+  }
+
+  .pf-qv-dot {
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 999px !important;
+    background: var(--brand-yellow-200, #F1EABC) !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .pf-qv-dot.active {
+    background: var(--primary-yellow-400, #FFE330) !important;
+    width: 22px !important;
+  }
+
+  @media (min-width: 768px) {
+    .pf-qv-benefits {
+      background: transparent !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+      margin-bottom: 26px !important;
+    }
+    .pf-qv-benefits-track {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      overflow-x: visible !important;
+      overflow-y: visible !important;
+      gap: 20px 28px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .pf-qv-benefit-item {
+      flex: 0 0 115px !important;
+      min-width: 0 !important;
+      max-width: 115px !important;
+      width: 115px !important;
+    }
+    .pf-qv-benefits-dots {
+      display: none !important;
+    }
+  }
+
+  .pf-benefits-grid {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  @media (min-width: 768px) and (max-width: 991px) {
+    .pf-benefits-grid .pf-qv-benefits-track,
+    .pf-product-summary-col .pf-qv-benefits-track {
+      justify-content: center !important;
+    }
+  }
+
+  @media (min-width: 992px) {
+    .pf-benefits-grid .pf-qv-benefits-track,
+    .pf-product-summary-col .pf-qv-benefits-track {
+      justify-content: flex-start !important;
+    }
+  }
+  @media(max-width: 767px){
+      .pf-lightbox-prev,
+  .pf-lightbox-next {
+    padding: 0;
+  }
   }
 </style>
 
@@ -825,11 +1012,36 @@
       });
 
       if (closeLightbox && lightbox) {
-          closeLightbox.addEventListener('click', closeLightboxModal);
-          lightbox.addEventListener('click', (e) => {
-              if (e.target === lightbox) closeLightboxModal();
+          closeLightbox.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              closeLightboxModal();
+          });
+          closeLightbox.addEventListener('touchend', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              closeLightboxModal();
+          }, { passive: false });
+          lightbox.addEventListener('click', function(e) {
+              if (e.target === lightbox || e.target.classList.contains('pf-lightbox-content')) {
+                  closeLightboxModal();
+              }
           });
       }
+
+      // Delegated fallback for close button to guarantee it always triggers across all viewports
+      document.addEventListener('click', function(e) {
+          if (e.target && e.target.closest && e.target.closest('.pf-lightbox-close')) {
+              e.preventDefault();
+              closeLightboxModal();
+          }
+      });
+      document.addEventListener('touchend', function(e) {
+          if (e.target && e.target.closest && e.target.closest('.pf-lightbox-close')) {
+              e.preventDefault();
+              closeLightboxModal();
+          }
+      }, { passive: false });
 
       document.addEventListener('keydown', (e) => {
           if (e.key === 'Escape' && lightbox && lightbox.style.display === 'flex') {
@@ -1098,7 +1310,11 @@
       // Initial price display sync
       updatePricing();
 
-      // Swiper Init
+      // Benefits Slider Init
+      if (typeof window.initPurrkinsBenefitsSliders === 'function') {
+          window.initPurrkinsBenefitsSliders();
+      }
+
       if (typeof Swiper !== 'undefined') {
           new Swiper('.pf-mobile-product-slider', {
               slidesPerView: 1,

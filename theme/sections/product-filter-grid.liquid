@@ -163,6 +163,12 @@
               window['purrkinsUpdateWishlistButtons'](qvContainer);
             }
 
+            if (typeof window.initPurrkinsBenefitsSliders === 'function') {
+              window.initPurrkinsBenefitsSliders(qvContainer);
+            } else if (typeof window.initBenefitsSliders === 'function') {
+              window.initBenefitsSliders(qvContainer);
+            }
+
             // Set height to scroll height for smooth animation
             setTimeout(() => {
               qvContainer.style.maxHeight = qvContainer.scrollHeight + 100 + 'px';
@@ -257,19 +263,22 @@
           });
           const freqWrapper = form.querySelector('.pf-qv-frequency-wrapper');
           if (freqWrapper) {
-            freqWrapper.style.display = (type === 'subscription') ? 'flex' : 'none';
+            freqWrapper.style.display = type === 'subscription' ? 'flex' : 'none';
           }
           if (priceDisplay) {
             const basePrice = parseInt(priceDisplay.getAttribute('data-base-price'), 10);
             const discountPrice = parseInt(priceDisplay.getAttribute('data-discount-price') || basePrice, 10);
-            const activePrice = (type === 'subscription') ? discountPrice : basePrice;
+            const activePrice = type === 'subscription' ? discountPrice : basePrice;
             priceDisplay.setAttribute('data-active-price', activePrice);
             const formatted = '₹' + Math.round((activePrice * qty) / 100).toString();
             priceDisplay.innerText = formatted;
           }
         } else if (e.target.name === 'quantity') {
           if (priceDisplay) {
-            const activePrice = parseInt(priceDisplay.getAttribute('data-active-price') || priceDisplay.getAttribute('data-base-price'), 10);
+            const activePrice = parseInt(
+              priceDisplay.getAttribute('data-active-price') || priceDisplay.getAttribute('data-base-price'),
+              10
+            );
             if (!isNaN(activePrice)) {
               const formatted = '₹' + Math.round((activePrice * qty) / 100).toString();
               priceDisplay.innerText = formatted;
@@ -837,7 +846,7 @@
       border-radius: 8px;
     }
     .pf-product-image img {
-      max-height: 181px;
+      max-height: 148px;
     }
     .pf-filter-right {
       justify-content: center;
