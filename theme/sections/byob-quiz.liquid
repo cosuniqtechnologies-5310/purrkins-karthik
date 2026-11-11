@@ -851,35 +851,188 @@
     }
   }
 
-  @media (max-width: 767px) {
-    .quiz-image-options.grid-4 {
-      display: flex;
-      flex-wrap: wrap;
+  @media (max-width: 768px) {
+    .byob-slider-wrapper {
+      padding: 44px 12px 18px 12px !important;
+      max-height: none !important;
+      height: auto !important;
+      min-height: auto !important;
+      justify-content: flex-start !important;
+      gap: 14px !important;
+      box-sizing: border-box !important;
     }
-    .quiz-image-options {
-      gap: 8px;
+    .byob-quiz-card {
+      border-radius: 14px !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
+    }
+    .quiz-box-group {
+      padding: 14px 10px !important;
+      border-radius: 12px !important;
+      box-sizing: border-box !important;
+    }
+
+    .quiz-title {
+      font-size: 18px !important;
+      line-height: 1.25 !important;
+      margin-bottom: 12px !important;
+      padding-right: 90px !important; /* Prevents title from overlapping quiz-nav */
+    }
+    .quiz-subtitle {
+      font-size: 15px !important;
+      line-height: 1.3 !important;
+      margin: 0 0 10px 0 !important;
+    }
+    .underline-input {
+      font-size: 16px !important;
+      padding: 6px 0 !important;
+      border-bottom: 2px solid #121217 !important;
+    }
+    .row-group {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 6px !important;
+      margin-bottom: 14px !important;
+      width: 100% !important;
+    }
+
+    /* Slide 1: Cat's age */
+    .quiz-options.grid-3 {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 8px !important;
+    }
+    .quiz-option span {
+      padding: 8px 6px !important;
+      font-size: 12.5px !important;
+      line-height: 1.3 !important;
+      border-radius: 10px !important;
+      min-height: 40px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      box-sizing: border-box !important;
+      word-break: break-word !important;
+    }
+
+    /* Slide 2: Gender & Neutered */
+    .quiz-split-layout {
+      flex-direction: column !important;
+      gap: 0 !important;
+      position: relative !important;
+    }
+    .quiz-split-content {
+      max-width: 100% !important;
+      width: 100% !important;
+    }
+    .quiz-split-image {
+      display: none !important; /* Hide absolute decorative image on mobile */
+    }
+    .quiz-box-group-custom {
+      margin-bottom: 14px !important;
+    }
+    .quiz-box-group-custom .quiz-subtitle {
+      margin-bottom: 8px !important;
+    }
+    .quiz-options.grid-2 {
+      grid-template-columns: 1fr 1fr !important;
+      gap: 8px !important;
+    }
+
+    /* Slide 3 & 4: Image Options (Body & Activity) */
+    .quiz-image-options.grid-4 {
+      display: grid !important;
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 8px !important;
+      width: 100% !important;
+      margin-top: 0 !important;
     }
     label.quiz-image-option {
-      width: calc(50% - 4px);
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .quiz-image-card {
+      padding: 10px 8px 0 !important;
+      border-radius: 12px !important;
+      min-height: 130px !important;
+      height: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .quiz-image-card h4 {
+      font-size: 13px !important;
+      margin: 0 0 4px 0 !important;
+      line-height: 1.2 !important;
+    }
+    .quiz-image-card img {
+      max-height: 80px !important;
+      width: auto !important;
+      max-width: 100% !important;
+      object-fit: contain !important;
+      margin-top: auto !important;
+    }
+    .quiz-image-card--full-width h4 {
+      padding: 0 !important;
+    }
+    .quiz-image-card--full-width img,
+    .quiz-img-full-width {
+      max-height: 80px !important;
+      width: auto !important;
+      object-fit: contain !important;
+    }
+
+    /* Slide 5: Focus Checklist & Allergies */
+    .byob-quiz-slide[data-step='5'] .quiz-options.grid-4 {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 6px !important;
+    }
+    .byob-quiz-slide[data-step='5'] .quiz-option span {
+      padding: 6px 4px !important;
+      font-size: 11.5px !important;
+      min-height: 36px !important;
+      border-radius: 8px !important;
+      line-height: 1.25 !important;
+    }
+    .byob-quiz-slide[data-step='5'] h2.quiz-subtitle {
+      margin-top: 14px !important;
+      margin-bottom: 8px !important;
+    }
+    .quiz-textarea-wrapper {
+      padding: 10px !important;
+      border-radius: 12px !important;
+    }
+    .quiz-textarea {
+      font-size: 13px !important;
+      height: 64px !important;
+      min-height: 64px !important;
+      padding: 8px !important;
+      border-radius: 8px !important;
+      box-sizing: border-box !important;
+    }
+    .quiz-submit-wrapper {
+      margin-top: 14px !important;
+    }
+    .quiz-submit-btn {
+      width: 100% !important;
+      padding: 12px 20px !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      border-radius: 30px !important;
+      cursor: pointer !important;
     }
   }
 
-  @media (max-width: 768px) {
-    .quiz-split-layout {
-      flex-direction: column;
+  @media (max-width: 380px) {
+    .quiz-options.grid-3 {
+      grid-template-columns: 1fr !important;
     }
-    .row-group {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
+    .quiz-title {
+      font-size: 16px !important;
     }
-  }
-  @media (max-width: 480px) {
-    .quiz-options.grid-2,
-    .quiz-options.grid-3,
-    .quiz-options.grid-4,
-    .quiz-image-options.grid-4 {
-      grid-template-columns: 1fr 1fr;
+    .quiz-subtitle {
+      font-size: 14px !important;
+    }
+    .quiz-option span {
+      font-size: 12px !important;
     }
   }
 </style>
