@@ -1,0 +1,61 @@
+name: Deploy Purrkins App to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'purrkins-customer-app/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup SSH Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY || secrets.VPS_SSH_KEY }}
+          
+      - name: Add AWS EC2 to known_hosts
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST || secrets.VPS_HOST }}
+          EC2_PORT: ${{ secrets.EC2_PORT || secrets.VPS_PORT || '22' }}
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p $EC2_PORT -H $EC2_HOST >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Sync Purrkins App ONLY to AWS EC2 (Excluding theme)
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST || secrets.VPS_HOST }}
+          EC2_USER: ${{ secrets.EC2_USERNAME || secrets.VPS_USERNAME || 'ubuntu' }}
+          EC2_PORT: ${{ secrets.EC2_PORT || secrets.VPS_PORT || '22' }}
+        run: |
+          # Sync ONLY the purrkins-customer-app directory to ~/purrkins-app/ on EC2
+          # theme/ is completely ignored and never copied
+          rsync -avz --delete \
+            -e "ssh -p $EC2_PORT -o StrictHostKeyChecking=no" \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.env' \
+            ./purrkins-customer-app/ $EC2_USER@$EC2_HOST:~/purrkins-app/
+
+      - name: Start Docker containers on AWS EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST || secrets.VPS_HOST }}
+          username: ${{ secrets.EC2_USERNAME || secrets.VPS_USERNAME || 'ubuntu' }}
+          key: ${{ secrets.EC2_SSH_KEY || secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || secrets.VPS_PORT || 22 }}
+          script: |
+            cd ~/purrkins-app
+            touch .env
+            docker compose up --build -d
+            docker image prune -f
